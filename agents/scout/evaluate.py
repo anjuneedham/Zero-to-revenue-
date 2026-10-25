@@ -73,7 +73,7 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     has_terms = bool(item.expected_payment and item.payment_asset)
     risk, flags = scam.assess(text, organization=org, expected_payment=item.expected_payment,
                               has_payment_terms=has_terms, injection=injection,
-                              required_capital=item.required_capital)
+                              required_capital=item.required_capital, title=title)
 
     missing = []
     if item.required_capital is None:
@@ -112,6 +112,12 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     if expired:
         flags.append("deadline_passed")
     status = OpportunityStatus.REVIEW_REQUIRED if expired else classify_opportunity(score, risk)
+    # Stricter than the spec's thresholds, on purpose: an opportunity cannot be auto-queued for the
+    # Operator unless payment amount and asset are stated AND there is a payment method or a deadline.
+    undocumented = not (item.expected_payment and item.payment_asset and (item.payment_method or item.deadline))
+    if status is OpportunityStatus.QUALIFIED and undocumented:
+        status = OpportunityStatus.REVIEW_REQUIRED
+        flags.append("insufficient_terms")
     known = [title, org, url, body, item.deadline, item.expected_payment, item.payment_asset, item.payment_method,
              item.required_skills, item.required_capital is not None]
     confidence = max(0, round(100 * sum(1 for k in known if k) / len(known)) - (25 if injection else 0))
@@ -120,6 +126,8 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
         action = "Research and draft; submission needs owner approval"
     elif risk > 35:
         action = "Do not engage until risk flags are reviewed by the owner"
+    elif "insufficient_terms" in flags:
+        action = "Owner review: payment terms are not documented well enough to queue automatically"
     else:
         action = "Owner review: score below qualification threshold"
     oid = opportunity_id(url)

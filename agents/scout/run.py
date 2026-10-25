@@ -4,6 +4,7 @@ import json
 import traceback  # noqa: F401  (errors are stored as text, never swallowed)
 
 from agents.scout import sources as src
+from agents.scout.rescore import rescore
 from agents.scout.enrich import EXTRA_FLAG_RISK, enrich
 from agents.scout.evaluate import evaluate
 from core.audit import audit
@@ -30,11 +31,12 @@ def run_scout(conn, sources=None, client=None) -> dict:
         d = authorize(Agent.SCOUT, action, paused=is_paused(conn))
         if not d.allowed:
             return {"ran": False, "reason": d.reason}
+    rescored = rescore(conn)
     sources = [s() if isinstance(s, type) else s for s in (sources if sources is not None else src.DEFAULT_SOURCES)]
     run_id = "run_" + uuid.uuid4().hex[:12]
     conn.execute("INSERT INTO agent_runs(id, agent, started_at) VALUES (?, 'scout', ?)", (run_id, now()))
     conn.execute("UPDATE agents SET status='online', last_run_at=? WHERE name='scout'", (now(),))
-    stats = {"ran": True, "seen": 0, "new": 0, "qualified": 0, "errors": []}
+    stats = {"ran": True, "seen": 0, "new": 0, "qualified": 0, "errors": [], "rescored": rescored}
     for source in sources:
         try:
             items = source.items()
@@ -69,6 +71,6 @@ def run_scout(conn, sources=None, client=None) -> dict:
     conn.execute("UPDATE agent_runs SET finished_at=?, outcome=?, error=? WHERE id=?",
                  (now(), outcome, "; ".join(stats["errors"])[:1000] or None, run_id))
     conn.execute("UPDATE agents SET status=? WHERE name='scout'", ("online" if outcome != "error" else "error",))
-    audit(conn, "scout", "scout.run", run_id, json.dumps({k: v for k, v in stats.items() if k != "errors"}))
+    audit(conn, "scout", "scout.run", run_id, json.dumps({k: v for k, v in stats.items() if k not in ("errors", "rescored")}))
     stats["outcome"] = outcome
     return stats

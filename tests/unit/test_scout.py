@@ -107,6 +107,43 @@ class EvaluateTest(unittest.TestCase):
         self.assertNotEqual(opportunity_id("https://x.com/a"), opportunity_id("https://x.com/b"))
 
 
+LIVE_JUNK = [  # titles seen in the first live Scout run, all previously scored risk 0 and QUALIFIED
+    "[Bounty] [STEAM VAULT] \U0001F3AE Exchange 100,000 DOOM ($wDOOM) for a $10 Steam Digital Gift Card",
+    "[STEAM VAULT] \U0001F3AE Exchange 100,000 DOOM ($wDOOM) for a $10 Steam Digital Gift Card! (10 / 10 Available \u2014 $100 USD Vault)",
+    "\U0001F4B0 Bounty Seguro ($$100): \U0001F4B0 Bounty Seguro ($$100): [Bounty] \U0001F4B0 Bounty Seguro",
+    "\U0001F4B0 Bounty Seguro ($$100): [Bounty] USDC-quoted pairs not having the correct",
+]
+
+
+class SpamRegressionTest(unittest.TestCase):
+    def test_live_junk_is_never_qualified(self):
+        for t in LIVE_JUNK:
+            ev = evaluate(good(title=t, payment_method="", deadline=None, required_capital=None,
+                               source_url="https://github.com/x/y/issues/" + str(abs(hash(t)) % 999)), skills=SKILLS)
+            self.assertEqual(ev.status, OpportunityStatus.REVIEW_REQUIRED, t)
+
+    def test_spam_indicators(self):
+        from agents.scout.scam import duplicated_title, emoji_count
+        self.assertTrue(duplicated_title(LIVE_JUNK[2]))
+        self.assertFalse(duplicated_title("Fix the date parser bug in utils and add tests"))
+        self.assertEqual(emoji_count(LIVE_JUNK[0]), 1)
+        flags = evaluate(good(title=LIVE_JUNK[0]), skills=SKILLS).flags
+        self.assertIn("non_cash_reward", flags)
+        self.assertIn("token_exchange_scheme", flags)
+        self.assertIn("duplicated_title_spam", evaluate(good(title=LIVE_JUNK[2]), skills=SKILLS).flags)
+
+    def test_undocumented_terms_cannot_auto_queue_but_documented_can(self):
+        bare = evaluate(good(payment_method="", deadline=None), skills=SKILLS)
+        self.assertEqual(bare.status, OpportunityStatus.REVIEW_REQUIRED)
+        self.assertIn("insufficient_terms", bare.flags)
+        self.assertEqual(evaluate(good(payment_method="", deadline="2099-01-01T00:00:00Z"), skills=SKILLS).status,
+                         OpportunityStatus.QUALIFIED)
+
+    def test_ordinary_good_titles_are_unaffected(self):
+        for t in ("Add dark mode to the settings page [$75 USDC]", "Fix flaky test in CI pipeline", "Write docs for the CLI"):
+            self.assertEqual(evaluate(good(title=t), skills=SKILLS).status, OpportunityStatus.QUALIFIED, t)
+
+
 class SourcesTest(unittest.TestCase):
     def test_parse_amount(self):
         self.assertEqual(parse_amount("[$50] Fix bug"), (50.0, "USD"))

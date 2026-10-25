@@ -11,17 +11,43 @@ INDICATORS = {
     "personal_data_request": (30, re.compile(r"passport|\bssn\b|social\s+security|driver'?s?\s+licen[cs]e|bank\s+(login|password)|id\s+card\s+photo", re.I)),
     "shortened_link": (20, re.compile(r"\b(bit\.ly|tinyurl\.com|t\.co|goo\.gl|cutt\.ly|is\.gd|rb\.gy)/", re.I)),
     "excessive_permissions": (25, re.compile(r"(admin|write|full)\s+access\s+to\s+(your\s+)?(repo|repository|account|drive|email|wallet)|grant\s.{0,25}access\s+to\s+(your\s+)?(account|wallet|email)", re.I | re.S)),
+    # Spam/farming patterns seen in live GitHub "bounty" issues (gift cards, tokens, repeated titles).
+    "non_cash_reward": (35, re.compile(r"gift\s*card|voucher|\bsteam\b.{0,20}(card|key|wallet)|v-?bucks|robux|itunes|coupon", re.I | re.S)),
+    "token_exchange_scheme": (40, re.compile(r"exchange\s+[\d,\.]+\s*[kKmMbB]?\s+\S+(\s+\(\$?\w+\))?\s+for\b|(?-i:\$w[A-Z0-9]{2,}\b)|airdrop|free\s+tokens?|claim\s+your\s+(reward|tokens?)", re.I)),
 }
 INJECTION_RISK = 40
+DUPLICATE_TITLE_RISK = 30
+EMOJI_RISK = 10
 UNKNOWN_ORG_RISK = 10
 UNCLEAR_PAYMENT_RISK = 10
 UNREALISTIC_PAYMENT_USD = 10_000
 UNREALISTIC_RISK = 20
 
 
+def duplicated_title(title: str) -> bool:
+    """True when a run of 3+ words appears twice, a typical farmed-issue signature."""
+    words = re.sub(r"\W+", " ", (title or "").lower()).split()
+    for n in range(3, len(words) // 2 + 1):
+        for i in range(len(words) - 2 * n + 1):
+            chunk = words[i:i + n]
+            if any(words[j:j + n] == chunk for j in range(i + n, len(words) - n + 1)):
+                return True
+    return False
+
+
+def emoji_count(title: str) -> int:
+    return sum(1 for ch in title or "" if 0x1F300 <= ord(ch) <= 0x1FAFF or 0x2600 <= ord(ch) <= 0x27BF)
+
+
 def assess(text: str, *, organization: str, expected_payment, has_payment_terms: bool,
-           injection: list[str], required_capital) -> tuple[int, list[str]]:
+           injection: list[str], required_capital, title: str = "") -> tuple[int, list[str]]:
     flags, risk = [], 0
+    if duplicated_title(title):
+        flags.append("duplicated_title_spam")
+        risk += DUPLICATE_TITLE_RISK
+    if emoji_count(title) >= 2:
+        flags.append("emoji_heavy_title")
+        risk += EMOJI_RISK
     for name, (weight, pat) in INDICATORS.items():
         if pat.search(text or ""):
             flags.append(name)

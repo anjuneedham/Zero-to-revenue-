@@ -202,6 +202,57 @@ class RunScoutTest(unittest.TestCase):
         self.assertGreaterEqual(r2["risk_score"], 60)  # a clean AI answer cannot lower scam risk
 
 
+class RescoreTest(unittest.TestCase):
+    JUNK = "[Bounty] [STEAM VAULT] Exchange 100,000 DOOM ($wDOOM) for a $10 Steam Digital Gift Card"
+
+    def setUp(self):
+        self.conn = make_conn()
+        self.env = mock.patch.dict(os.environ, {"OWNER_SKILLS": "python"}, clear=True)
+        self.env.start()
+        # reproduce the live state: junk was QUALIFIED, drafted, and waiting for the owner
+        from agents.scout.evaluate import evaluate
+        self.junk_item = good(title=self.JUNK, source_url="https://github.com/bad/repo/issues/1")
+        ev = evaluate(good(title="Add dark mode [$75 USDC]", source_url="https://github.com/bad/repo/issues/1"))
+        ev.row.update(title=self.JUNK, status="QUALIFIED", risk_score=0, scam_indicators="")
+        cols = list(ev.row)
+        self.conn.execute(f"INSERT INTO opportunities({','.join(cols)}, discovered_at) VALUES ({','.join('?' * len(cols))}, 'now')",
+                          (*[ev.row[c] for c in cols], ))
+        self.oid = ev.id
+        run_scout(self.conn, [])  # also runs the rescore; so first re-qualify and draft before that
+        self.conn.execute("DELETE FROM settings WHERE key='scout_rules_version'")
+        self.conn.execute("UPDATE opportunities SET status='QUALIFIED' WHERE id=?", (self.oid,))
+        from core.queue import queue
+        queue.enqueue(self.conn, "operator", "research_opportunity", "k", opportunity_id=self.oid)
+
+    def tearDown(self):
+        self.env.stop()
+
+    def test_junk_is_downgraded_and_unstarted_work_cancelled(self):
+        from agents.operator import run as operator
+        operator.step(self.conn)
+        self.assertEqual(self.conn.execute("select status from user_actions").fetchone()[0], "OPEN")
+        from agents.scout.rescore import rescore
+        r = rescore(self.conn)
+        self.assertEqual((r["skipped"], r["downgraded"], r["cancelled_tasks"]), (False, 1, 1))
+        self.assertEqual(self.conn.execute("select status from opportunities").fetchone()[0], "REVIEW_REQUIRED")
+        self.assertEqual(self.conn.execute("select status from tasks").fetchone()[0], "CANCELLED")
+        self.assertEqual(self.conn.execute("select status from user_actions").fetchone()[0], "REJECTED")
+        self.assertGreater(self.conn.execute("select risk_score from opportunities").fetchone()[0], 35)
+        self.assertEqual(rescore(self.conn)["skipped"], True)  # idempotent per rules version
+
+    def test_never_touches_owner_approved_work_or_promotes(self):
+        from agents.operator import run as operator
+        from agents.scout.rescore import rescore
+        from core import actions
+        aid = operator.step(self.conn)["action_id"]
+        actions.approve(self.conn, aid, "owner")  # owner already engaged: opportunity is APPROVED
+        self.conn.execute("INSERT INTO opportunities(id,title,source_url,status,discovered_at) VALUES ('opp_ok','Fix parser','https://github.com/a/b/issues/9','REVIEW_REQUIRED','now')")
+        rescore(self.conn)
+        self.assertEqual(self.conn.execute("select status from opportunities where id=?", (self.oid,)).fetchone()[0], "APPROVED")
+        self.assertEqual(self.conn.execute("select status from user_actions").fetchone()[0], "APPROVED")
+        self.assertEqual(self.conn.execute("select status from opportunities where id='opp_ok'").fetchone()[0], "REVIEW_REQUIRED")
+
+
 class ScoutApiTest(unittest.TestCase):
     def setUp(self):
         self.conn = make_conn()
