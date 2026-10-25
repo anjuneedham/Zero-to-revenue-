@@ -16,7 +16,7 @@ Guardrail: the loop may tune ranking, sources, prompts and offers. It may never 
 | Months | Engine | Target revenue/month | Gate to advance |
 |---|---|---|---|
 | 1-2 | Bounties + small freelance via Scout/Operator | $1k-2k | 3 verified payments; know which source pays |
-| 3-4 | Productised offer: AI automation setup for small businesses | $3.5k-5k | 2 paying clients from one repeatable offer |
+| 3-4 | "Never Miss a Job" for trades contractors (see docs/strategy/INVESTOR_THESIS.md) | $3.5k-5k | 2 paying clients from one repeatable offer |
 | 5-6 | Retainers (monthly maintenance/agent ops) | $6.5k-8k | 3 retainers, churn 0 |
 | 7-9 | Agent-as-a-service + referral partners; subcontract delivery | $9.5k-12k | delivery not limited by owner hours |
 | 10-12 | Scale what works; paid acquisition only from verified profit | $13k-15k | CAC paid back within 1 month |
