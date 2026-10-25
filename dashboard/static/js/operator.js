@@ -27,6 +27,24 @@
       const dl = el("div", "cols"); if (!s.open_user_actions.length) dl.append(Z.empty("Nothing waiting", "Run Scout, then Run Operator."));
       s.open_user_actions.forEach(x => dl.append(Z.decisionCard(x, () => Z.rerender()))); dec.append(dl); g.append(dec);
 
+      const leads = card("Leads (outreach)", "Paste a CSV of businesses YOU found (name,business,email,phone,notes). Nothing is scraped and nothing sends itself."); leads.classList.add("s12");
+      const ta = el("textarea"); ta.rows = 4; ta.placeholder = "name,business,email,phone,notes\nJane Doe,Doe Contracting,jane@example.com,+1876...,met at trade fair";
+      ta.setAttribute("aria-label", "Leads CSV");
+      const impRow = el("div", "row");
+      impRow.append(btn("Import leads", "ghost small", async () => {
+        const r = await Z.api("/api/leads/import", "POST", { csv: ta.value });
+        Z.toast(`${r.added} added, ${r.skipped_duplicates} already had that email`, "ok"); ta.value = ""; await Z.rerender();
+      }), btn("Draft outreach for up to 15 new leads", "gold small", async () => {
+        const r = await Z.api("/api/leads/draft", "POST", { count: 15 });
+        Z.toast(r.drafted ? r.drafted + " draft(s) added to your decisions above" : "No new leads to draft", "ok"); await Z.rerender();
+      }));
+      const leadList = el("div", "list");
+      const ld = await Z.api("/api/leads");
+      if (!ld.leads.length) leadList.append(Z.empty("No leads yet", "Import a CSV of businesses you found yourself."));
+      ld.leads.slice(0, 30).forEach(l => { const it = el("div", "item"); add(it, el("div", "t", l.business || l.name || l.email),
+        add(el("div", "meta"), pill(l.email), pill(nice(l.status), l.status === "SENT" ? "ok" : l.status === "DRAFTED" ? "gold" : "")), l.phone ? el("div", "sub", l.phone) : null); leadList.append(it); });
+      add(leads, ta, impRow, leadList); g.append(leads);
+
       const board = card("Task board", "Every task the Operator has touched"); board.classList.add("s12");
       const cols = el("div", "cols");
       COLS.forEach(([k, label]) => {

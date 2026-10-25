@@ -9,7 +9,7 @@ import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from agents.operator import run as operator
+from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
 from core import actions, scheduler
@@ -17,6 +17,7 @@ from dashboard import api_data
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
+from core.db import now
 from core.auth import owner_login as ol
 from core.orchestrator import killswitch
 from core.reports import status_snapshot
@@ -42,7 +43,7 @@ MAX_BODY = 4096
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
-ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|draft)$")
+ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft)$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 HEADERS = {
     "Cache-Control": "no-store",
@@ -146,6 +147,42 @@ def handle(method, path, authz, conn, body: bytes = b""):
         return _json(200, api_data.operator_board(conn))
     if method == "GET" and path == "/api/treasury/overview":
         return _json(200, api_data.treasury_overview(conn))
+    if method == "GET" and path == "/api/leads":
+        rows = conn.execute("SELECT id,name,business,email,phone,status,created_at FROM leads ORDER BY created_at DESC LIMIT 200")
+        return _json(200, {"leads": [dict(r) for r in rows]})
+    if method == "POST" and path == "/api/leads/import":
+        try:
+            data = json.loads(body or b"{}") if len(body) <= 200_000 else {}
+            csv_text = data.get("csv", "")
+            if not isinstance(csv_text, str):
+                raise ValueError("bad request")
+            return _json(200, outreach.import_leads(conn, owner, csv_text))
+        except outreach.ImportError_ as e:
+            return _json(400, {"error": str(e)})
+        except (ValueError, json.JSONDecodeError):
+            return _json(400, {"error": "bad request"})
+    if method == "POST" and path == "/api/leads/draft":
+        try:
+            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+            n = max(1, min(int(data.get("count", 15)), 50))
+        except (ValueError, json.JSONDecodeError):
+            return _json(400, {"error": "bad request"})
+        rows = conn.execute("SELECT * FROM leads WHERE status='NEW' ORDER BY created_at LIMIT ?", (n,)).fetchall()
+        made = []
+        for r in rows:
+            lead = dict(r)
+            draft = outreach.draft_outreach(lead)
+            action_id = "ua_lead_" + lead["id"]
+            conn.execute(
+                "INSERT INTO user_actions(action_id, task_id, title, why_required, exact_action, risk, status, "
+                "created_at, kind, submission_id) VALUES (?, NULL, ?, ?, ?, 'LOW', 'OPEN', ?, 'send_outreach', NULL) "
+                "ON CONFLICT (action_id) DO NOTHING",
+                (action_id, f"Send outreach to {lead['business'] or lead['name'] or lead['email']}"[:200],
+                 "Sending needs your review and your own email client. The system never emails anyone for you.",
+                 draft, now()))
+            conn.execute("UPDATE leads SET status='DRAFTED' WHERE id=?", (lead["id"],))
+            made.append(action_id)
+        return _json(200, {"drafted": len(made)})
     if method == "GET" and path == "/api/plan":
         return _json(200, api_data.plan_get(conn))
     if method == "POST" and path == "/api/plan":
@@ -174,6 +211,9 @@ def handle(method, path, authz, conn, body: bytes = b""):
         aid, verb = m.groups()
         try:
             if verb == "draft" and method == "GET":
+                a_row = conn.execute("SELECT kind, exact_action FROM user_actions WHERE action_id=?", (aid,)).fetchone()
+                if a_row and a_row["kind"] == "send_outreach":
+                    return _json(200, {"draft": a_row["exact_action"] or ""})
                 row = conn.execute("SELECT d.content FROM user_actions a JOIN deliverables d ON d.task_id=a.task_id WHERE a.action_id=?", (aid,)).fetchone()
                 return _json(200, {"draft": row["content"] if row else ""})
             if method != "POST":
@@ -182,6 +222,8 @@ def handle(method, path, authz, conn, body: bytes = b""):
                 actions.approve(conn, aid, owner)
             elif verb == "reject":
                 actions.reject(conn, aid, owner)
+            elif verb == "sent":
+                actions.mark_sent(conn, aid, owner)
             else:
                 (proof,) = _fields(body, "proof_url")
                 actions.mark_submitted(conn, aid, owner, proof)

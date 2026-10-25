@@ -38,3 +38,23 @@ Pursue these yourself; I can draft proposals and track them once you're in.
    API already works); but applying/bidding is manual and goes through the Operator's draft-and-approve flow.
 4. Say which of the login-gated marketplaces above you actually want to join — I'll write the application
    profile text and proposal templates once you tell me.
+
+## Outreach to businesses you find yourself (25 Oct update)
+I tried to find an automated, public, bulk-safe source of contractor emails/phones for Jamaica.
+None exists that is both reachable and consent-safe: OpenStreetMap's Overpass API is blocked in this
+sandbox, and Nominatim refused the request (its own policy against unauthorized bulk/automated use -
+exactly the kind of guardrail that exists for a reason). Scraping directory sites' HTML in bulk risks
+their terms and gets domains blacklisted, so this system does not do it.
+
+**What's built instead (Operator page, "Leads" panel):**
+1. You paste a CSV of businesses you found yourself (`name,business,email,phone,notes`). Nothing is
+   scraped; only this owner-supplied import writes to the leads table.
+2. **Draft outreach** generates one personalized email per lead, with every specific claim (why you're
+   reaching out, any example link, your contact details) left as `[OWNER TO FILL]` - it never invents one.
+3. Each draft becomes a decision in your queue, same as a bounty submission: **Approve**, then **I sent
+   it** once you've actually sent it yourself. Nothing sends automatically - this matches the policy rule
+   that outreach always needs owner approval (`core/policy/policy.py`, `Action.SEND_OUTREACH`).
+
+This is the structure; actual sending (SMTP/Gmail integration) isn't wired up yet, so "I sent it" means
+you send it from your own email client using the draft. If you want one-click send from the dashboard,
+that needs a connected email account and is a separate, larger piece of work.

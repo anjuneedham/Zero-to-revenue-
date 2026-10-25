@@ -111,19 +111,24 @@
   };
 
   Z.decisionCard = (a, refresh) => {
+    const isOutreach = a.kind === "send_outreach";
     const it = Z.el("div", "item");
     it.append(Z.el("div", "t", a.title));
     it.append(Z.add(Z.el("div", "meta"), Z.pill(Z.nice(a.status), a.status === "APPROVED" ? "gold" : "warn"),
-      Z.pill("risk " + (a.risk || "?"), a.risk === "HIGH" ? "bad" : "ok"), a.deadline ? Z.pill("due " + a.deadline.slice(0, 10)) : null));
+      Z.pill("risk " + (a.risk || "?"), a.risk === "HIGH" ? "bad" : "ok"), a.deadline ? Z.pill("due " + a.deadline.slice(0, 10)) : null,
+      isOutreach ? Z.pill("outreach") : null));
     it.append(Z.el("p", "sub", a.why_required));
     if (a.verified_url) { const l = Z.el("a", null, "Open the source page"); l.href = a.verified_url; l.target = "_blank"; l.rel = "noopener noreferrer"; it.append(l); }
     const row = Z.el("div", "row");
-    row.append(Z.btn("View draft", "ghost small", async () => {
-      const d = await Z.api("/api/actions/" + a.action_id + "/draft"); const pre = Z.el("pre", "draft", d.draft || "No draft."); Z.openDrawer("Draft submission", pre);
+    row.append(Z.btn(isOutreach ? "View draft email" : "View draft", "ghost small", async () => {
+      const d = await Z.api("/api/actions/" + a.action_id + "/draft"); const pre = Z.el("pre", "draft", d.draft || "No draft."); Z.openDrawer(isOutreach ? "Draft outreach email" : "Draft submission", pre);
     }));
     const done = async (path, body, msg) => { await Z.api("/api/actions/" + a.action_id + "/" + path, "POST", body); Z.toast(msg, "ok"); await refresh(); };
     if (a.status === "OPEN") {
-      row.append(Z.btn("Approve", "small", () => done("approve", {}, "Approved. Submit it yourself, then confirm.")), Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
+      row.append(Z.btn("Approve", "small", () => done("approve", {}, isOutreach ? "Approved. Send it yourself, then confirm." : "Approved. Submit it yourself, then confirm.")),
+        Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
+    } else if (a.status === "APPROVED" && isOutreach) {
+      row.append(Z.btn("I sent it", "gold small", () => done("sent", {}, "Marked sent.")), Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
     } else if (a.status === "APPROVED") {
       const inp = Z.el("input"); inp.placeholder = "Link to your submission (optional, https)"; inp.id = "proof-" + a.action_id; inp.setAttribute("aria-label", "Proof link");
       it.append(inp);

@@ -60,6 +60,20 @@ def reject(conn, action_id, owner):
     audit(conn, owner, "action.reject", action_id)
 
 
+def mark_sent(conn, action_id, owner):
+    """Owner confirms they personally sent an outreach message. No submission record is involved -
+    outreach never goes through a platform, so there is nothing to track payment against."""
+    a = _get(conn, action_id)
+    if a["kind"] != "send_outreach":
+        raise ActionError("this action is not outreach")
+    if a["status"] != "APPROVED":
+        raise ActionError("approve the action before marking it sent")
+    conn.execute("UPDATE user_actions SET status='DONE', resolved_at=? WHERE action_id=?", (now(), action_id))
+    if action_id.startswith("ua_lead_"):
+        conn.execute("UPDATE leads SET status='SENT' WHERE id=?", (action_id[len("ua_lead_"):],))
+    audit(conn, owner, "action.sent", action_id)
+
+
 def mark_submitted(conn, action_id, owner, proof_url=""):
     """Owner confirms they submitted. Requires a still-valid approval."""
     a = _get(conn, action_id)
