@@ -33,3 +33,11 @@ the Neon console, which re-opens setup (requires `OWNER_SETUP_TOKEN` again).
   filesystem is ephemeral, so SQLite will not persist. Cron on the free tier is limited.
 - Recommended: dashboard on Vercel (decided) + a small always-on worker or scheduled jobs with
   Postgres. Decide before Phase 2/6.
+
+## Claude connector (read-only MCP)
+1. Vercel -> Environment Variables: add `MCP_CONNECTOR_TOKEN` (Secret, 32+ random characters). Redeploy.
+2. claude.ai -> Settings -> Connectors -> Add custom connector. URL:
+   `https://zero-to-revenue-neon.vercel.app/mcp/<your token>`
+3. Ask any chat: "what needs my attention?" Tools: what_needs_my_attention, get_status, daily_report,
+   list_opportunities, list_open_actions, list_payments. None can change anything; each call is audited.
+4. If the URL ever leaks, change the token in Vercel and redeploy; the old URL stops working.

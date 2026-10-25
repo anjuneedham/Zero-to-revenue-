@@ -13,6 +13,7 @@ from agents.operator import run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
 from core import actions, scheduler
+from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
 from core.auth import owner_login as ol
@@ -64,6 +65,8 @@ def handle(method, path, authz, conn, body: bytes = b""):
         return 200, "text/html; charset=utf-8", PAGE.encode()
     if method == "GET" and path in STATIC_TYPES:
         return 200, STATIC_TYPES[path], (STATIC / path[1:]).read_bytes()
+    if path == "/mcp" or path.startswith("/mcp/"):
+        return handle_mcp(method, path, authz, conn, body)
     if not path.startswith("/api/"):
         return _json(404, {"error": "not found"})
 

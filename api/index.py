@@ -60,7 +60,7 @@ class handler(BaseHTTPRequestHandler):
         path = real_path(self.path)
         n = int(self.headers.get("Content-Length") or 0)
         req_body = self.rfile.read(min(n, dash.MAX_BODY + 1)) if n else b""
-        if path.startswith("/api/"):
+        if path.startswith("/api/") or path == "/mcp" or path.startswith("/mcp/"):
             code, ctype, body = _api(method, path, self.headers.get("Authorization"), req_body)
         else:
             code, ctype, body = dash.handle(method, path, None, None)
