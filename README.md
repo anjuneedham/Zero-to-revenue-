@@ -19,4 +19,4 @@ Phase 1 pieces: SQLite schema (`database/migrations`), task queue with leases an
 idempotency (`core/queue`), kill switch (`core/orchestrator`), append-only audit log,
 owner-only Firebase token verification (`core/auth`), notification service with a
 mock WhatsApp backend. Setup steps: [docs/runbooks/PHASE1_SETUP.md](docs/runbooks/PHASE1_SETUP.md).
-Dashboard: `python3 -m dashboard.app` (127.0.0.1:8080, owner-only, MOCK). Not built yet: agents, scheduler, wallet monitoring.
+Dashboard: `python3 -m dashboard.app` locally (owner-only, MOCK, installable PWA). Vercel + APK plan: [docs/runbooks/VERCEL_AND_APK.md](docs/runbooks/VERCEL_AND_APK.md). Not built yet: Postgres port, agents, scheduler, wallet monitoring.

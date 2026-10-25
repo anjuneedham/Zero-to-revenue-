@@ -10,3 +10,7 @@ node_modules/
 *.key
 *.pem
 keystore/
+*.jks
+*.keystore
+android-signing*
+.vercel

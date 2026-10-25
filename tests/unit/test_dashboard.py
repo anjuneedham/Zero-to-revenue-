@@ -52,3 +52,21 @@ class DashboardTest(AuthTest):
 del AuthTest  # avoid re-running the inherited auth tests here
 if __name__ == "__main__":
     unittest.main()
+
+
+class PwaTest(unittest.TestCase):
+    def test_pwa_assets_served_and_api_never_cached(self):
+        a = OwnerAuth(PROJECT, OWNER)
+        for path, ctype in (("/manifest.webmanifest", "application/manifest+json"),
+                            ("/sw.js", "text/javascript"), ("/icon-512.png", "image/png")):
+            code, ct, body = handle("GET", path, None, None, a)
+            self.assertEqual((code, ct), (200, ctype))
+            self.assertTrue(body)
+        sw = handle("GET", "/sw.js", None, None, a)[2].decode()
+        self.assertIn('startsWith("/api/")', sw)
+        manifest = json.loads(handle("GET", "/manifest.webmanifest", None, None, a)[2])
+        self.assertEqual(manifest["display"], "standalone")
+
+    def test_vercel_entry_refuses_api_without_postgres(self):
+        from api import index
+        self.assertFalse(index.HAS_PERSISTENT_DB)

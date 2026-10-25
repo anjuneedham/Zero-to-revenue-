@@ -24,6 +24,11 @@ HEADERS = {
 }
 
 
+STATIC = Path(__file__).parent / "static"
+STATIC_TYPES = {"/manifest.webmanifest": "application/manifest+json", "/sw.js": "text/javascript",
+                "/icon-192.png": "image/png", "/icon-512.png": "image/png"}
+
+
 def web_config() -> dict:
     """Firebase *web* config is public by design; it is not a secret."""
     return {k: os.environ.get(v, "") for k, v in
@@ -35,6 +40,8 @@ def handle(method, path, authz, conn, auth: OwnerAuth):
     j = lambda code, obj: (code, "application/json", json.dumps(obj).encode())
     if method == "GET" and path == "/":
         return 200, "text/html; charset=utf-8", PAGE.encode()
+    if method == "GET" and path in STATIC_TYPES:
+        return 200, STATIC_TYPES[path], (STATIC / path[1:]).read_bytes()
     if method == "GET" and path == "/config.json":
         return j(200, web_config())
     if not path.startswith("/api/"):

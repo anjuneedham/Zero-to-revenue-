@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zero-to-Revenue</title>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#111114">
+<link rel="icon" href="/icon-192.png">
 <style>
 body{font:16px system-ui;margin:0;padding:16px;background:#111;color:#eee;max-width:720px;margin:auto}
 .card{background:#1d1d22;border-radius:12px;padding:14px;margin:12px 0}
@@ -41,6 +43,7 @@ async function refresh(){
   s.open_user_actions.forEach(a=>row($('actions'),a.title+' - '+a.exact_action+(a.deadline?' (by '+a.deadline+')':'')));
   text($('counts'),'Tasks: '+JSON.stringify(s.tasks)+' | Opportunities: '+JSON.stringify(s.opportunities)+' | Payments pending: '+s.payments_pending);
 }
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 (async()=>{
   const cfg=await (await fetch('/config.json')).json();
   if(!cfg.apiKey){$('login').hidden=false;text($('err'),'Firebase is not configured yet.');$('signin').disabled=true;return}
