@@ -27,7 +27,7 @@ Pricing hypothesis: $1,500 setup + $400/month. Validate with real conversations 
 ## Path to $100k in 12 months (target, not forecast)
 | Months | Milestone | Revenue engine |
 |---|---|---|
-| 1-2 | Bounties/freelance keep cash flowing; 15 contractor interviews; 1 pilot at cost | Bounties + pilot |
+| 1-2 | Bounties/freelance keep cash flowing; cold outreach with a free missed-call audit; 1 pilot at cost | Bounties + pilot |
 | 3-4 | 4 paying clients | Setup fees + first retainers |
 | 5-6 | 10 clients; case study with real numbers from the pilot | Retainers compound |
 | 7-9 | 20 clients; referral deal with a trades supplier or accountant | Referrals |
@@ -42,6 +42,6 @@ Rough maths: ~40 setups x $1.5k = $60k, plus retainers building to ~$12k/month â
 - **Notifications:** the same Twilio integration becomes part of the product.
 
 ## Kill criteria (the investor's discipline)
-- Fewer than 5 of 15 interviews confirm the pain by week 4: pivot within trades (e.g. invoicing/payment chasing).
+- Owner has no warm contacts (checked 25 Oct). Fewer than 3 of the first 20 audits sent get a reply confirming the pain by week 4: change the pitch or the trade (e.g. invoicing/payment chasing).
 - Pilot doesn't measurably improve response time within 30 days: fix delivery before selling more.
 - Rules: no cold-call spam, follow SMS consent laws (opt-in, STOP handling), no fake reviews.
