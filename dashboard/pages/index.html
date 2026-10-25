@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zero-to-Revenue</title>
+<style>
+body{font:16px system-ui;margin:0;padding:16px;background:#111;color:#eee;max-width:720px;margin:auto}
+.card{background:#1d1d22;border-radius:12px;padding:14px;margin:12px 0}
+.badge{background:#ffb020;color:#000;border-radius:6px;padding:2px 8px;font-weight:700}
+button{font:inherit;padding:10px 16px;border-radius:8px;border:0;background:#1fc7d4;color:#000;font-weight:700}
+button.stop{background:#e5484d;color:#fff}
+.muted{color:#9a9aa5}.big{font-size:2rem;font-weight:700}
+</style></head><body>
+<h1>Zero-to-Revenue <span class="badge">MOCK</span></h1>
+<div id="login" class="card" hidden><p>Owner sign-in only.</p><button id="signin">Sign in with Google</button><p id="err" class="muted"></p></div>
+<div id="app" hidden>
+  <div class="card"><div class="muted">Verified revenue (only verified receipts)</div><div class="big" id="rev">$0.00</div>
+    <div id="state"></div><p><button id="pause" class="stop">PAUSE ALL AGENTS</button> <button id="resume">Resume</button></p></div>
+  <div class="card"><h3>Agents</h3><div id="agents"></div></div>
+  <div class="card"><h3>Action required</h3><div id="actions" class="muted">None</div></div>
+  <div class="card"><h3>Tasks / opportunities</h3><div id="counts" class="muted"></div></div>
+  <p><button id="signout">Sign out</button></p>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const text=(el,t)=>{el.textContent=t};            // text only: data may be untrusted
+function row(parent,t){const d=document.createElement('div');d.textContent=t;parent.appendChild(d)}
+async function api(path,method){
+  const tok=await firebase.auth().currentUser.getIdToken();
+  const r=await fetch(path,{method:method||'GET',headers:{Authorization:'Bearer '+tok}});
+  if(r.status===401){text($('err'),'This account is not the owner.');await firebase.auth().signOut();throw new Error('401')}
+  return r.json();
+}
+async function refresh(){
+  const s=await api('/api/status');
+  text($('rev'),'$'+Number(s.verified_revenue_usd).toFixed(2));
+  text($('state'),s.paused?'PAUSED - all agents stopped':'Running ('+s.mode+')');
+  $('agents').replaceChildren();s.agents.forEach(a=>row($('agents'),a.name.toUpperCase()+' - '+a.status+' ['+a.mode+'] last run: '+(a.last_run_at||'never')));
+  $('actions').replaceChildren();
+  if(!s.open_user_actions.length)text($('actions'),'None');
+  s.open_user_actions.forEach(a=>row($('actions'),a.title+' - '+a.exact_action+(a.deadline?' (by '+a.deadline+')':'')));
+  text($('counts'),'Tasks: '+JSON.stringify(s.tasks)+' | Opportunities: '+JSON.stringify(s.opportunities)+' | Payments pending: '+s.payments_pending);
+}
+(async()=>{
+  const cfg=await (await fetch('/config.json')).json();
+  if(!cfg.apiKey){$('login').hidden=false;text($('err'),'Firebase is not configured yet.');$('signin').disabled=true;return}
+  firebase.initializeApp(cfg);
+  $('signin').onclick=()=>firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>text($('err'),e.message));
+  $('signout').onclick=()=>firebase.auth().signOut();
+  $('pause').onclick=async()=>{await api('/api/pause','POST');refresh()};
+  $('resume').onclick=async()=>{await api('/api/resume','POST');refresh()};
+  firebase.auth().onAuthStateChanged(async u=>{
+    $('login').hidden=!!u;$('app').hidden=!u;
+    if(u){try{await refresh();setInterval(refresh,30000)}catch(e){}}
+  });
+})();
+</script></body></html>
