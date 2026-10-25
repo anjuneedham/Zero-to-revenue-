@@ -1,21 +1,13 @@
-import time
 import unittest
-from datetime import datetime, timedelta, timezone
 
-import jwt
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509.oid import NameOID
 
 from core import db
-from core.auth.firebase_auth import AuthError, OwnerAuth
 from core.notifications.notify import SecretInNotification, notify
 from core.orchestrator import killswitch
 from core.queue import queue
 from integrations.notifications.whatsapp import MockWhatsApp
 
-PROJECT, OWNER = "demo-proj", "owner@example.com"
+OWNER = "owner"
 
 
 from tests.dbutil import make_conn  # noqa: E402  (isolated Postgres schema per call)
@@ -97,62 +89,6 @@ class QueueTest(unittest.TestCase):
         self.assertEqual(c.execute("select status from tasks").fetchone()[0], "FAILED")
         with self.assertRaises(ValueError):
             queue.set_status(c, t, "QUEUED")
-
-
-class AuthTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "t")])
-        now = datetime.now(timezone.utc)
-        cert = (x509.CertificateBuilder().subject_name(name).issuer_name(name)
-                .public_key(cls.key.public_key()).serial_number(1)
-                .not_valid_before(now - timedelta(days=1)).not_valid_after(now + timedelta(days=1))
-                .sign(cls.key, hashes.SHA256()))
-        cls.certs = {"kid1": cert.public_bytes(serialization.Encoding.PEM).decode()}
-        cls.pem = cls.key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
-                                        serialization.NoEncryption())
-
-    def token(self, **over):
-        t = int(time.time())
-        claims = dict(iss=f"https://securetoken.google.com/{PROJECT}", aud=PROJECT, sub="uid1",
-                      iat=t, exp=t + 600, email=OWNER, email_verified=True)
-        claims.update(over)
-        claims = {k: v for k, v in claims.items() if v is not None}
-        return jwt.encode(claims, self.pem, algorithm="RS256", headers={"kid": "kid1"})
-
-    def auth(self, **kw):
-        return OwnerAuth(PROJECT, OWNER, cert_fetcher=lambda: self.certs, **kw)
-
-    def test_owner_accepted(self):
-        self.assertEqual(self.auth().verify(self.token()), OWNER)
-
-    def test_everything_else_rejected(self):
-        a = self.auth()
-        bad = [self.token(email="evil@example.com"), self.token(email_verified=False),
-               self.token(aud="other"), self.token(iss="https://evil"),
-               self.token(exp=int(time.time()) - 10), self.token(sub=""),
-               self.token(email=None), "garbage"]
-        for tok in bad:
-            with self.assertRaises(AuthError, msg=tok[:30]):
-                a.verify(tok)
-
-    def test_forged_signature_and_alg_none_rejected(self):
-        other = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        pem = other.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
-                                  serialization.NoEncryption())
-        t = int(time.time())
-        claims = dict(iss=f"https://securetoken.google.com/{PROJECT}", aud=PROJECT, sub="u",
-                      iat=t, exp=t + 600, email=OWNER, email_verified=True)
-        forged = jwt.encode(claims, pem, algorithm="RS256", headers={"kid": "kid1"})
-        none = jwt.encode(claims, None, algorithm="none", headers={"kid": "kid1"})
-        for tok in (forged, none):
-            with self.assertRaises(AuthError):
-                self.auth().verify(tok)
-
-    def test_fails_closed_when_unconfigured(self):
-        with self.assertRaises(AuthError):
-            OwnerAuth("", "", cert_fetcher=lambda: self.certs).verify(self.token())
 
 
 class NotifyTest(unittest.TestCase):

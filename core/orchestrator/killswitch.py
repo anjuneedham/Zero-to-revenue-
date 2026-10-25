@@ -23,9 +23,9 @@ def pause_all(conn, actor: str) -> None:
     # Stop scheduled work from being picked up; in-flight state is preserved.
 
 
-def resume(conn, verified_owner_email: str | None) -> None:
+def resume(conn, verified_owner: str | None) -> None:
     """Resuming needs an identity produced by core.auth (a verified owner)."""
-    if not verified_owner_email:
+    if not verified_owner:
         raise NotOwner("resume requires an authenticated owner")
     _set(conn, "0")
-    audit(conn, verified_owner_email, "kill_switch.resume")
+    audit(conn, verified_owner, "kill_switch.resume")

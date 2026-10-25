@@ -6,7 +6,7 @@
 | Dashboard + API | Vercel (Python functions, `api/index.py`) | Hobby free tier |
 | Database | **Postgres** (Neon via Vercel Marketplace, or Supabase) | Free tier |
 | Scheduler for agents | GitHub Actions cron calling a protected endpoint (Vercel Hobby cron is once/day only) | Free |
-| Login | Firebase Auth, owner email only | Free |
+| Login | Own password + authenticator app, stored in Postgres | Free |
 | Phone app | PWA first, then APK wrapper | Free (sideload) |
 
 ## Database (done): Neon Postgres, one database
@@ -23,10 +23,9 @@
 throwaway Postgres (each test gets its own schema). Without it Postgres tests are SKIPPED.
 
 ## Remaining before real use
-1. Set `OWNER_EMAIL`, `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, `FIREBASE_AUTH_DOMAIN` in Vercel
-   (Settings -> Environment Variables); add the Vercel domain to Firebase "Authorized domains".
+1. Complete first-time owner setup (see PHASE1_SETUP.md), then remove `OWNER_SETUP_TOKEN`.
 2. Turn off Vercel Deployment Protection for production so the PWA/APK can load the manifest
-   (our own owner-only login protects the data).
+   (our own owner-only login protects the data). Do this only after step 1.
 3. Move to Vercel Pro (or other hosting) before earning real revenue: Hobby is non-commercial.
 
 ## Phone app
@@ -37,4 +36,3 @@ throwaway Postgres (each test gets its own schema). Without it Postgres tests ar
   Sideloading an APK is free; Play Store needs a one-time $25 developer fee.
 - The Android **signing keystore is a secret**: keep it out of git (`*.jks`, `*.keystore`
   are ignored) and back it up yourself; losing it means you can't update the app.
-- Google sign-in popups can misbehave inside a TWA; if so switch to redirect sign-in.

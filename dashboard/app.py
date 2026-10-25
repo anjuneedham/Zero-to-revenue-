@@ -1,84 +1,129 @@
-"""Owner-only dashboard. Every /api route needs a Firebase ID token for the owner
-in the Authorization header (no cookies, so no CSRF surface). Mode: MOCK."""
+"""Owner-only dashboard + API. Every /api route except the few login/setup routes needs
+a session bearer token in the Authorization header (no cookies, so no CSRF surface).
+Mode: MOCK."""
 
 import json
-import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from core import db
 from core.audit import audit
-from core.auth.firebase_auth import AuthError, OwnerAuth
+from core.auth import owner_login as ol
 from core.orchestrator import killswitch
 from core.reports import status_snapshot
 
 PAGE = (Path(__file__).parent / "pages" / "index.html").read_text()
+STATIC = Path(__file__).parent / "static"
+STATIC_TYPES = {"/manifest.webmanifest": "application/manifest+json", "/sw.js": "text/javascript",
+                "/app.js": "text/javascript", "/icon-192.png": "image/png", "/icon-512.png": "image/png"}
+MAX_BODY = 4096
 HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
-    "Content-Security-Policy": ("default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; "
-                                "connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com; "
-                                "frame-src https://*.firebaseapp.com https://accounts.google.com; style-src 'self' 'unsafe-inline'"),
+    # No inline scripts and no third-party origins: a tight XSS barrier.
+    "Content-Security-Policy": ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                                "img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; "
+                                "base-uri 'none'; form-action 'self'"),
 }
 
 
-STATIC = Path(__file__).parent / "static"
-STATIC_TYPES = {"/manifest.webmanifest": "application/manifest+json", "/sw.js": "text/javascript",
-                "/icon-192.png": "image/png", "/icon-512.png": "image/png"}
+def _json(code, obj):
+    return code, "application/json", json.dumps(obj).encode()
 
 
-def web_config() -> dict:
-    """Firebase *web* config is public by design; it is not a secret."""
-    return {k: os.environ.get(v, "") for k, v in
-            {"apiKey": "FIREBASE_WEB_API_KEY", "authDomain": "FIREBASE_AUTH_DOMAIN", "projectId": "FIREBASE_PROJECT_ID"}.items()}
+def _fields(body: bytes, *names):
+    if len(body) > MAX_BODY:
+        raise ValueError("body too large")
+    data = json.loads(body or b"{}")
+    out = []
+    for n in names:
+        v = data.get(n, "")
+        if not isinstance(v, str):
+            raise ValueError("bad field")
+        out.append(v)
+    return out
 
 
-def handle(method, path, authz, conn, auth: OwnerAuth):
+def handle(method, path, authz, conn, body: bytes = b""):
     """Returns (status, content_type, body_bytes)."""
-    j = lambda code, obj: (code, "application/json", json.dumps(obj).encode())
     if method == "GET" and path == "/":
         return 200, "text/html; charset=utf-8", PAGE.encode()
     if method == "GET" and path in STATIC_TYPES:
         return 200, STATIC_TYPES[path], (STATIC / path[1:]).read_bytes()
-    if method == "GET" and path == "/config.json":
-        return j(200, web_config())
     if not path.startswith("/api/"):
-        return j(404, {"error": "not found"})
+        return _json(404, {"error": "not found"})
+
+    # --- unauthenticated: login and one-time setup (rate limited, audited) -------
+    try:
+        if method == "GET" and path == "/api/auth/state":
+            return _json(200, {"setup_complete": ol.setup_complete(conn), "setup_enabled": ol.setup_enabled()})
+        if method == "POST" and path == "/api/auth/login":
+            password, code = _fields(body, "password", "code")
+            return _json(200, ol.login(conn, password, code))
+        if method == "POST" and path == "/api/auth/setup/begin":
+            token, password = _fields(body, "setup_token", "password")
+            return _json(200, ol.begin_setup(conn, token, password))
+        if method == "POST" and path == "/api/auth/setup/confirm":
+            token, code = _fields(body, "setup_token", "code")
+            return _json(200, {"recovery_codes": ol.confirm_setup(conn, token, code)})
+    except ol.LockedOut:
+        return _json(429, {"error": "too many attempts; try again later"})
+    except ol.SetupDisabled:
+        return _json(403, {"error": "setup is not enabled"})
+    except ol.SetupClosed:
+        return _json(403, {"error": "setup is already complete"})
+    except ol.AuthError:
+        return _json(401, {"error": "invalid credentials"})
+    except (ValueError, KeyError, json.JSONDecodeError) as e:
+        return _json(400, {"error": str(e) if isinstance(e, ValueError) and "password" in str(e) else "bad request"})
+
+    # --- authenticated -------------------------------------------------------------
     token = authz[7:] if authz and authz.startswith("Bearer ") else ""
     try:
-        owner = auth.verify(token)
-    except AuthError:
-        return j(401, {"error": "unauthorized"})
+        owner = ol.verify_session(conn, token)
+    except ol.AuthError:
+        return _json(401, {"error": "unauthorized"})
     if method == "GET" and path == "/api/status":
-        return j(200, status_snapshot(conn))
+        return _json(200, status_snapshot(conn))
     if method == "POST" and path == "/api/pause":
         killswitch.pause_all(conn, owner)
-        return j(200, {"paused": True})
+        return _json(200, {"paused": True})
     if method == "POST" and path == "/api/resume":
         killswitch.resume(conn, owner)
-        return j(200, {"paused": False})
-    return j(404, {"error": "not found"})
+        return _json(200, {"paused": False})
+    if method == "POST" and path == "/api/auth/logout":
+        ol.logout(conn, token)
+        return _json(200, {"ok": True})
+    if method == "POST" and path == "/api/auth/logout-all":
+        ol.logout_everywhere(conn)
+        return _json(200, {"ok": True})
+    return _json(404, {"error": "not found"})
 
 
 def serve(host="127.0.0.1", port=8080):
     conn = db.connect()  # DATABASE_URL
     db.migrate(conn)
-    auth = OwnerAuth()
 
     class H(BaseHTTPRequestHandler):
         def _go(self, method):
-            code, ctype, body = handle(method, self.path.split("?")[0], self.headers.get("Authorization"), conn, auth)
+            n = int(self.headers.get("Content-Length") or 0)
+            body = self.rfile.read(min(n, MAX_BODY + 1)) if n else b""
+            code, ctype, out = handle(method, self.path.split("?")[0], self.headers.get("Authorization"), conn, body)
             self.send_response(code)
             self.send_header("Content-Type", ctype)
-            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Content-Length", str(len(out)))
             for k, v in HEADERS.items():
                 self.send_header(k, v)
             self.end_headers()
-            self.wfile.write(body)
+            self.wfile.write(out)
+
         do_GET = lambda self: self._go("GET")
         do_POST = lambda self: self._go("POST")
+
+        def log_message(self, *a):
+            pass
 
     ThreadingHTTPServer((host, port), H).serve_forever()
 

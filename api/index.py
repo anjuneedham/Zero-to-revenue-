@@ -11,10 +11,8 @@ import os
 from http.server import BaseHTTPRequestHandler
 
 from core import db
-from core.auth.firebase_auth import OwnerAuth
 from dashboard import app as dash
 
-auth = OwnerAuth()
 _migrated = False
 
 
@@ -26,7 +24,7 @@ def has_persistent_db() -> bool:
     return _db_url().startswith(("postgres://", "postgresql://"))
 
 
-def _api(method, path, authz):
+def _api(method, path, authz, body=b""):
     global _migrated
     unavailable = (503, "application/json", json.dumps({"error": "database unavailable"}).encode())
     if not has_persistent_db():
@@ -39,7 +37,7 @@ def _api(method, path, authz):
         if not _migrated:
             db.migrate(conn)
             _migrated = True
-        return dash.handle(method, path, authz, conn, auth)
+        return dash.handle(method, path, authz, conn, body)
     except Exception:
         return unavailable  # never leak driver errors (may contain hosts/users)
     finally:
@@ -49,10 +47,12 @@ def _api(method, path, authz):
 class handler(BaseHTTPRequestHandler):
     def _go(self, method):
         path = self.path.split("?")[0]
+        n = int(self.headers.get("Content-Length") or 0)
+        req_body = self.rfile.read(min(n, dash.MAX_BODY + 1)) if n else b""
         if path.startswith("/api/"):
-            code, ctype, body = _api(method, path, self.headers.get("Authorization"))
+            code, ctype, body = _api(method, path, self.headers.get("Authorization"), req_body)
         else:
-            code, ctype, body = dash.handle(method, path, None, None, auth)
+            code, ctype, body = dash.handle(method, path, None, None)
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))

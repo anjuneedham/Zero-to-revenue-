@@ -54,7 +54,8 @@ class ConcurrencyTest(unittest.TestCase):
         dbutil._schemas.append(schema)
         conns = [db.connect(dbutil.URL, schema=schema) for _ in range(5)]
         applied = self.run_parallel(lambda i: db.migrate(conns[i]), 5)
-        self.assertEqual(sum(len(a) for a in applied), 1)  # exactly one runner applied it
+        names = [n for a in applied for n in a]
+        self.assertEqual(sorted(names), sorted(f.name for f in db.MIGRATIONS.glob("*.sql")))  # each applied exactly once
 
 
 if __name__ == "__main__":

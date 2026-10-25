@@ -13,3 +13,9 @@
 - `tests/security/test_no_secrets.py` scans the repo for key material.
 
 Report a vulnerability to the repository owner privately.
+
+## Authentication
+- Single owner. Password is scrypt-hashed; second factor is TOTP (each code single-use) with
+  single-use recovery codes. Sessions are random bearer tokens stored only as sha256 hashes.
+- Login and setup attempts are rate limited and audited. Setup needs `OWNER_SETUP_TOKEN` and can
+  complete once. The dashboard serves a strict CSP (no inline scripts, no third-party origins).

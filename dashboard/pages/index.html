@@ -9,52 +9,41 @@ body{font:16px system-ui;margin:0;padding:16px;background:#111;color:#eee;max-wi
 .badge{background:#ffb020;color:#000;border-radius:6px;padding:2px 8px;font-weight:700}
 button{font:inherit;padding:10px 16px;border-radius:8px;border:0;background:#1fc7d4;color:#000;font-weight:700}
 button.stop{background:#e5484d;color:#fff}
-.muted{color:#9a9aa5}.big{font-size:2rem;font-weight:700}
+input{font:inherit;width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #444;background:#111;color:#eee;margin:6px 0}
+.muted{color:#9a9aa5}.big{font-size:2rem;font-weight:700}.err{color:#ff7b7b}
+code{word-break:break-all;background:#000;padding:2px 6px;border-radius:4px}
+[hidden]{display:none!important}
 </style></head><body>
 <h1>Zero-to-Revenue <span class="badge">MOCK</span></h1>
-<div id="login" class="card" hidden><p>Owner sign-in only.</p><button id="signin">Sign in with Google</button><p id="err" class="muted"></p></div>
+<div id="msg" class="muted"></div>
+
+<div id="setup1" class="card" hidden><h3>First-time setup</h3>
+  <p class="muted">Enter the OWNER_SETUP_TOKEN you set in Vercel, and choose a password (12+ characters).</p>
+  <input id="s_token" type="password" placeholder="Setup token" autocomplete="off">
+  <input id="s_pw" type="password" placeholder="New password" autocomplete="new-password">
+  <button id="s_begin">Continue</button></div>
+<div id="setup2" class="card" hidden><h3>Add your authenticator app</h3>
+  <p>In Google Authenticator (or similar): Add account, enter a setup key manually, then type this key:</p>
+  <p><code id="s_secret"></code></p>
+  <p class="muted">Type the 6-digit code it shows to finish.</p>
+  <input id="s_code" inputmode="numeric" placeholder="123456" autocomplete="off">
+  <button id="s_confirm">Finish setup</button></div>
+<div id="setup3" class="card" hidden><h3>Save your recovery codes</h3>
+  <p class="err">Shown once. Each works once if you lose your phone. Store them offline.</p>
+  <div id="s_codes"></div><p><button id="s_done">I saved them</button></p></div>
+
+<div id="login" class="card" hidden><h3>Owner sign-in</h3>
+  <input id="l_pw" type="password" placeholder="Password" autocomplete="current-password">
+  <input id="l_code" inputmode="numeric" placeholder="6-digit code (or recovery code)" autocomplete="one-time-code">
+  <button id="l_go">Sign in</button></div>
+
 <div id="app" hidden>
   <div class="card"><div class="muted">Verified revenue (only verified receipts)</div><div class="big" id="rev">$0.00</div>
     <div id="state"></div><p><button id="pause" class="stop">PAUSE ALL AGENTS</button> <button id="resume">Resume</button></p></div>
   <div class="card"><h3>Agents</h3><div id="agents"></div></div>
   <div class="card"><h3>Action required</h3><div id="actions" class="muted">None</div></div>
   <div class="card"><h3>Tasks / opportunities</h3><div id="counts" class="muted"></div></div>
-  <p><button id="signout">Sign out</button></p>
+  <p><button id="signout">Sign out</button> <button id="signoutall">Sign out everywhere</button></p>
 </div>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script>
-const $=id=>document.getElementById(id);
-const text=(el,t)=>{el.textContent=t};            // text only: data may be untrusted
-function row(parent,t){const d=document.createElement('div');d.textContent=t;parent.appendChild(d)}
-async function api(path,method){
-  const tok=await firebase.auth().currentUser.getIdToken();
-  const r=await fetch(path,{method:method||'GET',headers:{Authorization:'Bearer '+tok}});
-  if(r.status===401){text($('err'),'This account is not the owner.');await firebase.auth().signOut();throw new Error('401')}
-  return r.json();
-}
-async function refresh(){
-  const s=await api('/api/status');
-  text($('rev'),'$'+Number(s.verified_revenue_usd).toFixed(2));
-  text($('state'),s.paused?'PAUSED - all agents stopped':'Running ('+s.mode+')');
-  $('agents').replaceChildren();s.agents.forEach(a=>row($('agents'),a.name.toUpperCase()+' - '+a.status+' ['+a.mode+'] last run: '+(a.last_run_at||'never')));
-  $('actions').replaceChildren();
-  if(!s.open_user_actions.length)text($('actions'),'None');
-  s.open_user_actions.forEach(a=>row($('actions'),a.title+' - '+a.exact_action+(a.deadline?' (by '+a.deadline+')':'')));
-  text($('counts'),'Tasks: '+JSON.stringify(s.tasks)+' | Opportunities: '+JSON.stringify(s.opportunities)+' | Payments pending: '+s.payments_pending);
-}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
-(async()=>{
-  const cfg=await (await fetch('/config.json')).json();
-  if(!cfg.apiKey){$('login').hidden=false;text($('err'),'Firebase is not configured yet.');$('signin').disabled=true;return}
-  firebase.initializeApp(cfg);
-  $('signin').onclick=()=>firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>text($('err'),e.message));
-  $('signout').onclick=()=>firebase.auth().signOut();
-  $('pause').onclick=async()=>{await api('/api/pause','POST');refresh()};
-  $('resume').onclick=async()=>{await api('/api/resume','POST');refresh()};
-  firebase.auth().onAuthStateChanged(async u=>{
-    $('login').hidden=!!u;$('app').hidden=!u;
-    if(u){try{await refresh();setInterval(refresh,30000)}catch(e){}}
-  });
-})();
-</script></body></html>
+<script src="/app.js"></script>
+</body></html>
