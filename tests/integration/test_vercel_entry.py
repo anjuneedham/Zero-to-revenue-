@@ -47,6 +47,25 @@ class VercelEntryTest(unittest.TestCase):
         except urllib.error.HTTPError as e:
             return e.code, json.loads(e.read() or b"{}")
 
+    def raw(self, path):
+        try:
+            with urllib.request.urlopen(self.base + path, timeout=10) as r:
+                return r.status, r.headers.get("Content-Type"), r.read().decode()
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers.get("Content-Type"), e.read().decode()
+
+    def test_rewritten_requests_serve_the_real_path(self):
+        # What Vercel actually sends after the vercel.json rewrite
+        code, ctype, body = self.raw("/api/index?p=/")
+        self.assertEqual((code, ctype.split(";")[0]), (200, "text/html"))
+        self.assertIn("Zero-to-Revenue", body)
+        self.assertEqual(self.raw("/api/index?p=/app.js")[0], 200)
+        self.assertEqual(self.raw("/api/index?p=/manifest.webmanifest")[0], 200)
+        self.assertEqual(self.raw("/api/index?p=/api/status")[0], 401)
+        self.assertEqual(json.loads(self.raw("/api/index?p=/api/auth/state")[2])["setup_enabled"], True)
+        self.assertEqual(self.raw("/api/index?p=/nope")[0], 404)
+        self.assertEqual(self.raw("/api/index")[0], 401)  # direct hit, no p: an api route needing auth
+
     def test_full_flow(self):
         self.assertEqual(self.call("GET", "/api/status")[0], 401)
         self.assertEqual(self.call("GET", "/api/auth/state")[1], {"setup_complete": False, "setup_enabled": True})

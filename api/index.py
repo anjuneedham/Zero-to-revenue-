@@ -8,6 +8,7 @@ A fresh connection per request: serverless instances are short-lived.
 
 import json
 import os
+from urllib.parse import parse_qs, urlsplit
 from http.server import BaseHTTPRequestHandler
 
 from core import db
@@ -44,9 +45,19 @@ def _api(method, path, authz, body=b""):
         conn.close()
 
 
+def real_path(raw: str) -> str:
+    """vercel.json rewrites every request to /api/index?p=<original path>, because the
+    function otherwise sees the rewritten path. Direct hits on /api/index carry no p."""
+    parts = urlsplit(raw)
+    p = parse_qs(parts.query).get("p", [None])[0]
+    if parts.path == "/api/index" and p is not None:
+        return "/" + p.lstrip("/")
+    return parts.path
+
+
 class handler(BaseHTTPRequestHandler):
     def _go(self, method):
-        path = self.path.split("?")[0]
+        path = real_path(self.path)
         n = int(self.headers.get("Content-Length") or 0)
         req_body = self.rfile.read(min(n, dash.MAX_BODY + 1)) if n else b""
         if path.startswith("/api/"):
