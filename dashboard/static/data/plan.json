@@ -1,0 +1,354 @@
+{
+ "buildflow": [
+  {
+   "id": "bf-storage",
+   "p": "P0",
+   "who": "owner",
+   "title": "Turn on Firebase Storage",
+   "detail": "Needs the Blaze plan (a card), a budget alert, then Storage > Get started and deploy storage.rules. Until this is done every photo and file upload fails: posts, portfolio, job photos. Check that Google accepts your card; prepaid cards are sometimes refused. BuildFlow's own reminder is set for 31 Oct.",
+   "src": "Integration test report, P0-3"
+  },
+  {
+   "id": "bf-billing",
+   "p": "P0",
+   "who": "both",
+   "title": "Decide how contractors pay (Stripe is not available in Jamaica)",
+   "detail": "Billing is a stub: $50/month is displayed but nothing charges or enforces the trial. For the first 10 founding contractors use bank transfer or PayPal invoices and mark them paid in the admin screen. Then choose WiPay or PayPal subscriptions. Once you choose, I can build trial enforcement and a paid-until field.",
+   "src": "V2 audit; strategy section 6"
+  },
+  {
+   "id": "bf-legal",
+   "p": "P0",
+   "who": "owner",
+   "title": "Add real company details and get the legal pages reviewed",
+   "detail": "Production refuses to start until support email, company name, address, governing law and NEXT_PUBLIC_LEGAL_REVIEWED=true are set. The Privacy Policy and Terms still contain placeholders. I can draft wording; a lawyer must review it.",
+   "src": "Production readiness report, C4"
+  },
+  {
+   "id": "bf-hosting",
+   "p": "P0",
+   "who": "owner",
+   "title": "Move BuildFlow's Vercel project to Pro before charging",
+   "detail": "Hobby is non-commercial. Set the production environment variables at the same time (Firebase values, service account key as a secret, legal and support variables).",
+   "src": "Integration test report, P2-5; Firebase checklist"
+  },
+  {
+   "id": "bf-prodproject",
+   "p": "P1",
+   "who": "owner",
+   "title": "Choose the production Firebase project and deploy it properly",
+   "detail": "Decide build-6fa95 or buildflow-prod. Enable Email/Password, add the Vercel domain to authorised domains, set the email sender name, deploy rules, indexes and storage, turn on daily backups. Seed reference data on any new project before anyone signs up.",
+   "src": "Firebase production checklist"
+  },
+  {
+   "id": "bf-push",
+   "p": "P1",
+   "who": "both",
+   "title": "Add push notifications for new leads",
+   "detail": "Without them a contractor never hears about a lead unless the app is open, the main reason a tester would stop using it. You register the Android app in Firebase; I add google-services.json and the push plugin.",
+   "src": "Integration test report, P1-1"
+  },
+  {
+   "id": "bf-device",
+   "p": "P1",
+   "who": "owner",
+   "title": "Run the Android app on a real phone",
+   "detail": "Check the photo picker, PDFs, back button, offline launch and Android 15 layout. The app has never run on a device.",
+   "src": "Readiness report, C1; P2-6"
+  },
+  {
+   "id": "bf-keystore",
+   "p": "P1",
+   "who": "owner",
+   "title": "Create the Android upload keystore and back it up",
+   "detail": "Keep it outside git. Losing it means you cannot update the app. Set CAP_SERVER_URL to the production address.",
+   "src": "Firebase checklist, Android"
+  },
+  {
+   "id": "bf-play",
+   "p": "P1",
+   "who": "both",
+   "title": "Prepare the Google Play listing",
+   "detail": "512px icon, 1024x500 feature graphic, at least 2 phone screenshots, short and full descriptions, category, content rating, Data safety form, reviewer test account. I can draft the texts. Check Play Console for the current closed-testing tester requirement for new accounts.",
+   "src": "Google Play closed-test checklist"
+  },
+  {
+   "id": "bf-pilot",
+   "p": "P1",
+   "who": "owner",
+   "title": "Sign 10 founding contractors (your strongest skill)",
+   "detail": "Free for 60 days in exchange for feedback, a set of job photos and a testimonial. Pitch: your leads are yours, one flat monthly price, WhatsApp-first. Share each contractor's profile link or QR with their own customers, since a directory has no value without both sides.",
+   "src": "Product strategy, cold-start plan"
+  },
+  {
+   "id": "bf-price",
+   "p": "P1",
+   "who": "owner",
+   "title": "Test the price with real contractors",
+   "detail": "$50/month including 1 user, +$20 per extra user, is a bet and has not been validated. Ask each founding contractor: would you pay this, in USD or JMD, and is a cheaper solo tier needed?",
+   "src": "Product strategy, open questions"
+  },
+  {
+   "id": "bf-compete",
+   "p": "P2",
+   "who": "owner",
+   "title": "Study ClickAway, the Jamaican competitor",
+   "detail": "A local matching app with job bidding and payments, reported at about 2,800 beta users. BuildFlow's angle: leads are yours, flat price, built for the field.",
+   "src": "Competitive reverse engineering"
+  },
+  {
+   "id": "bf-chat",
+   "p": "P2",
+   "who": "both",
+   "title": "Decide on messaging",
+   "detail": "Private client link or in-app chat. Today customers contact contractors by quote request, phone or WhatsApp.",
+   "src": "Integration test report, P2-1"
+  },
+  {
+   "id": "bf-hardening",
+   "p": "P2",
+   "who": "agent",
+   "title": "Hardening: error monitoring, photo thumbnails, Content-Security-Policy",
+   "detail": "Agent work once the P0 items are clear: Sentry-style monitoring, thumbnails once Storage is on, and a CSP header.",
+   "src": "Integration test report, P2-2 to P2-4"
+  }
+ ],
+ "system": [
+  {
+   "id": "sys-twilio",
+   "p": "P1",
+   "who": "owner",
+   "title": "Connect Twilio WhatsApp alerts",
+   "detail": "Create the account, join the sandbox, add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM and WHATSAPP_TO in Vercel."
+  },
+  {
+   "id": "sys-anthropic",
+   "p": "P1",
+   "who": "owner",
+   "title": "Add the Anthropic key and token prices",
+   "detail": "ANTHROPIC_API_KEY (Secret) plus LLM_PRICE_IN_PER_MTOK and LLM_PRICE_OUT_PER_MTOK from the pricing page. The $80 cap is already set."
+  },
+  {
+   "id": "sys-pro",
+   "p": "P1",
+   "who": "owner",
+   "title": "Upgrade this project's Vercel team to Pro before real revenue",
+   "detail": "Hobby is non-commercial. Also unlocks longer functions and more frequent cron."
+  },
+  {
+   "id": "sys-protection",
+   "p": "P2",
+   "who": "owner",
+   "title": "Turn off Vercel Deployment Protection for production",
+   "detail": "Needed so the phone app can load the manifest. The owner login protects the data."
+  },
+  {
+   "id": "sys-solana",
+   "p": "P2",
+   "who": "owner",
+   "title": "Create a Solana address only if you go after Superteam bounties",
+   "detail": "They pay in USDC/USDG on Solana; Treasury watches EVM chains only."
+  }
+ ],
+ "phases": [
+  [
+   0,
+   "Architecture",
+   "Safety policy, permissions, spec",
+   "done"
+  ],
+  [
+   1,
+   "Foundation",
+   "Postgres, queue, kill switch, audit log, owner login, dashboard",
+   "done"
+  ],
+  [
+   2,
+   "Scout",
+   "Source scoring, scam and spam defense, optional Claude help",
+   "done"
+  ],
+  [
+   3,
+   "Operator",
+   "Drafts and decisions, nothing submitted for you",
+   "done"
+  ],
+  [
+   4,
+   "Treasury",
+   "Read-only wallet watching on 7 chains, on-chain payment verification",
+   "done"
+  ],
+  [
+   5,
+   "Notifications",
+   "WhatsApp alerts via Twilio, daily report",
+   "done"
+  ],
+  [
+   6,
+   "Scheduler",
+   "Daily run via Vercel Cron",
+   "done"
+  ],
+  [
+   7,
+   "BuildFlow launch",
+   "Clear the P0 blockers, sign 10 founding contractors",
+   "now"
+  ],
+  [
+   8,
+   "First verified payment",
+   "Reconciled end to end",
+   "next"
+  ],
+  [
+   9,
+   "Optimization",
+   "Revenue per hour and per approval drive ranking",
+   "later"
+  ]
+ ],
+ "year": [
+  1,
+  2,
+  3.5,
+  5,
+  6.5,
+  8,
+  9.5,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "ladder": [
+  [
+   "BuildFlow subscription",
+   "$50/month (+$20/user)",
+   "Volume entry point; billing not wired yet"
+  ],
+  [
+   "Done-for-you setup and funnel",
+   "$750-1,500",
+   "Your websites, funnels and onboarding skill"
+  ],
+  [
+   "Growth-plan retainer",
+   "$300-1,000/month",
+   "Your sales and growth planning experience"
+  ],
+  [
+   "Full local growth system",
+   "$3-5k",
+   "Later, once the first three tiers work"
+  ]
+ ],
+ "stages": [
+  [
+   "1-2",
+   "Clear BuildFlow blockers; 10 founding contractors; first manual-billed payments",
+   "$0.5-2k",
+   "3 paying contractors"
+  ],
+  [
+   "3-4",
+   "25 contractors; 4 done-for-you setups",
+   "$3.5-5k",
+   "Billing automated; 2 setups from one repeatable offer"
+  ],
+  [
+   "5-6",
+   "Retainers on top of subscriptions",
+   "$6.5-8k",
+   "3 retainers, none cancelled"
+  ],
+  [
+   "7-9",
+   "Referral partners; subcontracted setups",
+   "$9.5-12k",
+   "Delivery not limited by your hours"
+  ],
+  [
+   "10-12",
+   "Scale what works; ads only from verified profit",
+   "$13-15k",
+   "Each customer pays back its cost within a month"
+  ]
+ ],
+ "commands": {
+  "ask": [
+   [
+    "What needs my attention?",
+    "Decisions, payments, errors, kill switch"
+   ],
+   [
+    "Show my status",
+    "Revenue, agents, counts, health"
+   ],
+   [
+    "Give me today's report",
+    "The daily report"
+   ],
+   [
+    "List my top 10 opportunities",
+    "Best opportunities with scores and flags"
+   ],
+   [
+    "What decisions are waiting?",
+    "Open actions with exact steps"
+   ],
+   [
+    "What payments am I owed?",
+    "Expected and verified payments"
+   ]
+  ],
+  "slash": [
+   [
+    "/model",
+    "Switch the model for this session"
+   ],
+   [
+    "/help, /clear",
+    "Built-in help; clear the conversation"
+   ],
+   [
+    "/code-review, /security-review",
+    "Review pending changes for bugs or security problems"
+   ],
+   [
+    "/simplify",
+    "Review changed code for reuse and simplification, then apply fixes"
+   ],
+   [
+    "/run",
+    "Start the app and check a change works for real"
+   ],
+   [
+    "/loop 5m ...",
+    "Repeat a prompt on a timer"
+   ],
+   [
+    "/init",
+    "Create a CLAUDE.md for future sessions"
+   ],
+   [
+    "/morning",
+    "Your morning brief page"
+   ],
+   [
+    "/skill-creator",
+    "Build and test custom skills"
+   ],
+   [
+    "/update-config, /fewer-permission-prompts",
+    "Change settings; cut permission prompts"
+   ]
+  ]
+ },
+ "live_url": "https://zero-to-revenue-neon.vercel.app"
+}

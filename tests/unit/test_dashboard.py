@@ -4,6 +4,9 @@ import re
 import unittest
 from unittest import mock
 
+import glob
+from pathlib import Path
+
 from dashboard.app import HEADERS, STATIC, handle
 from tests.authutil import PASSWORD, SETUP_TOKEN, code, provision, session
 from tests.dbutil import make_conn
@@ -46,7 +49,7 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(self.call("GET", "/api/status", t)[0], 401)
 
     def test_login_routes_validate_input_and_report_state(self):
-        self.assertEqual(self.call("GET", "/api/auth/state")[1], {"setup_complete": False, "setup_enabled": False})
+        self.assertEqual(self.call("GET", "/api/auth/state")[1], {"setup_complete": False, "setup_enabled": False, "mode": "LOCAL"})
         self.assertEqual(self.call("POST", "/api/auth/login", body={"password": 1, "code": "x"})[0], 400)
         self.assertEqual(self.call("POST", "/api/auth/login", body={"password": "x", "code": "y"})[0], 401)
         c, _, _ = handle("POST", "/api/auth/login", None, self.conn, b"x" * 10000)
@@ -89,18 +92,20 @@ class FrontendSafetyTest(unittest.TestCase):
         self.assertNotRegex(html, r"<script(?![^>]*\bsrc=)")  # no inline <script>
 
     def test_no_dangerous_dom_sinks_and_no_secrets_in_js(self):
-        js = (STATIC / "app.js").read_text() + handle("GET", "/", None, None)[2].decode()
+        js = "".join(Path(f).read_text() for f in glob.glob(str(STATIC / "js" / "*.js"))) + handle("GET", "/", None, None)[2].decode()
         for sink in ("innerHTML", "outerHTML", "document.write", "eval(", "insertAdjacentHTML"):
             self.assertNotIn(sink, js)
 
     def test_pwa_assets_served_and_api_never_cached(self):
         for path, ctype in (("/manifest.webmanifest", "application/manifest+json"),
-                            ("/sw.js", "text/javascript"), ("/app.js", "text/javascript"),
+                            ("/sw.js", "text/javascript"), ("/js/main.js", "text/javascript"), ("/css/app.css", "text/css"),
                             ("/icon-512.png", "image/png")):
             c, ct, body = handle("GET", path, None, None)
             self.assertEqual((c, ct), (200, ctype))
             self.assertTrue(body)
-        self.assertIn('startsWith("/api/")', handle("GET", "/sw.js", None, None)[2].decode())
+        sw = handle("GET", "/sw.js", None, None)[2].decode()
+        self.assertIn('startsWith("/api/")', sw)
+        self.assertIn('startsWith("/mcp")', sw)
         self.assertEqual(handle("GET", "/nope", None, None)[0], 404)
 
     def test_vercel_entry_refuses_api_without_postgres(self):

@@ -13,6 +13,7 @@ from agents.operator import run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
 from core import actions, scheduler
+from dashboard import api_data
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
@@ -22,8 +23,21 @@ from core.reports import status_snapshot
 
 PAGE = (Path(__file__).parent / "pages" / "index.html").read_text()
 STATIC = Path(__file__).parent / "static"
-STATIC_TYPES = {"/manifest.webmanifest": "application/manifest+json", "/sw.js": "text/javascript",
-                "/app.js": "text/javascript", "/icon-192.png": "image/png", "/icon-512.png": "image/png"}
+STATIC_MIME = {".js": "text/javascript", ".css": "text/css", ".woff2": "font/woff2", ".png": "image/png",
+               ".json": "application/json", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml"}
+STATIC_ROOT = {"/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.png"}
+STATIC_DIRS = ("/css/", "/js/", "/fonts/", "/data/")
+
+
+def static_file(path: str):
+    """(content_type, bytes) for an allowed static file, else None. Path traversal safe."""
+    if path not in STATIC_ROOT and not path.startswith(STATIC_DIRS):
+        return None
+    root = STATIC.resolve()
+    f = (root / path.lstrip("/")).resolve()
+    if root not in f.parents or not f.is_file() or f.suffix not in STATIC_MIME:
+        return None
+    return STATIC_MIME[f.suffix], f.read_bytes()
 MAX_BODY = 4096
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
@@ -37,7 +51,7 @@ HEADERS = {
     "Referrer-Policy": "no-referrer",
     # No inline scripts and no third-party origins: a tight XSS barrier.
     "Content-Security-Policy": ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
-                                "img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; "
+                                "img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; "
                                 "base-uri 'none'; form-action 'self'"),
 }
 
@@ -63,8 +77,10 @@ def handle(method, path, authz, conn, body: bytes = b""):
     """Returns (status, content_type, body_bytes)."""
     if method == "GET" and path == "/":
         return 200, "text/html; charset=utf-8", PAGE.encode()
-    if method == "GET" and path in STATIC_TYPES:
-        return 200, STATIC_TYPES[path], (STATIC / path[1:]).read_bytes()
+    if method == "GET":
+        f = static_file(path)
+        if f:
+            return 200, f[0], f[1]
     if path == "/mcp" or path.startswith("/mcp/"):
         return handle_mcp(method, path, authz, conn, body)
     if not path.startswith("/api/"):
@@ -73,7 +89,8 @@ def handle(method, path, authz, conn, body: bytes = b""):
     # --- unauthenticated: login and one-time setup (rate limited, audited) -------
     try:
         if method == "GET" and path == "/api/auth/state":
-            return _json(200, {"setup_complete": ol.setup_complete(conn), "setup_enabled": ol.setup_enabled()})
+            return _json(200, {"setup_complete": ol.setup_complete(conn), "setup_enabled": ol.setup_enabled(),
+                               "mode": "LIVE" if api_data.is_live() else "LOCAL"})
         if method == "POST" and path == "/api/auth/login":
             password, code = _fields(body, "password", "code")
             return _json(200, ol.login(conn, password, code))
@@ -119,17 +136,35 @@ def handle(method, path, authz, conn, body: bytes = b""):
         rows = conn.execute(
             "SELECT id,title,organization,source_url,status,opportunity_score,risk_score,confidence,expected_payment,"
             "required_capital,deadline,scam_indicators,missing_information,recommended_action "
-            "FROM opportunities ORDER BY (status='QUALIFIED') DESC, opportunity_score DESC, discovered_at DESC LIMIT 25").fetchall()
+            "FROM opportunities ORDER BY (status='QUALIFIED') DESC, opportunity_score DESC, discovered_at DESC LIMIT 100").fetchall()
         return _json(200, {"opportunities": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
     if method == "POST" and path == "/api/scout/run":
         return _json(200, run_scout(conn, SCOUT_SOURCES, SCOUT_CLIENT))
+    if method == "GET" and path == "/api/scout/overview":
+        return _json(200, api_data.scout_overview(conn))
+    if method == "GET" and path == "/api/operator/board":
+        return _json(200, api_data.operator_board(conn))
+    if method == "GET" and path == "/api/treasury/overview":
+        return _json(200, api_data.treasury_overview(conn))
+    if method == "GET" and path == "/api/plan":
+        return _json(200, api_data.plan_get(conn))
+    if method == "POST" and path == "/api/plan":
+        try:
+            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+            if not isinstance(data.get("done"), bool):
+                raise ValueError("bad request")
+            return _json(200, api_data.plan_set(conn, str(data.get("id", "")), data["done"]))
+        except (ValueError, json.JSONDecodeError):
+            return _json(400, {"error": "bad request"})
     if method == "POST" and path == "/api/operator/run":
         return _json(200, {"steps": operator.run(conn)})
     if method == "POST" and path == "/api/treasury/run":
         return _json(200, treasury.check_balances(conn, TREASURY_RPC))
     if method == "GET" and path == "/api/payments":
-        rows = conn.execute("SELECT p.id, p.status, p.expected_amount, p.asset, p.chain_id, p.tx_hash, p.verified_at, o.title "
-                            "FROM payments p LEFT JOIN opportunities o ON o.id=p.opportunity_id ORDER BY p.created_at DESC LIMIT 50")
+        rows = conn.execute("SELECT p.id, p.status, p.expected_amount, p.asset, p.chain_id, p.tx_hash, p.verified_at, o.title, "
+                            "l.amount AS received_amount, l.asset AS received_asset FROM payments p "
+                            "LEFT JOIN opportunities o ON o.id=p.opportunity_id LEFT JOIN ledger_entries l ON l.entry_id=p.ledger_entry_id "
+                            "ORDER BY p.created_at DESC LIMIT 50")
         return _json(200, {"payments": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
     if method == "GET" and path == "/api/notifications":
         rows = conn.execute("SELECT priority, channel, title, body, status, created_at FROM notifications ORDER BY created_at DESC LIMIT 30")
@@ -174,14 +209,26 @@ def handle(method, path, authz, conn, body: bytes = b""):
 
 
 def serve(host="127.0.0.1", port=8080):
-    conn = db.connect()  # DATABASE_URL
-    db.migrate(conn)
+    """Local server. Same code as the live site: a fresh database connection per request, so a dropped
+    or suspended connection (Neon scales idle databases to zero) can never wedge the app."""
+    first = db.connect()  # DATABASE_URL; fails fast and loudly if it is missing or wrong
+    db.migrate(first)
+    first.close()
 
     class H(BaseHTTPRequestHandler):
         def _go(self, method):
             n = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(min(n, MAX_BODY + 1)) if n else b""
-            code, ctype, out = handle(method, self.path.split("?")[0], self.headers.get("Authorization"), conn, body)
+            path = self.path.split("?")[0]
+            conn = None
+            try:
+                conn = db.connect() if (path.startswith("/api/") or path.startswith("/mcp")) else None
+                code, ctype, out = handle(method, path, self.headers.get("Authorization"), conn, body)
+            except Exception:
+                code, ctype, out = 503, "application/json", json.dumps({"error": "database unavailable"}).encode()
+            finally:
+                if conn is not None:
+                    conn.close()
             self.send_response(code)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(out)))

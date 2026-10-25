@@ -1,0 +1,2 @@
+Oswald and Inter are licensed under the SIL Open Font License, Version 1.1 (https://openfontlicense.org).
+Files are the unmodified latin subsets served by Google Fonts.
