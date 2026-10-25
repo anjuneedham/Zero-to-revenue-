@@ -106,4 +106,41 @@ class SuperteamEarn:
         return out
 
 
-DEFAULT_SOURCES = [SuperteamEarn, GitHubBounties]
+class FreelancerCom:
+    """Freelancer.com public project-search API (no login). Fixed-price projects only; bid_count and
+    bid_avg are a competition signal, not a difficulty signal, and are passed through as a caveat."""
+    name = "freelancer-com"
+    hosts = {"www.freelancer.com"}
+
+    def __init__(self, fetch=fetch_json, limit: int = 50, min_budget: float = 500):
+        self.fetch, self.limit, self.min_budget = fetch, limit, min_budget
+
+    def items(self) -> list[RawItem]:
+        url = (f"https://www.freelancer.com/api/projects/0.1/projects/active/?limit={self.limit}"
+               "&compact=true&job_details=true&full_description=true&project_types[]=fixed")
+        data = self.fetch(url, self.hosts, {"Accept": "application/json"})
+        result = data.get("result") if isinstance(data, dict) else None
+        out = []
+        for p in (result.get("projects") if isinstance(result, dict) else None) or []:
+            if not isinstance(p, dict) or not p.get("id") or p.get("type") != "fixed":
+                continue
+            budget = p.get("budget") if isinstance(p.get("budget"), dict) else {}
+            hi = budget.get("maximum")
+            if not isinstance(hi, (int, float)) or hi < self.min_budget:
+                continue
+            currency = (p.get("currency") or {}).get("code", "USD") if isinstance(p.get("currency"), dict) else "USD"
+            jobs = [j.get("name") for j in (p.get("jobs") or []) if isinstance(j, dict) and j.get("name")]
+            bids = p.get("bid_stats") if isinstance(p.get("bid_stats"), dict) else {}
+            caveats = []
+            if bids.get("bid_count") is not None:
+                caveats.append(f"{bids['bid_count']} bid(s) already placed, average ${bids.get('bid_avg', 0):.0f}")
+            caveats.append("budget is a client-set range; the awarded amount may be lower")
+            out.append(RawItem(
+                title=str(p.get("title", "")), source=self.name, source_url=f"https://www.freelancer.com/projects/{p['id']}",
+                body=sanitize.clean(p.get("preview_description") or p.get("description") or "", 3000), category="freelance project",
+                required_skills=jobs[:6], expected_payment=float(hi), payment_asset=str(currency), payment_method="Freelancer.com escrow",
+                caveats=caveats))
+        return out
+
+
+DEFAULT_SOURCES = [SuperteamEarn, GitHubBounties, FreelancerCom]

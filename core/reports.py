@@ -1,6 +1,6 @@
 """Read-only status snapshot and reports (spec sections 27, 29)."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from core.db import money
 from core.orchestrator.killswitch import is_paused
@@ -44,11 +44,29 @@ def _today() -> str:
 
 def daily_report(conn) -> str:
     t = _today()
+    y = (datetime.now(timezone.utc) - timedelta(days=1))
+    y = datetime(y.year, y.month, y.day, tzinfo=timezone.utc).isoformat()
     rev_today = money(_one(conn, "SELECT COALESCE(SUM(usd_value),0) FROM ledger_entries WHERE type='receipt' AND status='VERIFIED' AND date >= ?", t))
     rev_total = money(_one(conn, "SELECT COALESCE(SUM(usd_value),0) FROM ledger_entries WHERE type='receipt' AND status='VERIFIED'"))
     exp = money(_one(conn, "SELECT COALESCE(SUM(usd_value),0) FROM ledger_entries WHERE type='expense' AND status='VERIFIED' AND date >= ?", t))
-    top = conn.execute("SELECT title FROM opportunities WHERE status='QUALIFIED' ORDER BY opportunity_score DESC LIMIT 1").fetchone()
-    lines = [
+    top = conn.execute("SELECT title, expected_payment, payment_asset, source_url FROM opportunities WHERE status='QUALIFIED' "
+                       "ORDER BY opportunity_score DESC LIMIT 1").fetchone()
+    qualified_new = _one(conn, "SELECT count(*) FROM opportunities WHERE status='QUALIFIED' AND discovered_at >= ?", t)
+    paid_today = _one(conn, "SELECT count(*) FROM ledger_entries WHERE type='receipt' AND status='VERIFIED' AND date >= ?", t)
+    moved = conn.execute(
+        "SELECT title, 'now ' || status AS what FROM opportunities WHERE discovered_at < ? AND "
+        "status IN ('APPROVED','AWAITING_PAYMENT','PAYMENT_VERIFIED') ORDER BY discovered_at DESC LIMIT 5", (t,)).fetchall()
+    lines = ["PIN MOVERS (what actually changed)"]
+    if paid_today:
+        lines.append(f"- {paid_today} payment(s) verified today")
+    if qualified_new:
+        lines.append(f"- {qualified_new} new opportunity(ies) qualified today")
+    for m in moved:
+        lines.append(f"- {m['title'][:80]}: {m['what']}")
+    if len(lines) == 1:
+        lines.append("- Nothing moved today")
+    lines.append("")
+    lines += [
         f"Verified revenue today: ${rev_today:.2f}",
         f"Verified expenses today: ${exp:.2f}",
         f"Net today: ${rev_today - exp:.2f}",
@@ -60,7 +78,7 @@ def daily_report(conn) -> str:
         f"Payments pending: {_one(conn, 'SELECT count(*) FROM payments WHERE status IN (?,?)', 'AWAITING_PAYMENT', 'PAYMENT_UNVERIFIED')}",
         f"User actions required: {_one(conn, 'SELECT count(*) FROM user_actions WHERE status IN (?,?)', 'OPEN', 'APPROVED')}",
         f"Agent failures today: {_one(conn, 'SELECT count(*) FROM agent_runs WHERE outcome=? AND started_at >= ?', 'error', t)}",
-        f"Top opportunity: {top['title'][:100] if top else 'none yet'}",
+        f"Top opportunity: {(top['title'][:80] + ' - $' + str(top['expected_payment']) + ' ' + (top['payment_asset'] or '') + ' claimed, ' + (top['source_url'] or '')) if top else 'none yet'}",
         "Next priority: " + ("review the open actions" if _one(conn, "SELECT count(*) FROM user_actions WHERE status='OPEN'") else "let Scout find work"),
     ]
     return "\n".join(lines)

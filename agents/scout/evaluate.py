@@ -2,6 +2,7 @@
 
 import hashlib
 import os
+from decimal import Decimal, InvalidOperation
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
@@ -12,6 +13,16 @@ from core.policy.policy import OpportunityStatus, classify_opportunity, opportun
 TRUSTED_DOMAINS = {"github.com", "gitcoin.co", "immunefi.com", "code4rena.com", "sherlock.xyz",
                    "hackerone.com", "bugcrowd.com", "superteam.fun", "dework.xyz", "layer3.xyz"}
 AUTOMATABLE = ("code", "development", "research", "writing", "data", "documentation", "bug", "test", "script", "bounty")
+EASY_WORDS = ("fix", "small", "simple", "quick", "minor", "one page", "single", "bug", "typo", "config", "update", "convert")
+HARD_WORDS = ("full", "platform", "build from scratch", "end to end", "end-to-end", "architecture", "migrate", "integration", "complex")
+
+
+def min_payment_usd() -> float:
+    try:
+        v = Decimal(os.environ.get("MIN_EXPECTED_PAYMENT_USD", "500").strip() or "500")
+    except InvalidOperation:
+        v = Decimal(500)
+    return float(v) if v >= 0 else 500.0
 
 
 @dataclass
@@ -128,6 +139,16 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     if status is OpportunityStatus.QUALIFIED and undocumented:
         status = OpportunityStatus.REVIEW_REQUIRED
         flags.append("insufficient_terms")
+
+    min_pay = min_payment_usd()
+    low_text = text.lower()
+    looks_hard = any(w in low_text for w in HARD_WORDS) or len(item.required_skills) > 2
+    bar = min_pay * 2 if looks_hard else min_pay  # harder work needs a bigger fee, not a pass on the floor
+    below_bar = item.expected_payment is not None and item.expected_payment < bar
+    if status is OpportunityStatus.QUALIFIED and below_bar:
+        status = OpportunityStatus.REVIEW_REQUIRED
+        flags.append(f"under_${bar:.0f}_bar" + ("_harder_work_needs_more" if looks_hard else ""))
+
     known = [title, org, url, body, item.deadline, item.expected_payment, item.payment_asset, item.payment_method,
              item.required_skills, item.required_capital is not None]
     confidence = max(0, round(100 * sum(1 for k in known if k) / len(known)) - (25 if injection else 0))
@@ -140,6 +161,9 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
         action = "Do not engage until risk flags are reviewed by the owner"
     elif "insufficient_terms" in flags:
         action = "Owner review: payment terms are not documented well enough to queue automatically"
+    elif any(f.startswith("under_$") for f in flags):
+        action = (f"Below the ${bar:.0f} bar for work this complex; needs a bigger fee" if looks_hard
+                  else f"Below the ${min_pay:.0f} floor; only worth it if the scope is genuinely small")
     else:
         action = "Owner review: score below qualification threshold"
     oid = opportunity_id(url)

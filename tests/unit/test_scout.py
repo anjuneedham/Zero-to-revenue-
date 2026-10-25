@@ -12,10 +12,10 @@ SKILLS = {"python"}
 
 
 def good(**kw):
-    base = dict(title="Build CLI tool [$200 USDC]", source="test", source_url="https://github.com/acme/repo/issues/1",
+    base = dict(title="Build CLI tool [$600 USDC]", source="test", source_url="https://github.com/acme/repo/issues/1",
                 body="Write a Python CLI that exports reports to CSV. Tests required.", organization="acme",
                 deadline="2099-01-01T00:00:00+00:00", required_skills=["python"], required_capital=0,
-                expected_payment=200, payment_asset="USDC", payment_method="on-chain USDC")
+                expected_payment=600, payment_asset="USDC", payment_method="on-chain USDC")
     base.update(kw)
     return RawItem(**base)
 
