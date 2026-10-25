@@ -9,18 +9,25 @@
 | Login | Firebase Auth, owner email only | Free |
 | Phone app | PWA first, then APK wrapper | Free (sideload) |
 
-## Why not SQLite on Vercel
-Vercel's filesystem is ephemeral. SQLite there would lose the kill-switch state, queue
-and audit log on any cold start. `api/index.py` therefore refuses every `/api` route
-(HTTP 503) until a Postgres backend exists. **Do not point production at it before then.**
+## Database (done): Neon Postgres, one database
+- Neon (Free) is connected to the Vercel project; `DATABASE_URL` is a hidden "sensitive" variable.
+- Created **without** per-deployment database branches: there is exactly one database, so the
+  kill switch, audit log and ledger never fork between deploys.
+- `api/index.py` applies migrations once per cold start under a Postgres advisory lock, and
+  answers 503 (never fake data) if the database is missing or unreachable.
+- Preview deployments currently share the production `DATABASE_URL`. Acceptable while only the
+  owner can sign in; remove the variable from **Preview** before inviting anyone else.
 
-## Remaining work before a real deploy (next steps)
-1. Port `core/db.py`, queue and reports to Postgres (replace `BEGIN IMMEDIATE` with
-   `SELECT ... FOR UPDATE SKIP LOCKED`; keep the same tests running against both).
-2. Create the Postgres database; set `DATABASE_URL` as a Vercel env var (never in git).
-3. Set `OWNER_EMAIL`, `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, `FIREBASE_AUTH_DOMAIN`
-   in Vercel project settings. Add the Vercel domain to Firebase "Authorized domains".
-4. Connect this repo to a Vercel project (owner action) and deploy a preview first.
+## Tests
+`TEST_DATABASE_URL=postgresql://... python3 -m unittest discover -s tests -t .` against a
+throwaway Postgres (each test gets its own schema). Without it Postgres tests are SKIPPED.
+
+## Remaining before real use
+1. Set `OWNER_EMAIL`, `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, `FIREBASE_AUTH_DOMAIN` in Vercel
+   (Settings -> Environment Variables); add the Vercel domain to Firebase "Authorized domains".
+2. Turn off Vercel Deployment Protection for production so the PWA/APK can load the manifest
+   (our own owner-only login protects the data).
+3. Move to Vercel Pro (or other hosting) before earning real revenue: Hobby is non-commercial.
 
 ## Phone app
 - **PWA (works now once deployed):** open the Vercel URL in Chrome -> menu -> Install app.

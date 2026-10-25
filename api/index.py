@@ -1,28 +1,61 @@
-"""Vercel entry point. Fails closed: Vercel's filesystem is ephemeral, so it must
-never run against SQLite (the kill switch would silently reset). Until the
-Postgres port lands (see docs/runbooks/VERCEL_AND_APK.md) this serves only the
-static app shell and answers every /api route with 503."""
+"""Vercel entry point (serverless, Neon Postgres).
+
+Fails closed: without a postgres DATABASE_URL, or if the database is unreachable,
+every /api route answers 503 - never a fake or partial state. The schema is applied
+(once per cold start) under an advisory lock, so concurrent cold starts are safe.
+A fresh connection per request: serverless instances are short-lived.
+"""
 
 import json
 import os
 from http.server import BaseHTTPRequestHandler
 
+from core import db
+from core.auth.firebase_auth import OwnerAuth
 from dashboard import app as dash
 
-HAS_PERSISTENT_DB = os.environ.get("DATABASE_URL", "").startswith(("postgres://", "postgresql://"))
+auth = OwnerAuth()
+_migrated = False
+
+
+def _db_url() -> str:
+    return os.environ.get("DATABASE_URL", "")
+
+
+def has_persistent_db() -> bool:
+    return _db_url().startswith(("postgres://", "postgresql://"))
+
+
+def _api(method, path, authz):
+    global _migrated
+    unavailable = (503, "application/json", json.dumps({"error": "database unavailable"}).encode())
+    if not has_persistent_db():
+        return unavailable
+    try:
+        conn = db.connect(_db_url())
+    except Exception:
+        return unavailable
+    try:
+        if not _migrated:
+            db.migrate(conn)
+            _migrated = True
+        return dash.handle(method, path, authz, conn, auth)
+    except Exception:
+        return unavailable  # never leak driver errors (may contain hosts/users)
+    finally:
+        conn.close()
 
 
 class handler(BaseHTTPRequestHandler):
     def _go(self, method):
         path = self.path.split("?")[0]
         if path.startswith("/api/"):
-            code, ctype, body = 503, "application/json", json.dumps(
-                {"error": "persistent database not configured"
-                         if not HAS_PERSISTENT_DB else "postgres backend not implemented yet"}).encode()
+            code, ctype, body = _api(method, path, self.headers.get("Authorization"))
         else:
-            code, ctype, body = dash.handle(method, path, None, None, None)
+            code, ctype, body = dash.handle(method, path, None, None, auth)
         self.send_response(code)
         self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
         for k, v in dash.HEADERS.items():
             self.send_header(k, v)
         self.end_headers()
@@ -33,3 +66,6 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self._go("POST")
+
+    def log_message(self, *args):  # no request logging: headers may carry tokens
+        pass

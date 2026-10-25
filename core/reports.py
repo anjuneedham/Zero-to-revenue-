@@ -1,5 +1,6 @@
 """Read-only status snapshot for the dashboard (spec sections 27, 29)."""
 
+from core.db import money
 from core.orchestrator.killswitch import is_paused
 
 
@@ -10,7 +11,7 @@ def status_snapshot(conn) -> dict:
     return {
         "mode": "MOCK",
         "paused": is_paused(conn),
-        "verified_revenue_usd": revenue,
+        "verified_revenue_usd": money(revenue),
         "agents": [dict(r) for r in conn.execute("SELECT name,status,last_run_at,mode FROM agents ORDER BY name")],
         "tasks": {r["status"]: r["n"] for r in conn.execute("SELECT status, COUNT(*) n FROM tasks GROUP BY status")},
         "opportunities": {r["status"]: r["n"] for r in conn.execute("SELECT status, COUNT(*) n FROM opportunities GROUP BY status")},

@@ -68,5 +68,13 @@ class PwaTest(unittest.TestCase):
         self.assertEqual(manifest["display"], "standalone")
 
     def test_vercel_entry_refuses_api_without_postgres(self):
+        import os
+        from unittest import mock
         from api import index
-        self.assertFalse(index.HAS_PERSISTENT_DB)
+        with mock.patch.dict(os.environ, {"DATABASE_URL": "sqlite:///x.db"}):
+            self.assertFalse(index.has_persistent_db())
+            self.assertEqual(index._api("GET", "/api/status", None)[0], 503)
+        with mock.patch.dict(os.environ, {"DATABASE_URL": "postgresql://nobody@127.0.0.1:1/none"}):
+            code, _, body = index._api("GET", "/api/status", None)
+            self.assertEqual(code, 503)
+            self.assertNotIn(b"127.0.0.1", body)  # no driver details leak

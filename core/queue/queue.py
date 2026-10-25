@@ -17,43 +17,39 @@ def _event(conn, task_id, event, detail=None):
 
 def enqueue(conn, owner_agent, kind, idempotency_key, *, inputs=None, priority=5,
             risk="LOW", opportunity_id=None, max_attempts=3) -> str:
-    """Returns the task id; a repeated idempotency key returns the existing task."""
-    row = conn.execute("SELECT id FROM tasks WHERE idempotency_key=?", (idempotency_key,)).fetchone()
-    if row:
-        return row["id"]
+    """Returns the task id; a repeated idempotency key returns the existing task
+    (also under concurrent callers: the unique key arbitrates)."""
     tid = "task_" + uuid.uuid4().hex[:12]
     t = now()
-    conn.execute(
+    cur = conn.execute(
         "INSERT INTO tasks(id,opportunity_id,owner_agent,kind,status,priority,risk,created_at,updated_at,"
-        "max_attempts,idempotency_key,inputs) VALUES (?,?,?,?, 'QUEUED',?,?,?,?,?,?,?)",
+        "max_attempts,idempotency_key,inputs) VALUES (?,?,?,?, 'QUEUED',?,?,?,?,?,?,?) "
+        "ON CONFLICT (idempotency_key) DO NOTHING",
         (tid, opportunity_id, owner_agent, kind, priority, risk, t, t, max_attempts, idempotency_key, inputs))
+    if cur.rowcount == 0:
+        return conn.execute("SELECT id FROM tasks WHERE idempotency_key=?", (idempotency_key,)).fetchone()["id"]
     _event(conn, tid, "enqueued")
     return tid
 
 
 def claim(conn, agent, lease_seconds=300):
     """Atomically claim the next task for `agent`. Returns None when paused or empty.
+    FOR UPDATE SKIP LOCKED lets concurrent workers each take a different task.
     Expired leases are reclaimed; attempts are counted on every claim."""
     if is_paused(conn):
         return None
     t = now()
     until = (datetime.now(timezone.utc) + timedelta(seconds=lease_seconds)).isoformat()
-    conn.execute("BEGIN IMMEDIATE")
-    try:
+    with conn.transaction():
         row = conn.execute(
-            "SELECT * FROM tasks WHERE owner_agent=? AND attempts < max_attempts AND "
+            "SELECT id, attempts FROM tasks WHERE owner_agent=? AND attempts < max_attempts AND "
             "(status='QUEUED' OR (status='IN_PROGRESS' AND lease_until < ?)) "
-            "ORDER BY priority, created_at LIMIT 1", (agent, t)).fetchone()
+            "ORDER BY priority, created_at LIMIT 1 FOR UPDATE SKIP LOCKED", (agent, t)).fetchone()
         if row is None:
-            conn.execute("COMMIT")
             return None
         conn.execute("UPDATE tasks SET status='IN_PROGRESS', attempts=attempts+1, lease_until=?, updated_at=? WHERE id=?",
                      (until, t, row["id"]))
         _event(conn, row["id"], "claimed", f"attempt {row['attempts'] + 1}")
-        conn.execute("COMMIT")
-    except Exception:
-        conn.execute("ROLLBACK")
-        raise
     return conn.execute("SELECT * FROM tasks WHERE id=?", (row["id"],)).fetchone()
 
 

@@ -18,17 +18,15 @@ from integrations.notifications.whatsapp import MockWhatsApp
 PROJECT, OWNER = "demo-proj", "owner@example.com"
 
 
-def make_conn():
-    c = db.connect()
-    db.migrate(c)
-    return c
+from tests.dbutil import make_conn  # noqa: E402  (isolated Postgres schema per call)
 
 
 class DbTest(unittest.TestCase):
     def test_migrate_is_idempotent_and_has_all_tables(self):
         c = make_conn()
         self.assertEqual(db.migrate(c), [])
-        names = {r[0] for r in c.execute("select name from sqlite_master where type='table'")}
+        names = {r[0] for r in c.execute(
+            "select table_name from information_schema.tables where table_schema=current_schema()")}
         for t in "users settings agents agent_runs opportunities tasks task_events user_actions deliverables "\
                  "submissions payments wallets transactions ledger_entries notifications audit_events".split():
             self.assertIn(t, names)

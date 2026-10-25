@@ -62,8 +62,8 @@ def handle(method, path, authz, conn, auth: OwnerAuth):
     return j(404, {"error": "not found"})
 
 
-def serve(db_path="zero_to_revenue.db", host="127.0.0.1", port=8080):
-    conn = db.connect(db_path)
+def serve(host="127.0.0.1", port=8080):
+    conn = db.connect()  # DATABASE_URL
     db.migrate(conn)
     auth = OwnerAuth()
 

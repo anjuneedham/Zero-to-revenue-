@@ -1,5 +1,4 @@
--- Phase 1 schema. The database is the source of truth (spec section 21).
-PRAGMA foreign_keys = ON;
+-- Phase 1 schema (PostgreSQL). The database is the source of truth (spec section 21).
 
 CREATE TABLE users (
   id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, firebase_uid TEXT UNIQUE,
@@ -18,7 +17,7 @@ CREATE TABLE agent_runs (
 CREATE TABLE opportunities (
   id TEXT PRIMARY KEY, title TEXT NOT NULL, category TEXT, source TEXT, source_url TEXT,
   organization TEXT, discovered_at TEXT NOT NULL, deadline TEXT, eligibility TEXT,
-  required_skills TEXT, required_capital REAL NOT NULL DEFAULT 0, expected_payment REAL,
+  required_skills TEXT, required_capital NUMERIC(24,8) NOT NULL DEFAULT 0, expected_payment NUMERIC(24,8),
   payment_method TEXT, payment_asset TEXT, effort_estimate TEXT,
   opportunity_score INTEGER, risk_score INTEGER, confidence INTEGER,
   scam_indicators TEXT, missing_information TEXT, recommended_action TEXT,
@@ -37,12 +36,12 @@ CREATE TABLE tasks (
   lease_until TEXT
 );
 CREATE TABLE task_events (
-  id INTEGER PRIMARY KEY AUTOINCREMENT, task_id TEXT NOT NULL REFERENCES tasks(id),
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(id),
   event TEXT NOT NULL, detail TEXT, created_at TEXT NOT NULL
 );
 CREATE TABLE user_actions (
   action_id TEXT PRIMARY KEY, task_id TEXT, title TEXT NOT NULL, why_required TEXT NOT NULL,
-  exact_action TEXT NOT NULL, deadline TEXT, estimated_value REAL, risk TEXT,
+  exact_action TEXT NOT NULL, deadline TEXT, estimated_value NUMERIC(24,8), risk TEXT,
   verified_url TEXT, status TEXT NOT NULL DEFAULT 'OPEN', created_at TEXT NOT NULL
 );
 CREATE TABLE deliverables (
@@ -55,7 +54,7 @@ CREATE TABLE submissions (
 );
 CREATE TABLE payments (
   id TEXT PRIMARY KEY, opportunity_id TEXT REFERENCES opportunities(id),
-  expected_amount REAL, asset TEXT, status TEXT NOT NULL DEFAULT 'AWAITING_PAYMENT', created_at TEXT NOT NULL
+  expected_amount NUMERIC(24,8), asset TEXT, status TEXT NOT NULL DEFAULT 'AWAITING_PAYMENT', created_at TEXT NOT NULL
 );
 CREATE TABLE wallets (
   id TEXT PRIMARY KEY, address TEXT NOT NULL, chain_id INTEGER,
@@ -69,7 +68,7 @@ CREATE TABLE transactions (
 );
 CREATE TABLE ledger_entries (
   entry_id TEXT PRIMARY KEY, date TEXT NOT NULL, type TEXT NOT NULL, source TEXT, description TEXT,
-  asset TEXT, amount TEXT, usd_value REAL, valuation_source TEXT, valuation_time TEXT,
+  asset TEXT, amount TEXT, usd_value NUMERIC(24,8), valuation_source TEXT, valuation_time TEXT,
   fee TEXT, net_amount TEXT, status TEXT NOT NULL, transaction_hash TEXT, chain_id INTEGER,
   evidence TEXT, notes TEXT,
   UNIQUE (chain_id, transaction_hash, type)
@@ -80,12 +79,16 @@ CREATE TABLE notifications (
   status TEXT NOT NULL DEFAULT 'PENDING', created_at TEXT NOT NULL, sent_at TEXT, error TEXT
 );
 CREATE TABLE audit_events (
-  id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, actor TEXT NOT NULL,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, at TEXT NOT NULL, actor TEXT NOT NULL,
   action TEXT NOT NULL, target TEXT, detail TEXT
 );
 -- Audit log is append-only.
-CREATE TRIGGER audit_no_update BEFORE UPDATE ON audit_events BEGIN SELECT RAISE(ABORT,'audit_events is append-only'); END;
-CREATE TRIGGER audit_no_delete BEFORE DELETE ON audit_events BEGIN SELECT RAISE(ABORT,'audit_events is append-only'); END;
+CREATE FUNCTION audit_events_immutable() RETURNS trigger AS $$
+BEGIN RAISE EXCEPTION 'audit_events is append-only'; END; $$ LANGUAGE plpgsql;
+CREATE TRIGGER audit_no_update BEFORE UPDATE OR DELETE ON audit_events
+  FOR EACH ROW EXECUTE FUNCTION audit_events_immutable();
+CREATE TRIGGER audit_no_truncate BEFORE TRUNCATE ON audit_events
+  FOR EACH STATEMENT EXECUTE FUNCTION audit_events_immutable();
 
 INSERT INTO agents(name) VALUES ('scout'),('operator'),('treasury');
 INSERT INTO settings(key,value,updated_at) VALUES ('paused','0','1970-01-01T00:00:00+00:00');

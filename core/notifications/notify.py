@@ -23,7 +23,8 @@ def notify(conn, backend, to, priority, dedupe_key, title, body, channel="whatsa
             raise SecretInNotification("refusing to send possible secret material")
     nid = "ntf_" + uuid.uuid4().hex[:12]
     cur = conn.execute(
-        "INSERT OR IGNORE INTO notifications(id,priority,dedupe_key,channel,title,body,created_at) VALUES (?,?,?,?,?,?,?)",
+        "INSERT INTO notifications(id,priority,dedupe_key,channel,title,body,created_at) VALUES (?,?,?,?,?,?,?) "
+        "ON CONFLICT (dedupe_key) DO NOTHING",
         (nid, priority, dedupe_key, channel, title, body, now()))
     if cur.rowcount == 0:
         return False
