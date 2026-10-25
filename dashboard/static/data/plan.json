@@ -408,5 +408,178 @@
    "detail": "Vetted developer networks with larger projects; screening is extensive, worth it only once you want bigger, steadier work.",
    "src": "sources research, 25 Oct"
   }
- ]
+ ],
+ "week": {
+  "range": "Mon 26 Oct - Sun 1 Nov 2026",
+  "days": [
+   {
+    "day": "Mon",
+    "date": "26 Oct",
+    "items": [
+     {
+      "id": "wk-mon-storage",
+      "cat": "buildflow",
+      "title": "Turn on Firebase Storage for BuildFlow",
+      "detail": "Blaze plan + budget alert, then Storage > Get started, deploy storage.rules. Unblocks every photo/file upload. 20 min."
+     },
+     {
+      "id": "wk-mon-billing",
+      "cat": "buildflow",
+      "title": "Decide BuildFlow's first billing method",
+      "detail": "Bank transfer or PayPal invoice for your first 10 contractors, while WiPay/PayPal integration gets built. One decision, not a build."
+     },
+     {
+      "id": "wk-mon-scout",
+      "cat": "jobs",
+      "title": "Run Scout + review the board",
+      "detail": "Click Run Scout now. Approve anything genuinely $500+ or easy; note which human-only Superteam listings you'll do yourself this week."
+     },
+     {
+      "id": "wk-mon-study",
+      "cat": "study",
+      "title": "Study: registering YardScale Digital in Jamaica",
+      "detail": "Companies Office of Jamaica (ORC) business registration steps, cost, timeline. 30 min research, write down what you need."
+     }
+    ]
+   },
+   {
+    "day": "Tue",
+    "date": "27 Oct",
+    "items": [
+     {
+      "id": "wk-tue-legal",
+      "cat": "buildflow",
+      "title": "Draft BuildFlow's company details for the legal pages",
+      "detail": "Real support email, company name (YardScale Digital or BuildFlow entity), address, governing law. I'll draft the Privacy Policy/Terms text; a lawyer still needs to review before launch."
+     },
+     {
+      "id": "wk-tue-jobs",
+      "cat": "jobs",
+      "title": "Work one human-only Superteam listing yourself",
+      "detail": "Pick the best-scoring one that's still open. Real work, real submission, tracked as a job in the system once submitted."
+     },
+     {
+      "id": "wk-tue-study",
+      "cat": "study",
+      "title": "Study: Jamaica crypto off-ramp routes",
+      "detail": "Test a small Binance->bank or Wise conversion if you're comfortable, so the route is proven before a real payment needs it."
+     },
+     {
+      "id": "wk-tue-improve",
+      "cat": "improve",
+      "title": "Weekly loop: review what Scout found this week so far",
+      "detail": "One line per rejected opportunity: why, and whether a scoring rule should change. This is the Monday loop from docs/runbooks/IMPROVEMENT_LOOP.md, run a day early this week."
+     }
+    ]
+   },
+   {
+    "day": "Wed",
+    "date": "28 Oct",
+    "items": [
+     {
+      "id": "wk-wed-firebase",
+      "cat": "buildflow",
+      "title": "Confirm BuildFlow's production Firebase project",
+      "detail": "build-6fa95 or a fresh buildflow-prod - pick one, I'll update .firebaserc and the deploy checklist."
+     },
+     {
+      "id": "wk-wed-jobs",
+      "cat": "jobs",
+      "title": "Run Scout + Operator; approve/reject the queue",
+      "detail": "Keep the decision queue at zero. Every approval or rejection also trains the scoring via the weekly review."
+     },
+     {
+      "id": "wk-wed-study",
+      "cat": "study",
+      "title": "Study: what contractors actually pay for",
+      "detail": "Read 3-5 reviews/complaints of Jobber, Housecall Pro or similar on G2/Capterra. Real pain points sharpen BuildFlow's pitch and the missed-call offer."
+     }
+    ]
+   },
+   {
+    "day": "Thu",
+    "date": "29 Oct",
+    "items": [
+     {
+      "id": "wk-thu-founding",
+      "cat": "buildflow",
+      "title": "List 3-5 contractors you could approach as founding users",
+      "detail": "Doesn't need to be 15 - even 3 real names is enough to start. Past Needham's Construction / Yardscale contacts count."
+     },
+     {
+      "id": "wk-thu-jobs",
+      "cat": "jobs",
+      "title": "Run Scout + Operator",
+      "detail": "Standard daily pass."
+     },
+     {
+      "id": "wk-thu-study",
+      "cat": "study",
+      "title": "Study: one Freelancer.com or Upwork proposal that won",
+      "detail": "Find one publicly-discussed winning proposal in your field, note its structure. Feeds the proposal-writer skill later."
+     }
+    ]
+   },
+   {
+    "day": "Fri",
+    "date": "30 Oct",
+    "items": [
+     {
+      "id": "wk-fri-pitch",
+      "cat": "buildflow",
+      "title": "Pitch BuildFlow to at least 1 of the contractors from Thursday",
+      "detail": "Free for 60 days in exchange for feedback, photos, a testimonial. First real signal on the $50 price."
+     },
+     {
+      "id": "wk-fri-jobs",
+      "cat": "jobs",
+      "title": "Run Scout + Operator",
+      "detail": "Standard daily pass."
+     },
+     {
+      "id": "wk-fri-improve",
+      "cat": "improve",
+      "title": "One platform improvement",
+      "detail": "Pick one real friction point from this week (a scoring miss, a confusing page, a missing field) and fix just that one thing."
+     }
+    ]
+   },
+   {
+    "day": "Sat",
+    "date": "31 Oct",
+    "items": [
+     {
+      "id": "wk-sat-storage-check",
+      "cat": "buildflow",
+      "title": "Verify Storage actually works end to end",
+      "detail": "BuildFlow's own reminder is set for today. Upload a logo and a job photo on the live site; confirm no 'Upload failed' error."
+     },
+     {
+      "id": "wk-sat-rest",
+      "cat": "study",
+      "title": "Light day: read, don't build",
+      "detail": "Skim the week's Founder's Log entry, Scout's run history, and the daily reports. Notice patterns, don't act on everything."
+     }
+    ]
+   },
+   {
+    "day": "Sun",
+    "date": "1 Nov",
+    "items": [
+     {
+      "id": "wk-sun-review",
+      "cat": "improve",
+      "title": "Weekly review: revenue, pipeline, what changed",
+      "detail": "Verified revenue, opportunities qualified vs rejected, BuildFlow blockers cleared. Write one line in the Founder's Log."
+     },
+     {
+      "id": "wk-sun-plan",
+      "cat": "improve",
+      "title": "Set next week's 3 priorities",
+      "detail": "Not a full re-plan - just the top 3 things that matter most going into next week."
+     }
+    ]
+   }
+  ]
+ }
 }

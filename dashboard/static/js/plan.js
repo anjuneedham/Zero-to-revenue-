@@ -1,8 +1,9 @@
 (function () {
   const { el, add, pill, btn, card, fmt } = Z;
   let tab = "bf", data = null, ticks = {}, who = "ALL";
-  const TABS = [["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
+  const TABS = [["week", "This week"], ["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
   const WHO = { owner: ["You", "gold"], agent: ["Agent", "royal"], both: ["Both", ""] };
+  const CAT = { buildflow: ["BuildFlow", "gold"], jobs: ["Jobs", "ok"], study: ["Study", "royal"], improve: ["Improve", ""] };
 
   const mono = t => { const c = el("code", "key", t); c.style.margin = "0"; c.style.fontSize = "13px"; return c; };
   const table = (heads, rows) => {
@@ -37,7 +38,30 @@
     box.append(chips, checklist(items, redraw)); return box;
   }
 
+  function weekDay(day, redraw) {
+    const sec = el("div", "item");
+    add(sec, el("div", "t", day.day + " · " + day.date));
+    day.items.forEach(i => {
+      const done = !!ticks[i.id]; const row = el("label", "check" + (done ? " done" : "")); row.htmlFor = "c-" + i.id;
+      const cb = el("input"); cb.type = "checkbox"; cb.id = "c-" + i.id; cb.checked = done;
+      cb.onchange = async () => { try { const r = await Z.api("/api/plan", "POST", { id: i.id, done: cb.checked }); ticks = r.ticks; Z.toast(cb.checked ? "Ticked off" : "Reopened", "ok"); } catch (e) { cb.checked = !cb.checked; Z.toast(e.message, "bad"); } redraw(); };
+      const mid = el("div"); add(mid, el("b", null, i.title), el("p", null, i.detail));
+      add(row, cb, mid, pill(CAT[i.cat][0], CAT[i.cat][1])); sec.append(row);
+    });
+    return sec;
+  }
+
   const panels = {
+    week(redraw) {
+      const all = data.week.days.flatMap(d => d.items);
+      const done = all.filter(i => ticks[i.id]).length;
+      const c = card("This week", data.week.range);
+      const bar = el("div", "bar"); const f = el("i"); f.style.width = (all.length ? 100 * done / all.length : 0) + "%"; bar.append(f);
+      c.append(add(el("div", "row"), el("b", null, done + " of " + all.length + " done")), bar);
+      const l = el("div", "list");
+      data.week.days.forEach(day => l.append(weekDay(day, redraw)));
+      c.append(l); return c;
+    },
     bf(redraw) {
       const c = card("BuildFlow: path to launch", "Read from the BuildFlow repo on 25 Oct. Verdict in its own report: not ready, with one owner-side blocker (Storage).");
       c.append(el("p", "sub", "BuildFlow is live in beta at buildflow-app-beta.vercel.app: customer and project management for contractors, a public profile where customers find them, $50/month with a 14-day trial. The code is in good shape; launch is blocked by setup only you can do, and by billing, which is not built yet."), list(data.buildflow, redraw)); return c;
