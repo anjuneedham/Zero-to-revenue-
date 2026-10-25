@@ -1,0 +1,138 @@
+"""Deterministic scoring of one opportunity (spec sections 6-8). No network, no LLM."""
+
+import hashlib
+import os
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from urllib.parse import urlsplit
+
+from agents.scout import sanitize, scam
+from core.policy.policy import OpportunityStatus, classify_opportunity, opportunity_score
+
+TRUSTED_DOMAINS = {"github.com", "gitcoin.co", "immunefi.com", "code4rena.com", "sherlock.xyz",
+                   "hackerone.com", "bugcrowd.com", "superteam.fun", "dework.xyz", "layer3.xyz"}
+AUTOMATABLE = ("code", "development", "research", "writing", "data", "documentation", "bug", "test", "script", "bounty")
+
+
+@dataclass
+class RawItem:
+    title: str
+    source: str
+    source_url: str
+    body: str = ""
+    organization: str = ""
+    category: str = "bounty"
+    deadline: str | None = None            # ISO 8601
+    required_skills: list[str] = field(default_factory=list)
+    required_capital: float | None = None  # None = unknown (never assumed zero)
+    expected_payment: float | None = None  # CLAIMED, unverified
+    payment_asset: str = ""
+    payment_method: str = ""
+    effort_estimate: str = ""
+    labels: list[str] = field(default_factory=list)
+
+
+@dataclass
+class Evaluation:
+    id: str
+    row: dict
+    score: int
+    risk: int
+    status: OpportunityStatus
+    flags: list[str]
+
+
+def opportunity_id(source_url: str) -> str:
+    return "opp_" + hashlib.sha256(source_url.strip().lower().encode()).hexdigest()[:12]
+
+
+def owner_skills() -> set[str]:
+    return {s.strip().lower() for s in os.environ.get("OWNER_SKILLS", "").split(",") if s.strip()}
+
+
+def _parse_deadline(deadline):
+    if not deadline:
+        return None
+    try:
+        d = datetime.fromisoformat(str(deadline).replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None = None) -> Evaluation:
+    now = now or datetime.now(timezone.utc)
+    skills = owner_skills() if skills is None else skills
+    title = sanitize.clean(item.title, 300)
+    body = sanitize.clean(item.body)
+    org = sanitize.clean(item.organization, 200)
+    url = sanitize.clean(item.source_url, 500)
+    text = f"{title}\n{body}\n{' '.join(item.labels)}"
+
+    injection = sanitize.injection_findings(title, body, *item.labels)
+    has_terms = bool(item.expected_payment and item.payment_asset)
+    risk, flags = scam.assess(text, organization=org, expected_payment=item.expected_payment,
+                              has_payment_terms=has_terms, injection=injection,
+                              required_capital=item.required_capital)
+
+    missing = []
+    if item.required_capital is None:
+        missing.append("required_capital unknown (not assumed zero)")
+    if not item.expected_payment:
+        missing.append("payment amount not stated")
+    if not item.payment_asset:
+        missing.append("payment asset not stated")
+    if not item.payment_method:
+        missing.append("payment method not stated")
+    if not item.deadline:
+        missing.append("deadline not stated")
+    if not skills:
+        missing.append("OWNER_SKILLS not configured; skill fit is neutral")
+
+    host = (urlsplit(url).hostname or "").removeprefix("www.")
+    trusted = urlsplit(url).scheme == "https" and any(host == d or host.endswith("." + d) for d in TRUSTED_DOMAINS)
+    deadline = _parse_deadline(item.deadline)
+    expired = deadline is not None and deadline < now
+
+    legit = 0.25 + (0.25 if trusted else 0) + (0.2 if org else 0) + (0.15 if has_terms else 0) + (0.15 if deadline else 0)
+    legit = max(0.0, min(1.0, legit - 0.8 * risk / 100))
+    overlap = (len(skills & {s.lower() for s in item.required_skills}) / len(item.required_skills)
+               if skills and item.required_skills else 0.5)
+    factors = {
+        "legitimacy": legit,
+        # unknown capital is NOT zero capital: partial credit only; known capital > 0 earns nothing
+        "zero_capital": 1.0 if item.required_capital == 0 else (0.5 if item.required_capital is None else 0.0),
+        "payment_clarity": (0.5 if item.expected_payment else 0) + (0.25 if item.payment_asset else 0) + (0.25 if item.payment_method else 0),
+        "skill_fit": overlap,
+        "repeatability": 0.7 if trusted else 0.4,
+        "automation": 0.7 if any(k in text.lower() for k in AUTOMATABLE) else 0.4,
+        "deadline": 0.0 if expired else (1.0 if deadline else 0.5),
+    }
+    score = opportunity_score(factors)
+    if expired:
+        flags.append("deadline_passed")
+    status = OpportunityStatus.REVIEW_REQUIRED if expired else classify_opportunity(score, risk)
+    known = [title, org, url, body, item.deadline, item.expected_payment, item.payment_asset, item.payment_method,
+             item.required_skills, item.required_capital is not None]
+    confidence = max(0, round(100 * sum(1 for k in known if k) / len(known)) - (25 if injection else 0))
+
+    if status is OpportunityStatus.QUALIFIED:
+        action = "Research and draft; submission needs owner approval"
+    elif risk > 35:
+        action = "Do not engage until risk flags are reviewed by the owner"
+    else:
+        action = "Owner review: score below qualification threshold"
+    oid = opportunity_id(url)
+    row = {
+        "id": oid, "title": title, "category": sanitize.clean(item.category, 60), "source": sanitize.clean(item.source, 80),
+        "source_url": url, "organization": org, "deadline": item.deadline,
+        "eligibility": None, "required_skills": ",".join(item.required_skills)[:300],
+        "required_capital": item.required_capital, "expected_payment": item.expected_payment,
+        "payment_method": item.payment_method or None, "payment_asset": item.payment_asset or None,
+        "effort_estimate": item.effort_estimate or None, "opportunity_score": score, "risk_score": risk,
+        "confidence": confidence, "scam_indicators": "; ".join(flags), "missing_information": "; ".join(missing),
+        "recommended_action": action, "approval_required": 1,
+        "evidence": f"{url} | claimed payment (unverified): {item.expected_payment} {item.payment_asset}".strip(),
+        "status": status.value,
+    }
+    return Evaluation(oid, row, score, risk, status, flags)

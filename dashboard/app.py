@@ -6,6 +6,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from agents.scout.run import run_scout
 from core import db
 from core.audit import audit
 from core.auth import owner_login as ol
@@ -17,6 +18,8 @@ STATIC = Path(__file__).parent / "static"
 STATIC_TYPES = {"/manifest.webmanifest": "application/manifest+json", "/sw.js": "text/javascript",
                 "/app.js": "text/javascript", "/icon-192.png": "image/png", "/icon-512.png": "image/png"}
 MAX_BODY = 4096
+SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
+SCOUT_CLIENT = None
 HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
@@ -93,6 +96,14 @@ def handle(method, path, authz, conn, body: bytes = b""):
     if method == "POST" and path == "/api/resume":
         killswitch.resume(conn, owner)
         return _json(200, {"paused": False})
+    if method == "GET" and path == "/api/opportunities":
+        rows = conn.execute(
+            "SELECT id,title,organization,source_url,status,opportunity_score,risk_score,confidence,expected_payment,"
+            "required_capital,deadline,scam_indicators,missing_information,recommended_action "
+            "FROM opportunities ORDER BY (status='QUALIFIED') DESC, opportunity_score DESC, discovered_at DESC LIMIT 25").fetchall()
+        return _json(200, {"opportunities": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
+    if method == "POST" and path == "/api/scout/run":
+        return _json(200, run_scout(conn, SCOUT_SOURCES, SCOUT_CLIENT))
     if method == "POST" and path == "/api/auth/logout":
         ol.logout(conn, token)
         return _json(200, {"ok": True})

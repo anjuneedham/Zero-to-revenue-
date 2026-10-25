@@ -37,7 +37,22 @@ async function refresh() {
   $("actions").replaceChildren();
   if (!s.open_user_actions.length) text($("actions"), "None");
   s.open_user_actions.forEach(a => row($("actions"), a.title + " - " + a.exact_action + (a.deadline ? " (by " + a.deadline + ")" : "")));
+  loadOpps().catch(() => {});
   text($("counts"), "Tasks: " + JSON.stringify(s.tasks) + " | Opportunities: " + JSON.stringify(s.opportunities) + " | Payments pending: " + s.payments_pending);
+}
+async function loadOpps() {
+  const d = await call("/api/opportunities", "GET", null, true);
+  $("opps").replaceChildren();
+  if (!d.opportunities.length) { text($("opps"), "None yet. Run Scout."); return; }
+  d.opportunities.forEach(o => {
+    const el = document.createElement("div"); el.className = "card";
+    row(el, "[" + o.status + "] " + o.title);
+    row(el, "score " + o.opportunity_score + " | risk " + o.risk_score + " | confidence " + o.confidence +
+      " | claimed pay: " + (o.expected_payment == null ? "n/a" : "$" + o.expected_payment) + " (unverified)");
+    if (o.scam_indicators) row(el, "flags: " + o.scam_indicators);
+    row(el, o.recommended_action || "");
+    $("opps").appendChild(el);
+  });
 }
 const guard = fn => async () => { text($("msg"), ""); try { await fn(); } catch (e) { text($("msg"), e.message); } };
 
@@ -55,6 +70,12 @@ $("l_go").onclick = guard(async () => {
   const d = await call("/api/auth/login", "POST", { password: $("l_pw").value, code: $("l_code").value.trim() });
   $("l_pw").value = ""; $("l_code").value = ""; store.set(d.token);
   show("app"); await refresh(); timer = setInterval(() => refresh().catch(() => {}), 30000);
+});
+$("scout").onclick = guard(async () => {
+  text($("scoutmsg"), "Running...");
+  const r = await call("/api/scout/run", "POST", null, true);
+  text($("scoutmsg"), r.ran ? ("seen " + r.seen + ", new " + r.new + ", qualified " + r.qualified + (r.errors.length ? " | errors: " + r.errors.join("; ") : "")) : ("Not run: " + r.reason));
+  await loadOpps(); await refresh();
 });
 $("pause").onclick = guard(async () => { await call("/api/pause", "POST", null, true); await refresh(); });
 $("resume").onclick = guard(async () => { await call("/api/resume", "POST", null, true); await refresh(); });
