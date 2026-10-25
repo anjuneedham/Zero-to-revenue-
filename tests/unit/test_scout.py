@@ -155,6 +155,8 @@ class SourcesTest(unittest.TestCase):
         seen = {}
 
         def fake(url, hosts, headers=None):
+            if "search/issues" not in url:
+                raise RuntimeError("repo lookup unavailable")  # reputation stays unknown, never guessed
             seen.update(url=url, hosts=hosts, headers=headers)
             return {"items": [
                 {"title": "[$75] Add dark mode", "html_url": "https://github.com/acme/app/issues/9", "body": "please",
@@ -193,3 +195,70 @@ class EnrichParseTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SuperteamTest(unittest.TestCase):
+    """Fixture is a real response captured from the live API on 2026-10-25."""
+    DATA = json.load(open(__import__("pathlib").Path(__file__).resolve().parents[1] / "fixtures" / "superteam_sample.json"))
+
+    def items(self, data=None):
+        from agents.scout.sources import SuperteamEarn
+        seen = {}
+
+        def fake(url, hosts, headers=None):
+            seen["url"], seen["hosts"] = url, hosts
+            return self.DATA if data is None else data
+        out = SuperteamEarn(fetch=fake).items()
+        self.assertTrue(seen["url"].startswith("https://superteam.fun/api/listings"))
+        self.assertEqual(seen["hosts"], {"superteam.fun"})
+        return out
+
+    def test_maps_real_listings(self):
+        items = self.items()
+        self.assertEqual(len(items), len([x for x in self.DATA if x["status"] == "OPEN"]))
+        i = next(i for i in items if "Solana Validators" in i.title)
+        self.assertEqual((i.expected_payment, i.payment_asset, i.organization), (2500.0, "USDC", "Superteam Ukraine"))
+        self.assertTrue(i.source_url.startswith("https://superteam.fun/earn/listing/"))
+        self.assertTrue(i.sponsor_verified)
+        self.assertTrue(any("prize pool" in c for c in i.caveats))
+        self.assertTrue(any("submission" in c for c in i.caveats))
+        self.assertIsNone(i.required_capital)
+
+    def test_closed_or_announced_and_malformed_rows_are_skipped(self):
+        base = dict(self.DATA[0])
+        self.assertEqual(self.items([{**base, "status": "CLOSED"}, {**base, "isWinnersAnnounced": True}, "x", {"title": "no slug"}]), [])
+
+    def test_human_only_listings_are_never_auto_queued_for_ai_drafting(self):
+        item = self.items([{**self.DATA[3], "agentAccess": "HUMAN_ONLY"}])[0]
+        ev = evaluate(item, skills=SKILLS)
+        self.assertEqual(ev.status, OpportunityStatus.REVIEW_REQUIRED)
+        self.assertIn("human_only_listing", ev.flags)
+        self.assertIn("do the work yourself", ev.row["recommended_action"])
+
+    def test_verified_sponsor_with_ai_allowed_qualifies_but_token_promo_and_unverified_do_not(self):
+        ok = evaluate(self.items([{**self.DATA[3], "agentAccess": "AGENT_ALLOWED"}])[0], skills=SKILLS)
+        self.assertEqual(ok.status, OpportunityStatus.QUALIFIED)
+        promo = next(i for i in self.items([{**self.DATA[6], "agentAccess": "AGENT_ALLOWED"}]))
+        ev = evaluate(promo, skills=SKILLS)
+        self.assertIn("token_promotion", ev.flags)
+        self.assertIn("unverified_sponsor", ev.flags)
+        self.assertEqual(ev.status, OpportunityStatus.REVIEW_REQUIRED)
+
+    def test_github_repo_reputation_flags_young_repos_and_never_guesses(self):
+        from datetime import datetime, timedelta, timezone
+        from agents.scout.sources import GitHubBounties
+        young = (datetime.now(timezone.utc) - timedelta(days=10)).isoformat()
+        old = (datetime.now(timezone.utc) - timedelta(days=900)).isoformat()
+
+        def fake(url, hosts, headers=None):
+            if "search/issues" in url:
+                mk = lambda n, repo: {"title": f"[$50] t{n}", "html_url": f"https://github.com/{repo}/issues/{n}", "labels": [],
+                                      "repository_url": f"https://api.github.com/repos/{repo}"}
+                return {"items": [mk(1, "farm/new"), mk(2, "real/lib"), mk(3, "broken/api")]}
+            if url.endswith("farm/new"):
+                return {"created_at": young, "stargazers_count": 0}
+            if url.endswith("real/lib"):
+                return {"created_at": old, "stargazers_count": 900}
+            raise RuntimeError("rate limited")
+        by_org = {i.organization: i.sponsor_verified for i in GitHubBounties(fetch=fake).items()}
+        self.assertEqual(by_org, {"farm": False, "real": True, "broken": None})

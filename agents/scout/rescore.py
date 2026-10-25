@@ -8,7 +8,7 @@ from core.audit import audit
 from core.db import now
 from core.queue import queue
 
-RULES_VERSION = "2"
+RULES_VERSION = "3"
 KEY = "scout_rules_version"
 
 

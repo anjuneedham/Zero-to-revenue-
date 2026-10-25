@@ -30,6 +30,9 @@ class RawItem:
     payment_method: str = ""
     effort_estimate: str = ""
     labels: list[str] = field(default_factory=list)
+    caveats: list[str] = field(default_factory=list)   # shown to the owner under "missing information"
+    sponsor_verified: bool | None = None               # None = unknown
+    human_only: bool = False                           # listing says AI-produced work is not allowed
 
 
 @dataclass
@@ -73,7 +76,8 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     has_terms = bool(item.expected_payment and item.payment_asset)
     risk, flags = scam.assess(text, organization=org, expected_payment=item.expected_payment,
                               has_payment_terms=has_terms, injection=injection,
-                              required_capital=item.required_capital, title=title)
+                              required_capital=item.required_capital, title=title,
+                              sponsor_verified=item.sponsor_verified)
 
     missing = []
     if item.required_capital is None:
@@ -88,6 +92,9 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
         missing.append("deadline not stated")
     if not skills:
         missing.append("OWNER_SKILLS not configured; skill fit is neutral")
+    missing.extend(sanitize.clean(c, 200) for c in item.caveats)
+    if item.human_only:
+        pass
 
     host = (urlsplit(url).hostname or "").removeprefix("www.")
     trusted = urlsplit(url).scheme == "https" and any(host == d or host.endswith("." + d) for d in TRUSTED_DOMAINS)
@@ -115,6 +122,9 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     # Stricter than the spec's thresholds, on purpose: an opportunity cannot be auto-queued for the
     # Operator unless payment amount and asset are stated AND there is a payment method or a deadline.
     undocumented = not (item.expected_payment and item.payment_asset and (item.payment_method or item.deadline))
+    if item.human_only:
+        flags.append("human_only_listing")
+        status = OpportunityStatus.REVIEW_REQUIRED
     if status is OpportunityStatus.QUALIFIED and undocumented:
         status = OpportunityStatus.REVIEW_REQUIRED
         flags.append("insufficient_terms")
@@ -124,6 +134,8 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
 
     if status is OpportunityStatus.QUALIFIED:
         action = "Research and draft; submission needs owner approval"
+    elif item.human_only:
+        action = "Listing is human-only: do the work yourself; AI-produced work may break the rules"
     elif risk > 35:
         action = "Do not engage until risk flags are reviewed by the owner"
     elif "insufficient_terms" in flags:

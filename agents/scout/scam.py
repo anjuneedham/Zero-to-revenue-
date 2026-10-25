@@ -14,7 +14,9 @@ INDICATORS = {
     # Spam/farming patterns seen in live GitHub "bounty" issues (gift cards, tokens, repeated titles).
     "non_cash_reward": (35, re.compile(r"gift\s*card|voucher|\bsteam\b.{0,20}(card|key|wallet)|v-?bucks|robux|itunes|coupon", re.I | re.S)),
     "token_exchange_scheme": (40, re.compile(r"exchange\s+[\d,\.]+\s*[kKmMbB]?\s+\S+(\s+\(\$?\w+\))?\s+for\b|(?-i:\$w[A-Z0-9]{2,}\b)|airdrop|free\s+tokens?|claim\s+your\s+(reward|tokens?)", re.I)),
+    "token_promotion": (25, re.compile(r"fair\s+launch|trading\s+competition|\bshill|(write|create|post)\b.{0,25}(thread|tweet|post).{0,40}(?-i:\$[A-Za-z]{3,10}\b)", re.I | re.S)),
 }
+UNVERIFIED_SPONSOR_RISK = 15
 INJECTION_RISK = 40
 DUPLICATE_TITLE_RISK = 30
 EMOJI_RISK = 10
@@ -40,8 +42,12 @@ def emoji_count(title: str) -> int:
 
 
 def assess(text: str, *, organization: str, expected_payment, has_payment_terms: bool,
-           injection: list[str], required_capital, title: str = "") -> tuple[int, list[str]]:
+           injection: list[str], required_capital, title: str = "",
+           sponsor_verified=None) -> tuple[int, list[str]]:
     flags, risk = [], 0
+    if sponsor_verified is False:
+        flags.append("unverified_sponsor")
+        risk += UNVERIFIED_SPONSOR_RISK
     if duplicated_title(title):
         flags.append("duplicated_title_spam")
         risk += DUPLICATE_TITLE_RISK

@@ -13,6 +13,9 @@ miss calls, reply hours later and send quotes days later. Every slow reply goes 
 - Demand: contractors spend on ads and directories but rarely measure what happens after the phone rings.
 - Supply: AI agencies sell generic chatbots; few implementers understand both trades workflows and automation.
 
+> UPDATE 25 Oct 2026: see RESEARCH_2026-10.md. Text-back alone sells for $99-200/month elsewhere, so the offer below is
+> sold as a bundle with a website, and pricing is $750-1,500 setup + $250-497/month (to be tested).
+
 ## The offer: "Never Miss a Job"
 1. Missed-call text-back within 60 seconds (SMS via Twilio, which we're already integrating).
 2. A 24/7 intake form/chat that captures job type, address, photos and timing.

@@ -2,6 +2,7 @@
 
 import os
 import re
+from datetime import datetime, timezone
 from urllib.parse import quote
 
 from agents.scout import sanitize
@@ -39,7 +40,7 @@ class GitHubBounties:
         if os.environ.get("GITHUB_TOKEN"):
             headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
         data = self.fetch(url, self.hosts, headers)
-        out = []
+        out, reputation = [], {}
         for it in (data.get("items") or []) if isinstance(data, dict) else []:
             if not isinstance(it, dict) or not it.get("html_url") or "pull_request" in it:
                 continue
@@ -47,12 +48,62 @@ class GitHubBounties:
             repo = str(it.get("repository_url", "")).removeprefix("https://api.github.com/repos/")
             owner = repo.split("/")[0] if "/" in repo else ""
             amount, asset = parse_amount(str(it.get("title", "")), *labels)
+            if repo not in reputation:
+                reputation[repo] = self._repo_vetted(repo, headers)
             out.append(RawItem(
                 title=str(it.get("title", "")), source=self.name, source_url=str(it["html_url"]),
                 body=str(it.get("body") or ""), organization=owner, category="development bounty",
                 required_skills=[l for l in labels if l.lower() not in ("bounty", "help wanted")][:5],
-                expected_payment=amount, payment_asset=asset, labels=labels))
+                expected_payment=amount, payment_asset=asset, labels=labels, sponsor_verified=reputation[repo]))
+        return out
+
+    def _repo_vetted(self, repo: str, headers: dict):
+        """True: established repo (>=50 stars, >=180 days old). False: young/unknown farm-like repo.
+        None: could not check (rate limit, error) - never guessed."""
+        if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo or ""):
+            return None
+        try:
+            r = self.fetch(f"https://api.github.com/repos/{repo}", self.hosts, headers)
+            created = datetime.fromisoformat(str(r["created_at"]).replace("Z", "+00:00"))
+            age = (datetime.now(timezone.utc) - created).days
+            return int(r.get("stargazers_count", 0)) >= 50 and age >= 180
+        except Exception:
+            return None
+
+
+class SuperteamEarn:
+    """Superteam Earn: vetted listings with stated reward, token, deadline, sponsor and submission count.
+    Rewards are prize POOLS shared among winners, so the owner's share is unknown until results."""
+    name = "superteam-earn"
+    hosts = {"superteam.fun"}
+
+    def __init__(self, fetch=fetch_json, take: int = 40):
+        self.fetch, self.take = fetch, take
+
+    def items(self) -> list[RawItem]:
+        data = self.fetch(f"https://superteam.fun/api/listings?take={self.take}", self.hosts, {"Accept": "application/json"})
+        out = []
+        for x in data if isinstance(data, list) else []:
+            if not isinstance(x, dict) or not x.get("slug") or x.get("status") != "OPEN" or x.get("isWinnersAnnounced"):
+                continue
+            sponsor = x.get("sponsor") if isinstance(x.get("sponsor"), dict) else {}
+            amount = x.get("rewardAmount")
+            subs = (x.get("_count") or {}).get("Submission") if isinstance(x.get("_count"), dict) else None
+            caveats = []
+            if amount:
+                caveats.append("reward is a prize pool shared among winners; your share is unknown")
+            if subs is not None:
+                caveats.append(f"{subs} submission(s) so far")
+            if x.get("agentAccess") not in (None, "HUMAN_ONLY"):
+                caveats.append(f"AI-use policy: {x.get('agentAccess')}")
+            out.append(RawItem(
+                title=str(x.get("title", "")), source=self.name, source_url=f"https://superteam.fun/earn/listing/{x['slug']}",
+                organization=str(sponsor.get("name") or "").strip(), category=str(x.get("type") or "bounty"),
+                deadline=x.get("deadline"), expected_payment=float(amount) if isinstance(amount, (int, float)) else None,
+                payment_asset=str(x.get("token") or ""), caveats=caveats,
+                sponsor_verified=sponsor.get("isVerified") if isinstance(sponsor.get("isVerified"), bool) else None,
+                human_only=x.get("agentAccess") == "HUMAN_ONLY"))
         return out
 
 
-DEFAULT_SOURCES = [GitHubBounties]
+DEFAULT_SOURCES = [SuperteamEarn, GitHubBounties]
