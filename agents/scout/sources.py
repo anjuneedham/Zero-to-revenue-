@@ -143,4 +143,31 @@ class FreelancerCom:
         return out
 
 
-DEFAULT_SOURCES = [SuperteamEarn, GitHubBounties, FreelancerCom]
+class RemotiveFreelance:
+    """Remotive's public jobs API, filtered to its 'contract'/'freelance' listings only - most of its
+    jobs are full-time salaried roles, which are a different kind of opportunity and are left out.
+    Pay is given as free text ('$1000 per task', '70K-80K'); only amounts parse_amount can read are kept."""
+    name = "remotive-freelance"
+    hosts = {"remotive.com"}
+    WANTED_TYPES = {"contract", "freelance"}
+
+    def __init__(self, fetch=fetch_json, limit: int = 60):
+        self.fetch, self.limit = fetch, limit
+
+    def items(self) -> list[RawItem]:
+        data = self.fetch(f"https://remotive.com/api/remote-jobs?limit={self.limit}", self.hosts, {"Accept": "application/json"})
+        out = []
+        for j in (data.get("jobs") if isinstance(data, dict) else None) or []:
+            if not isinstance(j, dict) or not j.get("url") or str(j.get("job_type", "")).lower() not in self.WANTED_TYPES:
+                continue
+            amount, asset = parse_amount(str(j.get("salary") or ""))
+            caveats = [] if amount else ["pay was given as text and could not be parsed as a fixed amount"]
+            out.append(RawItem(
+                title=str(j.get("title", "")), source=self.name, source_url=str(j["url"]),
+                body=sanitize.clean(j.get("description") or "", 3000), organization=str(j.get("company_name") or ""),
+                category="freelance/contract role", deadline=None, expected_payment=amount, payment_asset=asset,
+                payment_method="employer-stated" if amount else "", caveats=caveats))
+        return out
+
+
+DEFAULT_SOURCES = [SuperteamEarn, GitHubBounties, FreelancerCom, RemotiveFreelance]

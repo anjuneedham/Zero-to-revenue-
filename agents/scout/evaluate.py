@@ -140,14 +140,17 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
         status = OpportunityStatus.REVIEW_REQUIRED
         flags.append("insufficient_terms")
 
+    # Owner's rule: $500+ normally, but a job that is genuinely small and easy is worth doing for less,
+    # since it costs almost no time; a job that looks hard needs to clear the floor to be worth it at all.
     min_pay = min_payment_usd()
     low_text = text.lower()
+    looks_easy = (any(w in low_text for w in EASY_WORDS) and not any(w in low_text for w in HARD_WORDS)
+                 and len(item.required_skills) <= 2)
     looks_hard = any(w in low_text for w in HARD_WORDS) or len(item.required_skills) > 2
-    bar = min_pay * 2 if looks_hard else min_pay  # harder work needs a bigger fee, not a pass on the floor
-    below_bar = item.expected_payment is not None and item.expected_payment < bar
+    below_bar = (not looks_easy) and item.expected_payment is not None and item.expected_payment < min_pay
     if status is OpportunityStatus.QUALIFIED and below_bar:
         status = OpportunityStatus.REVIEW_REQUIRED
-        flags.append(f"under_${bar:.0f}_bar" + ("_harder_work_needs_more" if looks_hard else ""))
+        flags.append(f"under_${min_pay:.0f}_bar_and_not_clearly_easy")
 
     known = [title, org, url, body, item.deadline, item.expected_payment, item.payment_asset, item.payment_method,
              item.required_skills, item.required_capital is not None]
@@ -162,8 +165,8 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     elif "insufficient_terms" in flags:
         action = "Owner review: payment terms are not documented well enough to queue automatically"
     elif any(f.startswith("under_$") for f in flags):
-        action = (f"Below the ${bar:.0f} bar for work this complex; needs a bigger fee" if looks_hard
-                  else f"Below the ${min_pay:.0f} floor; only worth it if the scope is genuinely small")
+        action = (f"Below the ${min_pay:.0f} bar and looks like real work, not a quick job; needs a bigger fee"
+                  if looks_hard else f"Below the ${min_pay:.0f} bar; worth a look only if it is genuinely quick")
     else:
         action = "Owner review: score below qualification threshold"
     oid = opportunity_id(url)

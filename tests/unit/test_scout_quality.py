@@ -10,33 +10,35 @@ SKILLS = {"python"}
 
 
 class MinPaymentTest(unittest.TestCase):
-    def test_default_bar_is_500(self):
+    def test_default_bar_is_500_for_ordinary_work(self):
         with mock.patch.dict(os.environ, {}, clear=True):
-            cheap = evaluate(good(expected_payment=100, title="Fix the broken date picker"), skills=SKILLS)
+            cheap = evaluate(good(expected_payment=100, title="Redesign the onboarding flow", required_skills=["python", "design"]), skills=SKILLS)
             self.assertEqual(cheap.status, OpportunityStatus.REVIEW_REQUIRED)
             self.assertTrue(any(f.startswith("under_$500") for f in cheap.flags))
             big = evaluate(good(expected_payment=600), skills=SKILLS)
             self.assertEqual(big.status, OpportunityStatus.QUALIFIED)
 
-    def test_easy_job_still_needs_the_full_500_floor(self):
+    def test_cheap_but_clearly_easy_work_qualifies_below_the_floor(self):
+        # The owner's rule: a small, quick job is worth doing even under $500, because it costs
+        # almost no time. Only work that looks hard or unclear must clear the full bar.
         with mock.patch.dict(os.environ, {}, clear=True):
-            cheap_easy = evaluate(good(expected_payment=150, title="Fix a small typo in the README", required_skills=["python"]), skills=SKILLS)
-            self.assertEqual(cheap_easy.status, OpportunityStatus.REVIEW_REQUIRED)
-            self.assertFalse(any("harder_work" in f for f in cheap_easy.flags))
+            cheap_easy = evaluate(good(expected_payment=75, title="Fix a small typo in the README", required_skills=["python"]), skills=SKILLS)
+            self.assertEqual(cheap_easy.status, OpportunityStatus.QUALIFIED)
+            self.assertFalse(any(f.startswith("under_$") for f in cheap_easy.flags))
 
-    def test_hard_job_needs_double_the_floor(self):
+    def test_cheap_and_hard_stays_under_review(self):
         with mock.patch.dict(os.environ, {}, clear=True):
-            hard_mid = evaluate(good(expected_payment=700, title="Build a full platform migration end to end", required_skills=["python", "go", "rust"]), skills=SKILLS)
-            self.assertEqual(hard_mid.status, OpportunityStatus.REVIEW_REQUIRED)  # 700 < 2x500
-            self.assertTrue(any("harder_work" in f for f in hard_mid.flags))
-            hard_paid = evaluate(good(expected_payment=1200, title="Build a full platform migration end to end", required_skills=["python", "go", "rust"]), skills=SKILLS)
-            self.assertEqual(hard_paid.status, OpportunityStatus.QUALIFIED)
+            hard = evaluate(good(expected_payment=300, title="Build a full platform migration end to end", required_skills=["python", "go", "rust"]), skills=SKILLS)
+            self.assertEqual(hard.status, OpportunityStatus.REVIEW_REQUIRED)
+            self.assertTrue(any(f.startswith("under_$500") for f in hard.flags))
+            paid_enough = evaluate(good(expected_payment=600, title="Build a full platform migration end to end", required_skills=["python", "go", "rust"]), skills=SKILLS)
+            self.assertEqual(paid_enough.status, OpportunityStatus.QUALIFIED)
 
     def test_bar_is_configurable(self):
         with mock.patch.dict(os.environ, {"MIN_EXPECTED_PAYMENT_USD": "100"}, clear=True):
-            self.assertEqual(evaluate(good(expected_payment=150, title="Fix a parser bug"), skills=SKILLS).status, OpportunityStatus.QUALIFIED)
+            self.assertEqual(evaluate(good(expected_payment=150, title="Redesign the onboarding flow", required_skills=["python", "design"]), skills=SKILLS).status, OpportunityStatus.QUALIFIED)
         with mock.patch.dict(os.environ, {"MIN_EXPECTED_PAYMENT_USD": "not-a-number"}, clear=True):
-            cheap = evaluate(good(expected_payment=100, title="Fix the broken date picker"), skills=SKILLS)
+            cheap = evaluate(good(expected_payment=100, title="Redesign the onboarding flow", required_skills=["python", "design"]), skills=SKILLS)
             self.assertEqual(cheap.status, OpportunityStatus.REVIEW_REQUIRED)  # falls back to 500
 
 
@@ -99,3 +101,44 @@ class DailyReportTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RemotiveFreelanceTest(unittest.TestCase):
+    SAMPLE = {"jobs": [
+        {"title": "Software Engineer, AI Coding Tasks", "job_type": "contract", "salary": "$1000 per task",
+         "url": "https://remotive.com/remote-jobs/software-development/x-1", "company_name": "Askable", "description": "Contract AI coding tasks."},
+        {"title": "AI Trainer - Video Annotation", "job_type": "freelance", "salary": "70K-80K",
+         "url": "https://remotive.com/remote-jobs/ai/x-2", "company_name": "iMerit", "description": "Annotate video."},
+        {"title": "Tech Lead Full-Stack Rails Engineer", "job_type": "full_time", "salary": "$170k - $200k",
+         "url": "https://remotive.com/remote-jobs/x-3", "company_name": "Acme"},
+        "garbage", {"title": "no url", "job_type": "contract"},
+    ]}
+
+    def items(self, data=None):
+        from agents.scout.sources import RemotiveFreelance
+        seen = {}
+
+        def fake(url, hosts, headers=None):
+            seen["url"], seen["hosts"] = url, hosts
+            return self.SAMPLE if data is None else data
+        out = RemotiveFreelance(fetch=fake).items()
+        self.assertTrue(seen["url"].startswith("https://remotive.com/api/remote-jobs"))
+        self.assertEqual(seen["hosts"], {"remotive.com"})
+        return out
+
+    def test_keeps_only_contract_and_freelance_with_valid_url(self):
+        items = self.items()
+        self.assertEqual(len(items), 2)  # full_time dropped, garbage rows dropped, no-url row dropped
+        self.assertEqual({i.title for i in items}, {"Software Engineer, AI Coding Tasks", "AI Trainer - Video Annotation"})
+
+    def test_parses_a_dollar_amount_and_flags_unparseable_pay(self):
+        items = self.items()
+        parsed = next(i for i in items if "AI Coding Tasks" in i.title)
+        self.assertEqual((parsed.expected_payment, parsed.payment_asset), (1000.0, "USD"))
+        unparsed = next(i for i in items if "Video Annotation" in i.title)
+        self.assertIsNone(unparsed.expected_payment)
+        self.assertTrue(any("could not be parsed" in c for c in unparsed.caveats))
+
+    def test_malformed_response_never_crashes(self):
+        self.assertEqual(self.items({"jobs": "not a list"}), [])
+        self.assertEqual(self.items({}), [])

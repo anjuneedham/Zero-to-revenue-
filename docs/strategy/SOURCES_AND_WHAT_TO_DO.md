@@ -1,16 +1,23 @@
 # Where to look for $500+ work, and what to do about each (25 Oct 2026)
 
-Scout now enforces: **$500 floor** for ordinary jobs; jobs that read as complex (full rebuilds,
-migrations, "end to end", architecture, or more than 2 named skills) need **$1,000+** instead of being
-let in cheap. Set with `MIN_EXPECTED_PAYMENT_USD` (default 500). Below the bar and not clearly worth it
-goes to REVIEW_REQUIRED, not auto-queued.
+Scout enforces a **$500 floor** (`MIN_EXPECTED_PAYMENT_USD`, default 500) - except for a job that
+reads as genuinely small and quick (title mentions fix/typo/small/config/etc, no more than 2 named
+skills, nothing complex-sounding): those qualify under the floor too, since they cost almost no time.
+A job that reads as hard (full rebuild, migration, "end to end", architecture, or 3+ named skills) must
+clear the floor to qualify at all. Below the bar and not clearly a quick win goes to REVIEW_REQUIRED,
+not auto-queued, so it still shows up for you to glance at.
 
 ## Wired into Scout (automatic, read-only)
 | Source | What it is | Status |
 |---|---|---|
 | **Freelancer.com** | Public project-search API, no login. Real client-set budgets, bid counts. Fixed-price, $500+ only. | Added 25 Oct |
+| **Remotive** | Public jobs API; filtered to its `contract`/`freelance` listings only (not the full-time roles). | Added 25 Oct |
 | **Superteam Earn** | Vetted Web3 bounty listings, sponsor + deadline + entry count. | Built earlier; most listings are prize pools or human-only |
 | **GitHub "bounty" label** | Open issues. Mostly spam; repo-reputation checked. | Built earlier; low yield |
+
+**Checked and skipped:** OpenStreetMap Overpass (blocked in this sandbox), Nominatim (refuses automated
+bulk use - its own anti-scraping policy), WeWorkRemotely RSS (almost entirely full-time salaried roles
+with no structured pay field, a poor match for one-off paid work).
 
 ## Needs an account; Scout cannot read these (public API is closed or login-gated)
 Pursue these yourself; I can draft proposals and track them once you're in.
