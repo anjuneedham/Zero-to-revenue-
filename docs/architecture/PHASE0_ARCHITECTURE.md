@@ -30,7 +30,7 @@ Status: **ARCHITECTURE ONLY.** No agent performs any external action yet.
    `zero-to-revenue-`. Kept the actual repo; layout follows spec §20.
 2. **REVIEW_REQUIRED** (§7) is not in the opportunity state list (§3).
    Added it as an explicit state.
-3. **Wallet chain is not configured** (§2 forbids assuming Ethereum).
+3. **Wallet chains are not configured** (§2 forbids assuming Ethereum).
    Treasury must refuse to run until `OWNER_WALLET_CHAIN_ID` is set → USER_ACTION.
 4. **"Autonomous discovery" vs. cost control**: real web research and LLM
    reasoning need paid APIs. Per §39 these require owner approval first.
