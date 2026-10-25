@@ -41,6 +41,33 @@
       if (unpriced) rev.append(el("p", "flags", unpriced + " verified receipt(s) have no USD price yet (native coins and unconfirmed tokens are not valued), so they are not counted here."));
       g.append(rev);
 
+      const calc = card("Payment calculator", "Convert any amount you were paid - crypto or fiat - into USD or JMD. Not tied to a job; use it for any online payment."); calc.classList.add("s12");
+      const rr = await Z.api("/api/rates");
+      const CODES = Object.keys(rr.crypto_usd); const FIATS = ["USD", ...Object.keys(rr.fiat_per_usd)];
+      const form = el("div", "form");
+      const l1 = el("label", "f", "Amount"); const amt = el("input"); amt.type = "number"; amt.step = "any"; amt.value = "1"; amt.id = "calc-amt"; l1.append(amt);
+      const l2 = el("label", "f", "You received"); const from = el("select"); from.id = "calc-from";
+      CODES.forEach(c => { const o = el("option", c, c); o.value = c; from.append(o); });
+      const customOpt = el("option", null, "Other (enter rate)"); customOpt.value = "CUSTOM"; from.append(customOpt); l2.append(from);
+      const l3 = el("label", "f", "Rate to USD (only for “Other”)"); const customRate = el("input"); customRate.type = "number"; customRate.step = "any";
+      customRate.placeholder = "e.g. 1 unit = $X"; customRate.id = "calc-rate"; customRate.disabled = true; l3.append(customRate);
+      const l4 = el("label", "f", "Show in"); const to = el("select"); to.id = "calc-to"; FIATS.forEach(c => { const o = el("option", c, c); o.value = c; to.append(o); }); l4.append(to);
+      const out = el("div"); add(out, el("div", "label", "Result"), el("div", "stat", "-"));
+      from.onchange = () => { customRate.disabled = from.value !== "CUSTOM"; };
+      const compute = () => {
+        const a = parseFloat(amt.value) || 0;
+        const usdRate = from.value === "CUSTOM" ? (parseFloat(customRate.value) || 0) : (rr.crypto_usd[from.value] || 0);
+        const usd = a * usdRate;
+        const target = to.value === "USD" ? 1 : (rr.fiat_per_usd[to.value] || 0);
+        Z.text(out.lastChild, target ? fmt.usd(usd * target).replace("$", "") + " " + to.value : "no rate available");
+        out.lastChild.title = `1 ${from.value === "CUSTOM" ? "unit" : from.value} ≈ $${usdRate} USD`;
+      };
+      [amt, from, customRate, to].forEach(e => e.addEventListener("input", compute));
+      compute();
+      add(form, l1, l2, l3, l4); calc.append(form, out);
+      calc.append(el("p", "sub", rr.as_of ? "Rates as of " + fmt.when(rr.as_of) + (rr.stale ? " (could not refresh just now; showing the last good rates)" : "") + ". Reference only - never counted as verified revenue on its own." : "Rates are not available right now."));
+      g.append(calc);
+
       const ch = card("Chains", "Native-coin balances on the chains you allow"); ch.classList.add("s12");
       const cols = el("div", "cols");
       if (!t.chains.length) cols.append(Z.empty("No chains configured", "Set OWNER_WALLET_CHAIN_IDS in Vercel."));

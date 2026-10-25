@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, scheduler
+from core import actions, rates, scheduler
 from dashboard import api_data
 from dashboard.mcp import handle_mcp
 from core import db
@@ -147,6 +147,8 @@ def handle(method, path, authz, conn, body: bytes = b""):
         return _json(200, api_data.operator_board(conn))
     if method == "GET" and path == "/api/treasury/overview":
         return _json(200, api_data.treasury_overview(conn))
+    if method == "GET" and path == "/api/rates":
+        return _json(200, rates.get_rates())
     if method == "GET" and path == "/api/leads":
         rows = conn.execute("SELECT id,name,business,email,phone,status,created_at FROM leads ORDER BY created_at DESC LIMIT 200")
         return _json(200, {"leads": [dict(r) for r in rows]})

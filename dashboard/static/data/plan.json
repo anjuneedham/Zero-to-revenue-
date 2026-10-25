@@ -350,5 +350,63 @@
    ]
   ]
  },
- "live_url": "https://zero-to-revenue-neon.vercel.app"
+ "live_url": "https://zero-to-revenue-neon.vercel.app",
+ "sources_setup": [
+  {
+   "id": "src-ghtoken",
+   "p": "P1",
+   "who": "owner",
+   "title": "Add a GitHub token (read-only, no scopes)",
+   "detail": "Raises Scout's GitHub search rate limit so it can look further before giving up. Create one at GitHub > Settings > Developer settings > Personal access tokens (classic, no scopes needed, read-only is fine). Add GITHUB_TOKEN as a Secret in Vercel.",
+   "src": "sources research, 25 Oct"
+  },
+  {
+   "id": "src-upwork",
+   "p": "P1",
+   "who": "owner",
+   "title": "Create an Upwork profile",
+   "detail": "The largest general freelance market; $500+ fixed-price web/app work is common. Its job feed closed its public API in 2024, so this needs a manual profile and proposals - I can draft proposal text once you're set up.",
+   "src": "sources research, 25 Oct"
+  },
+  {
+   "id": "src-contra",
+   "p": "P2",
+   "who": "owner",
+   "title": "Create a Contra profile",
+   "detail": "No-fee, portfolio-first marketplace. A good fit for showing your BuildFlow and funnel work directly.",
+   "src": "sources research, 25 Oct"
+  },
+  {
+   "id": "src-braintrust",
+   "p": "P2",
+   "who": "owner",
+   "title": "Apply to Braintrust",
+   "detail": "Vetted talent network; the client pays the platform fee, so you keep more of the rate.",
+   "src": "sources research, 25 Oct"
+  },
+  {
+   "id": "src-webflow",
+   "p": "P2",
+   "who": "owner",
+   "title": "Apply as a Webflow/Framer Expert or Partner",
+   "detail": "Matches your website/funnel-building skill directly; these directories route client work to listed experts.",
+   "src": "sources research, 25 Oct"
+  },
+  {
+   "id": "src-freelancer-account",
+   "p": "P2",
+   "who": "owner",
+   "title": "Optional: create a Freelancer.com account",
+   "detail": "Scout already reads Freelancer.com's public listings with no login. An account is only needed to actually bid - not required for discovery.",
+   "src": "sources research, 25 Oct"
+  },
+  {
+   "id": "src-toptal",
+   "p": "P2",
+   "who": "owner",
+   "title": "Optional: apply to Toptal, Gun.io or Arc.dev",
+   "detail": "Vetted developer networks with larger projects; screening is extensive, worth it only once you want bigger, steadier work.",
+   "src": "sources research, 25 Oct"
+  }
+ ]
 }

@@ -65,3 +65,28 @@ their terms and gets domains blacklisted, so this system does not do it.
 This is the structure; actual sending (SMTP/Gmail integration) isn't wired up yet, so "I sent it" means
 you send it from your own email client using the draft. If you want one-click send from the dashboard,
 that needs a connected email account and is a separate, larger piece of work.
+
+## Payment calculator (25 Oct)
+Treasury now has a general-purpose calculator - any amount, any asset you were actually paid in
+(crypto or fiat), converted to USD or JMD. It is not tied to a specific job. Rates come from two
+free, no-key public APIs (CoinGecko for crypto, open.er-api.com for fiat), fetched server-side and
+cached for 5 minutes. This is reference only - it never counts as verified revenue on its own; that
+still requires Treasury's on-chain verification (or an owner-confirmed stablecoin contract) as before.
+
+## Off-ramping crypto to JMD cash (researched, not wired into the system)
+No source gave a confirmed, current answer for "sell USDC, get JMD in a Jamaican bank" - worth
+testing with a small amount before relying on any route:
+- **Binance** is the most commonly cited exchange for Jamaican users (reported 0.10% maker/taker fees,
+  bank transfer or card funding) but JMD P2P / direct Jamaican bank withdrawal isn't confirmed current.
+- **Common route:** sell crypto for USD on an exchange, withdraw to a bank or Wise, then convert
+  USD -> JMD locally (banks, or Wise's own conversion). A Jamaican user has reported this working via
+  Wise for PayPal funds; the same likely applies to exchange withdrawals.
+- **Yellow Card** (a common African off-ramp) does not support Jamaica/JMD - ruled out.
+- **Not confirmed:** whether WiPay (your local card gateway) accepts crypto at all; it is a card
+  gateway, not an exchange, so probably not a fit for this.
+
+## Scout cleanup (25 Oct)
+Every Scout run now removes opportunities that are clearly junk (a scam-level risk score, or a
+gift-card/token-promotion/duplicated-title flag) and that nothing has touched yet (no task, no
+payment). This runs automatically on every refresh - "Run Scout now" both finds new work and tidies
+up the old junk in one click. Anything the Operator drafted or you approved is never deleted.

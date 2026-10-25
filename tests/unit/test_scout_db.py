@@ -151,9 +151,11 @@ class RunScoutTest(unittest.TestCase):
 
     def test_run_stores_classifies_emits_and_queues_for_operator(self):
         r = run_scout(self.conn, [Source(self.items)])
-        self.assertEqual((r["new"], r["qualified"], r["outcome"]), (3, 1, "ok"))
+        # both scam-flagged items (risk 85 and 100) are untouched junk and get cleaned up in the
+        # same pass; only the genuine, qualified opportunity is left on the forefront
+        self.assertEqual((r["new"], r["qualified"], r["purged"], r["outcome"]), (3, 1, 2, "ok"))
         st = {row["title"]: row["status"] for row in self.conn.execute("select title,status from opportunities")}
-        self.assertEqual(sorted(st.values()), ["QUALIFIED", "REVIEW_REQUIRED", "REVIEW_REQUIRED"])
+        self.assertEqual(st, {"Build CLI tool [$600 USDC]": "QUALIFIED"})
         ev = self.conn.execute("select event, source_agent, payload from events").fetchall()
         self.assertEqual([(e["event"], e["source_agent"]) for e in ev], [("opportunity.qualified", "scout")])
         t = self.conn.execute("select owner_agent, kind, status from tasks").fetchall()
@@ -161,10 +163,13 @@ class RunScoutTest(unittest.TestCase):
         self.assertEqual(self.conn.execute("select status from agents where name='scout'").fetchone()[0], "online")
 
     def test_rerun_is_idempotent(self):
+        # The genuine opportunity is never re-created (dedup by source_url). The two scam items are
+        # deleted each run, so their source_url is free again and they are rediscovered and
+        # re-purged on every pass - churn in the numbers, but the stored state never grows.
         run_scout(self.conn, [Source(self.items)])
         r = run_scout(self.conn, [Source(self.items)])
-        self.assertEqual(r["new"], 0)
-        self.assertEqual((self.count("opportunities"), self.count("events"), self.count("tasks")), (3, 1, 1))
+        self.assertEqual(r["new"], r["purged"])
+        self.assertEqual((self.count("opportunities"), self.count("events"), self.count("tasks")), (1, 1, 1))
 
     def test_kill_switch_stops_scout(self):
         killswitch.pause_all(self.conn, "owner")
@@ -198,8 +203,10 @@ class RunScoutTest(unittest.TestCase):
         self.conn.execute("delete from opportunities")
         with mock.patch.dict(os.environ, LLM_ENV, clear=True):
             run_scout(self.conn, [Source([self.items[1]])], client=FakeClient({**OKREPLY, "risk_flags": []}))
-        r2 = self.conn.execute("select risk_score from opportunities").fetchone()
-        self.assertGreaterEqual(r2["risk_score"], 60)  # a clean AI answer cannot lower scam risk
+        # a clean AI answer cannot lower scam risk - it stayed above the cleanup threshold and was
+        # removed as junk in the same pass, never silently left QUALIFIED or downgraded-but-visible
+        self.assertIsNone(self.conn.execute("select 1 from opportunities").fetchone())
+        self.assertEqual(self.conn.execute("select count(*) from audit_events where action='scout.cleanup'").fetchone()[0], 1)
 
 
 class RescoreTest(unittest.TestCase):
@@ -218,7 +225,8 @@ class RescoreTest(unittest.TestCase):
         self.conn.execute(f"INSERT INTO opportunities({','.join(cols)}, discovered_at) VALUES ({','.join('?' * len(cols))}, 'now')",
                           (*[ev.row[c] for c in cols], ))
         self.oid = ev.id
-        run_scout(self.conn, [])  # also runs the rescore; so first re-qualify and draft before that
+        from agents.scout.rescore import rescore as _rescore
+        _rescore(self.conn)  # applies the current rules version once; re-qualify and draft before testing the real downgrade
         self.conn.execute("DELETE FROM settings WHERE key='scout_rules_version'")
         self.conn.execute("UPDATE opportunities SET status='QUALIFIED' WHERE id=?", (self.oid,))
         from core.queue import queue
@@ -274,11 +282,11 @@ class ScoutApiTest(unittest.TestCase):
         self.assertEqual(self.call("GET", "/api/opportunities")[0], 401)
         t, _, _ = session(self.conn)
         c, r = self.call("POST", "/api/scout/run", t)
-        self.assertEqual((c, r["new"], r["qualified"]), (200, 2, 1))
+        self.assertEqual((c, r["new"], r["qualified"], r["purged"]), (200, 2, 1, 1))  # the scam item is cleaned up on the spot
         c, d = self.call("GET", "/api/opportunities", t)
-        self.assertEqual([o["status"] for o in d["opportunities"]], ["QUALIFIED", "REVIEW_REQUIRED"])
+        self.assertEqual([o["status"] for o in d["opportunities"]], ["QUALIFIED"])
         self.assertIsInstance(d["opportunities"][0]["expected_payment"], float)
-        self.assertEqual(self.call("GET", "/api/status", t)[1]["opportunities"], {"QUALIFIED": 1, "REVIEW_REQUIRED": 1})
+        self.assertEqual(self.call("GET", "/api/status", t)[1]["opportunities"], {"QUALIFIED": 1})
 
 
 if __name__ == "__main__":
