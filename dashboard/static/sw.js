@@ -1,5 +1,5 @@
 // Caches only the static app shell. Never caches /api/* (status, kill switch, tokens).
-const SHELL = "z2r-shell-v2";
+const SHELL = "z2r-shell-v3";
 const FILES = ["/", "/app.js", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 self.addEventListener("install", e => e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES))));
 self.addEventListener("activate", e => e.waitUntil(

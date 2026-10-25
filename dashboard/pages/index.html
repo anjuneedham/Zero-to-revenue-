@@ -1,52 +1,192 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Zero-to-Revenue</title>
-<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#111114">
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#034694">
 <link rel="icon" href="/icon-192.png">
 <style>
-body{font:16px system-ui;margin:0;padding:16px;background:#111;color:#eee;max-width:720px;margin:auto}
-.card{background:#1d1d22;border-radius:12px;padding:14px;margin:12px 0}
-.badge{background:#ffb020;color:#000;border-radius:6px;padding:2px 8px;font-weight:700}
-button{font:inherit;padding:10px 16px;border-radius:8px;border:0;background:#1fc7d4;color:#000;font-weight:700}
-button.stop{background:#e5484d;color:#fff}
-input{font:inherit;width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #444;background:#111;color:#eee;margin:6px 0}
-.muted{color:#9a9aa5}.big{font-size:2rem;font-weight:700}.err{color:#ff7b7b}
-code{word-break:break-all;background:#000;padding:2px 6px;border-radius:4px}
+/* Matchday control room: royal-blue tunnel, white pitch lines, gold trim. Kit-inspired, no club marks. */
+:root{
+  --royal:#034694;--royal-2:#0a5bc4;--navy:#021b3d;--gold:#dba111;--gold-soft:#f2d27a;--white:#fff;
+  --bg:#eef3fa;--card:#fff;--fg:#0b1a30;--muted:#5a6b84;--line:#d3ddeb;--chip:#e4ecf8;
+  --ok:#14804a;--warn:#b26a00;--bad:#c8102e;
+  --display:"Oswald","Bebas Neue","Arial Narrow",Impact,sans-serif;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{--bg:#030c1c;--card:#0a1932;--fg:#e9f0fb;--muted:#9db0cc;--line:#1b3157;--chip:#11264a;--ok:#3fd18b;--warn:#f2a93b;--bad:#ff5a6e;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--body)}
+.wrap{max-width:1100px;margin:0 auto;padding-block:0 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 [hidden]{display:none!important}
-</style></head><body>
-<h1>Zero-to-Revenue <span class="badge">MOCK</span></h1>
-<div id="msg" class="muted"></div>
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;border-radius:8px;padding:9px 14px;font-weight:700;background:var(--royal);color:var(--white)}
+button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+button.gold{background:var(--gold);color:var(--navy)}
+button.red{background:var(--bad);color:var(--white)}
+button:disabled{opacity:.55;cursor:progress}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input,select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
 
-<div id="setup1" class="card" hidden><h3>First-time setup</h3>
-  <p class="muted">Enter the OWNER_SETUP_TOKEN you set in Vercel, and choose a password (12+ characters).</p>
+/* ---- kick-off loading screen ---- */
+#kickoff{position:fixed;inset:0;z-index:50;display:grid;place-items:center;text-align:center;color:var(--white);
+  background:radial-gradient(90% 70% at 50% 30%,var(--royal-2),var(--royal) 45%,var(--navy));transition:opacity .45s}
+#kickoff.out{opacity:0;pointer-events:none}
+#kickoff .lines{position:absolute;inset:0;opacity:.14;background:
+  radial-gradient(circle at 50% 50%,transparent 0 118px,#fff 119px 121px,transparent 122px),
+  linear-gradient(#fff,#fff) 50% 0/2px 100% no-repeat}
+.ball{width:84px;height:84px;margin:0 auto 18px;border-radius:50%;position:relative;background:
+  radial-gradient(circle at 50% 50%,#111 0 13px,transparent 14px),
+  radial-gradient(circle at 50% 8%,#111 0 8px,transparent 9px),radial-gradient(circle at 92% 38%,#111 0 8px,transparent 9px),
+  radial-gradient(circle at 76% 88%,#111 0 8px,transparent 9px),radial-gradient(circle at 24% 88%,#111 0 8px,transparent 9px),
+  radial-gradient(circle at 8% 38%,#111 0 8px,transparent 9px),#fff;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:spin 1.6s linear infinite, bounce .8s ease-in-out infinite alternate}
+@keyframes spin{to{rotate:360deg}}
+@keyframes bounce{from{translate:0 -6px}to{translate:0 8px}}
+#kickoff h1{font:700 clamp(30px,7vw,54px)/1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0}
+#kickoff h1 b{color:var(--gold)}
+#kickoff p{font:600 13px var(--mono);letter-spacing:.16em;text-transform:uppercase;opacity:.85;min-height:1.5em}
+.stripe{width:min(320px,70vw);height:6px;margin:14px auto 0;border-radius:99px;background:rgba(255,255,255,.2);overflow:hidden}
+.stripe i{display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));animation:sweep 1.1s ease-in-out infinite}
+@keyframes sweep{from{translate:-110% 0}to{translate:260% 0}}
+@media (prefers-reduced-motion:reduce){.ball,.stripe i{animation:none}#kickoff{transition:none}}
+
+/* ---- header ---- */
+header{background:linear-gradient(120deg,var(--navy),var(--royal) 55%,var(--royal-2));color:var(--white);position:relative}
+header::after{content:"";position:absolute;inset:auto 0 0;height:5px;background:linear-gradient(90deg,var(--gold),var(--gold-soft),var(--gold))}
+header .wrap{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding-block:18px 22px}
+.brand{display:flex;gap:12px;align-items:center}
+.crestish{width:44px;height:44px;border-radius:50%;border:3px solid var(--gold);display:grid;place-items:center;font:700 16px var(--display);background:var(--royal)}
+.brand h1{margin:0;font:700 26px/1 var(--display);letter-spacing:.05em;text-transform:uppercase}
+.brand small{display:block;font:600 11px var(--mono);letter-spacing:.18em;opacity:.8;text-transform:uppercase}
+.badge{background:var(--gold);color:var(--navy);font:800 11px var(--mono);letter-spacing:.12em;padding:4px 8px;border-radius:4px;vertical-align:middle}
+#msg{min-height:1.4em;color:var(--bad);font-weight:600;margin:12px 0 0}
+
+/* ---- layout ---- */
+.grid{display:grid;gap:16px;grid-template-columns:repeat(12,minmax(0,1fr));margin-top:16px}
+.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}
+@media (max-width:900px){.span-8,.span-6,.span-4{grid-column:span 12}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.card h2{margin:0 0 4px;font:700 19px/1.2 var(--display);letter-spacing:.05em;text-transform:uppercase}
+.card .sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* scoreboard */
+.scoreboard{background:linear-gradient(135deg,var(--navy),var(--royal));color:var(--white);border:0;position:relative;overflow:hidden}
+.scoreboard::before{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:2px solid rgba(255,255,255,.12)}
+.scoreboard .label{font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.big{font:700 clamp(40px,8vw,64px)/1 var(--display);color:var(--gold);font-variant-numeric:tabular-nums;margin:6px 0}
+.state{display:inline-flex;gap:8px;align-items:center;font-weight:700;padding:5px 10px;border-radius:99px;background:rgba(255,255,255,.12)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(20,128,74,.25)}
+.dot.paused{background:var(--bad)}.dot.err{background:var(--warn)}.dot.off{background:#8a97ab}
+.scoreboard .muted{opacity:.8;font-size:13px}
+
+/* team sheet */
+.team{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.team{grid-template-columns:1fr}}
+.player{border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;background:var(--card)}
+.shirt{grid-row:span 3;width:48px;height:52px;background:var(--royal);color:var(--white);display:grid;place-items:center;font:700 20px var(--display);
+  clip-path:polygon(22% 0,78% 0,100% 18%,88% 34%,82% 30%,82% 100%,18% 100%,18% 30%,12% 34%,0 18%);border-top:4px solid var(--gold)}
+.player h3{margin:0;font:700 16px var(--display);letter-spacing:.05em;text-transform:uppercase}
+.player .pos{font:600 11px var(--mono);color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.player .stat{font-size:13px;color:var(--muted)}
+
+/* lists */
+.list{display:grid;gap:10px}
+.item{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:6px;background:var(--card)}
+.item .t{font-weight:700}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font:700 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:99px;background:var(--chip);color:var(--muted)}
+.pill.q{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.pill.r{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.pill.x{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.pill.g{background:color-mix(in srgb,var(--gold) 25%,transparent);color:var(--fg)}
+.empty{color:var(--muted);font-style:italic}
+.flags{font-size:12px;color:var(--warn)}
+pre.draft{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:60vh;overflow:auto;font:13px/1.5 var(--mono)}
+dialog{border:0;border-radius:14px;padding:0;width:min(760px,94vw);background:var(--card);color:var(--fg)}
+dialog::backdrop{background:rgba(2,27,61,.7)}
+dialog .head{background:var(--royal);color:var(--white);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+dialog .body{padding:16px}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+.feed .item{grid-template-columns:auto 1fr;align-items:start}
+.form{display:grid;gap:8px;grid-template-columns:1fr 2fr auto;align-items:end}
+@media (max-width:700px){.form{grid-template-columns:1fr}}
+label.f{display:grid;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+.auth{max-width:440px;margin:28px auto}
+.auth .card{display:grid;gap:10px}
+code.key{display:block;word-break:break-all;font:600 15px var(--mono);background:var(--bg);padding:10px;border-radius:8px;border:1px dashed var(--gold)}
+</style></head><body>
+
+<div id="kickoff" role="status" aria-live="polite">
+  <div class="lines" aria-hidden="true"></div>
+  <div>
+    <div class="ball" aria-hidden="true"></div>
+    <h1>Zero<b>·</b>to<b>·</b>Revenue</h1>
+    <p id="ko-msg">Walking out of the tunnel</p>
+    <div class="stripe" aria-hidden="true"><i></i></div>
+  </div>
+</div>
+
+<header><div class="wrap">
+  <div class="brand"><div class="crestish" aria-hidden="true">Z2R</div>
+    <div><small>Matchday control room</small><h1>Zero-to-Revenue <span class="badge">MOCK</span></h1></div></div>
+  <div class="row" id="topbtns" hidden><button class="ghost" id="signout" style="color:#fff;border-color:rgba(255,255,255,.4)">Sign out</button><button class="ghost" id="signoutall" style="color:#fff;border-color:rgba(255,255,255,.4)">Sign out everywhere</button></div>
+</div></header>
+
+<main class="wrap">
+<p id="msg" role="alert"></p>
+
+<section class="auth" id="setup1" hidden><div class="card"><h2>First-time setup</h2>
+  <p class="sub">Enter the OWNER_SETUP_TOKEN you set in Vercel and choose a password (12+ characters).</p>
   <input id="s_token" type="password" placeholder="Setup token" autocomplete="off">
   <input id="s_pw" type="password" placeholder="New password" autocomplete="new-password">
-  <button id="s_begin">Continue</button></div>
-<div id="setup2" class="card" hidden><h3>Add your authenticator app</h3>
-  <p>In Google Authenticator (or similar): Add account, enter a setup key manually, then type this key:</p>
-  <p><code id="s_secret"></code></p>
-  <p class="muted">Type the 6-digit code it shows to finish.</p>
-  <input id="s_code" inputmode="numeric" placeholder="123456" autocomplete="off">
-  <button id="s_confirm">Finish setup</button></div>
-<div id="setup3" class="card" hidden><h3>Save your recovery codes</h3>
-  <p class="err">Shown once. Each works once if you lose your phone. Store them offline.</p>
-  <div id="s_codes"></div><p><button id="s_done">I saved them</button></p></div>
-
-<div id="login" class="card" hidden><h3>Owner sign-in</h3>
+  <button id="s_begin">Continue</button></div></section>
+<section class="auth" id="setup2" hidden><div class="card"><h2>Add your authenticator</h2>
+  <p class="sub">In Google Authenticator: Add account → Enter a setup key → type this key.</p>
+  <code class="key" id="s_secret"></code>
+  <input id="s_code" inputmode="numeric" placeholder="6-digit code" autocomplete="off">
+  <button id="s_confirm">Finish setup</button></div></section>
+<section class="auth" id="setup3" hidden><div class="card"><h2>Recovery codes</h2>
+  <p class="sub" style="color:var(--bad)">Shown once. Each works once. Store them offline.</p>
+  <div id="s_codes" class="list"></div><button id="s_done">I saved them</button></div></section>
+<section class="auth" id="login" hidden><div class="card"><h2>Owner sign-in</h2>
   <input id="l_pw" type="password" placeholder="Password" autocomplete="current-password">
   <input id="l_code" inputmode="numeric" placeholder="6-digit code (or recovery code)" autocomplete="one-time-code">
-  <button id="l_go">Sign in</button></div>
+  <button id="l_go">Sign in</button></div></section>
 
 <div id="app" hidden>
-  <div class="card"><div class="muted">Verified revenue (only verified receipts)</div><div class="big" id="rev">$0.00</div>
-    <div id="state"></div><p><button id="pause" class="stop">PAUSE ALL AGENTS</button> <button id="resume">Resume</button></p></div>
-  <div class="card"><h3>Agents</h3><div id="agents"></div></div>
-  <div class="card"><h3>Action required</h3><div id="actions" class="muted">None</div></div>
-  <div class="card"><h3>Opportunities</h3>
-    <p><button id="scout">Run Scout now</button> <span id="scoutmsg" class="muted"></span></p>
-    <div id="opps" class="muted">None yet</div></div>
-  <div class="card"><h3>Tasks / opportunities</h3><div id="counts" class="muted"></div></div>
-  <p><button id="signout">Sign out</button> <button id="signoutall">Sign out everywhere</button></p>
+<div class="grid">
+  <section class="card scoreboard span-8">
+    <div class="label">Verified revenue · only confirmed receipts count</div>
+    <div class="big" id="rev">$0.00</div>
+    <div class="row"><span class="state"><span class="dot" id="statedot"></span><span id="state">Loading</span></span>
+      <span class="muted" id="unvalued"></span></div>
+  </section>
+  <section class="card span-4" style="display:grid;gap:10px;align-content:start">
+    <h2>Kill switch</h2><p class="sub">Stops every agent and scheduled job. Resuming needs your sign-in.</p>
+    <button class="red" id="pause">Red card · pause all agents</button>
+    <button class="gold" id="resume">Resume play</button>
+  </section>
+
+  <section class="card span-12"><h2>Team sheet</h2><p class="sub">Three agents, each with only the permissions its position needs.</p>
+    <div class="team" id="team"></div></section>
+
+  <section class="card span-6"><h2>Manager's decisions</h2><p class="sub">Drafts wait here. You review, submit on the platform yourself, then confirm.</p>
+    <div class="list" id="actions"></div></section>
+  <section class="card span-6"><h2>Scouting report</h2><p class="sub">Claimed pay is unverified until Treasury confirms it on-chain.</p>
+    <div class="row" style="margin-bottom:10px"><button id="scout">Run Scout now</button><button class="ghost" id="operator">Run Operator</button></div>
+    <p class="sub" id="scoutmsg"></p><div class="list" id="opps"></div></section>
+
+  <section class="card span-8"><h2>Trophy cabinet</h2><p class="sub">Payments you're owed. Paste the transaction hash the payer sends you to verify it on-chain.</p>
+    <div class="list" id="payments"></div></section>
+  <section class="card span-4"><h2>Wallet watch</h2><p class="sub">Read-only balance check across monitored chains.</p>
+    <button class="ghost" id="treasury">Check wallet now</button><div class="list" id="balances" style="margin-top:10px"></div></section>
+
+  <section class="card span-12 feed"><h2>Dressing-room messages</h2><p class="sub">Every alert the system raised. WhatsApp delivery once Twilio is connected.</p>
+    <div class="list" id="feed"></div></section>
 </div>
+</div>
+</main>
+
+<dialog id="draftdlg"><div class="head"><strong>Draft submission</strong><button class="ghost" id="closedlg" style="color:#fff;border-color:rgba(255,255,255,.4)">Close</button></div>
+  <div class="body"><pre class="draft" id="drafttext"></pre></div></dialog>
+
 <script src="/app.js"></script>
 </body></html>

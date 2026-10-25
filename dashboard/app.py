@@ -2,11 +2,17 @@
 a session bearer token in the Authorization header (no cookies, so no CSRF surface).
 Mode: MOCK."""
 
+import hmac
 import json
+import os
+import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from agents.operator import run as operator
 from agents.scout.run import run_scout
+from agents.treasury import run as treasury
+from core import actions, scheduler
 from core import db
 from core.audit import audit
 from core.auth import owner_login as ol
@@ -20,6 +26,9 @@ STATIC_TYPES = {"/manifest.webmanifest": "application/manifest+json", "/sw.js": 
 MAX_BODY = 4096
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
+TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
+ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|draft)$")
+PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
@@ -82,6 +91,13 @@ def handle(method, path, authz, conn, body: bytes = b""):
     except (ValueError, KeyError, json.JSONDecodeError) as e:
         return _json(400, {"error": str(e) if isinstance(e, ValueError) and "password" in str(e) else "bad request"})
 
+    # --- scheduler: Vercel Cron sends "Authorization: Bearer <CRON_SECRET>" ------------
+    if path == "/api/cron":
+        secret = os.environ.get("CRON_SECRET", "")
+        if len(secret) < 16 or not hmac.compare_digest((authz or "").encode(), f"Bearer {secret}".encode()):
+            return _json(401, {"error": "unauthorized"})
+        return _json(200, scheduler.tick(conn, SCOUT_SOURCES, TREASURY_RPC))
+
     # --- authenticated -------------------------------------------------------------
     token = authz[7:] if authz and authz.startswith("Bearer ") else ""
     try:
@@ -104,6 +120,47 @@ def handle(method, path, authz, conn, body: bytes = b""):
         return _json(200, {"opportunities": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
     if method == "POST" and path == "/api/scout/run":
         return _json(200, run_scout(conn, SCOUT_SOURCES, SCOUT_CLIENT))
+    if method == "POST" and path == "/api/operator/run":
+        return _json(200, {"steps": operator.run(conn)})
+    if method == "POST" and path == "/api/treasury/run":
+        return _json(200, treasury.check_balances(conn, TREASURY_RPC))
+    if method == "GET" and path == "/api/payments":
+        rows = conn.execute("SELECT p.id, p.status, p.expected_amount, p.asset, p.chain_id, p.tx_hash, p.verified_at, o.title "
+                            "FROM payments p LEFT JOIN opportunities o ON o.id=p.opportunity_id ORDER BY p.created_at DESC LIMIT 50")
+        return _json(200, {"payments": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
+    if method == "GET" and path == "/api/notifications":
+        rows = conn.execute("SELECT priority, channel, title, body, status, created_at FROM notifications ORDER BY created_at DESC LIMIT 30")
+        return _json(200, {"notifications": [dict(r) for r in rows]})
+    m = ACTION_RE.match(path)
+    if m:
+        aid, verb = m.groups()
+        try:
+            if verb == "draft" and method == "GET":
+                row = conn.execute("SELECT d.content FROM user_actions a JOIN deliverables d ON d.task_id=a.task_id WHERE a.action_id=?", (aid,)).fetchone()
+                return _json(200, {"draft": row["content"] if row else ""})
+            if method != "POST":
+                return _json(404, {"error": "not found"})
+            if verb == "approve":
+                actions.approve(conn, aid, owner)
+            elif verb == "reject":
+                actions.reject(conn, aid, owner)
+            else:
+                (proof,) = _fields(body, "proof_url")
+                actions.mark_submitted(conn, aid, owner, proof)
+            return _json(200, {"ok": True})
+        except actions.ActionError as e:
+            return _json(409, {"error": str(e)})
+        except (ValueError, json.JSONDecodeError):
+            return _json(400, {"error": "bad request"})
+    m = PAY_RE.match(path)
+    if m and method == "POST":
+        try:
+            chain, tx = _fields(body, "chain_id", "tx_hash")
+            return _json(200, treasury.verify_payment(conn, m.group(1), int(chain), tx, TREASURY_RPC))
+        except treasury.VerifyError as e:
+            return _json(422, {"error": str(e)})
+        except ValueError:
+            return _json(400, {"error": "chain_id must be a number"})
     if method == "POST" and path == "/api/auth/logout":
         ol.logout(conn, token)
         return _json(200, {"ok": True})
