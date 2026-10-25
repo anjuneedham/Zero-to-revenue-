@@ -42,6 +42,43 @@ class MinPaymentTest(unittest.TestCase):
             self.assertEqual(cheap.status, OpportunityStatus.REVIEW_REQUIRED)  # falls back to 500
 
 
+class SkillFitTest(unittest.TestCase):
+    """A listing that is nothing like any configured skill gets flagged for removal, even if it is
+    well-documented and risk-free - "fit" is about relevance, not legitimacy."""
+    OWNER = {"sales", "customer service", "business operations", "websites", "funnels", "marketing",
+             "growth planning", "app development"}
+
+    def test_unrelated_physical_or_creative_work_is_flagged_off_skill(self):
+        for title in ("Mobile Deep Tissue Massage", "R-22 Refill for Mitsubishi AC", "Sweet Romantic Poem Needed"):
+            item = good(title=title, body="", required_skills=[], source="freelancer-com")
+            e = evaluate(item, skills=self.OWNER)
+            self.assertIn("off_skill", e.flags, title)
+            self.assertEqual(e.status, OpportunityStatus.REVIEW_REQUIRED)
+
+    def test_real_fit_is_never_flagged(self):
+        for title in ("Modernize Existing Website Design", "Deploy Secure Node.js App to VPS", "B2B Appointment Setters"):
+            item = good(title=title, body="", required_skills=[], source="freelancer-com")
+            e = evaluate(item, skills=self.OWNER)
+            self.assertNotIn("off_skill", e.flags, title)
+
+    def test_no_configured_skills_means_neutral_fit(self):
+        item = good(title="Mobile Deep Tissue Massage", body="", required_skills=[], source="freelancer-com")
+        e = evaluate(item, skills=set())
+        self.assertNotIn("off_skill", e.flags)
+
+    def test_human_only_listing_is_never_flagged_off_skill_even_if_unrelated(self):
+        item = good(title="Mobile Deep Tissue Massage", body="", required_skills=[], human_only=True, source="freelancer-com")
+        e = evaluate(item, skills=self.OWNER)
+        self.assertNotIn("off_skill", e.flags)
+
+    def test_gate_does_not_apply_to_github_or_superteam_sources(self):
+        # Those sources are software/crypto work by construction; an unmapped skill tag should
+        # never get treated as "off skill" there the way a generic marketplace listing would.
+        item = good(title="Mobile Deep Tissue Massage", body="", required_skills=[], source="github-bounty-label")
+        e = evaluate(item, skills=self.OWNER)
+        self.assertNotIn("off_skill", e.flags)
+
+
 class FreelancerComTest(unittest.TestCase):
     SAMPLE = {"status": "success", "result": {"total_count": 3, "projects": [
         {"id": 1, "title": "Rebuild checkout flow", "type": "fixed", "preview_description": "Full rebuild of the checkout flow with Stripe.",

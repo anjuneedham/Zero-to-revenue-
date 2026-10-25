@@ -106,6 +106,14 @@ class CleanupTest(unittest.TestCase):
         self.conn.execute("update opportunities set status='REVIEW_REQUIRED', risk_score=90, scam_indicators='token_exchange_scheme'")
         self.assertEqual(purge_junk(self.conn), 0)  # has a task from the scout run
 
+    def test_removes_untouched_off_skill_listings(self):
+        self.seed(id="f", risk_score=0, scam_indicators="off_skill")
+        self.seed(id="g", risk_score=0, scam_indicators="human_only_listing")  # off-skill never set alongside this; kept
+        n = purge_junk(self.conn)
+        self.assertEqual(n, 1)
+        left = {r[0] for r in self.conn.execute("select id from opportunities")}
+        self.assertEqual(left, {"g"})
+
     def test_only_qualified_status_untouched(self):
         self.seed(id="q", status="QUALIFIED", risk_score=90, scam_indicators="token_exchange_scheme")
         self.assertEqual(purge_junk(self.conn), 0)  # not REVIEW_REQUIRED, left for the owner to see

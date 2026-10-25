@@ -16,6 +16,47 @@ AUTOMATABLE = ("code", "development", "research", "writing", "data", "documentat
 EASY_WORDS = ("fix", "small", "simple", "quick", "minor", "one page", "single", "bug", "typo", "config", "update", "convert")
 HARD_WORDS = ("full", "platform", "build from scratch", "end to end", "end-to-end", "architecture", "migrate", "integration", "complex")
 
+# Loose keyword map from OWNER_SKILLS phrases to the words real listings use, so Scout can tell a
+# totally unrelated job (massage, AC repair, poetry, zoning plans) apart from a real fit, even when
+# a source (e.g. Freelancer.com) doesn't tag skills at all. This never raises a score - it only
+# decides whether an otherwise-unqualified listing is worth showing the owner at all.
+SKILL_KEYWORDS = {
+    "sales": ("sales", "lead gen", "leads", "appointment", "crm", "cold call", "outreach", "closing"),
+    "customer service": ("customer service", "support", "helpdesk", "client support", "customer success"),
+    "business operations": ("business operations", "operations", "business consult", "sop", "process"),
+    "websites": ("website", "web design", "web development", "wordpress", "webflow", "squarespace",
+                 "landing page", "shopify", "ecommerce", "e-commerce"),
+    "funnels": ("funnel", "clickfunnels", "landing page", "conversion rate", "lead magnet"),
+    "marketing": ("marketing", "seo", "ad campaign", "advertising", "social media", "copywriting",
+                  "copywriter", "content writ", "email campaign", "growth hack", "branding"),
+    "growth planning": ("growth", "go-to-market", "gtm", "business plan", "roadmap", "strategy"),
+    "app development": ("app development", "mobile app", "ios app", "android app", "web app", "software",
+                         "saas", "api", "automation", "bot", "chatbot", "no-code", "integration",
+                         " app", "application", "backend", "back-end", "database", "deploy", "develop",
+                         "programming", "coding", "code review", "script", "node.js", "python", "javascript"),
+}
+
+
+GENERIC_MARKETPLACE_SOURCES = {"freelancer-com", "remotive-freelance"}
+
+
+def skill_fit(text: str, skills: set[str], required_skills: list[str] | None = None) -> bool:
+    """True if the text plausibly matches one of the owner's configured skills, the listing's own
+    stated required_skills literally overlap with them, or no skills are configured (then skill fit
+    is neutral, never a reason to hide anything)."""
+    if not skills:
+        return True
+    if required_skills and skills & {s.lower() for s in required_skills}:
+        return True
+    low = text.lower()
+    for s in skills:
+        if s in low:
+            return True
+        for kw in SKILL_KEYWORDS.get(s, ()):
+            if kw in low:
+                return True
+    return False
+
 
 def min_payment_usd() -> float:
     try:
@@ -151,6 +192,15 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     if status is OpportunityStatus.QUALIFIED and below_bar:
         status = OpportunityStatus.REVIEW_REQUIRED
         flags.append(f"under_${min_pay:.0f}_bar_and_not_clearly_easy")
+
+    # Gated to the general-purpose marketplaces: GitHub bounty labels and Superteam Earn are already
+    # software/crypto work by construction. Freelancer.com and Remotive pull every category of
+    # freelance work, so that's where an unrelated job (massage, AC repair, poetry) needs filtering.
+    if item.source in GENERIC_MARKETPLACE_SOURCES and not skill_fit(text, skills, item.required_skills) \
+            and "human_only_listing" not in flags:
+        flags.append("off_skill")
+        status = OpportunityStatus.REVIEW_REQUIRED
+        action = "Not a fit for your configured skills - left for your own judgment, otherwise safe to remove"
 
     known = [title, org, url, body, item.deadline, item.expected_payment, item.payment_asset, item.payment_method,
              item.required_skills, item.required_capital is not None]

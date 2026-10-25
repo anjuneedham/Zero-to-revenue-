@@ -1,15 +1,17 @@
 """Removes clearly-spam opportunities after every Scout run (spec: Scout should not leave scam
 listings cluttering the owner's view). Deletes only when BOTH are true:
-  1. It is unmistakable junk: a scam-style risk score, or one of the hard spam flags.
+  1. It is unmistakable junk (a scam-style risk score, or one of the hard spam flags), OR it does
+     not fit any of the owner's configured skills at all (agents/scout/evaluate.py's "off_skill" flag).
   2. Nothing has touched it - no task, no payment. Anything the owner or Operator engaged with,
      however briefly, is left alone and archived data is never silently discarded for those.
 A human-only listing with a clean score (risk 0) is NOT deleted: it is legitimate information the
-owner can still choose to do by hand, just not auto-drafted.
+owner can still choose to do by hand, just not auto-drafted. evaluate() never marks a human-only
+listing "off_skill" for the same reason.
 """
 
 from core.audit import audit
 
-HARD_SPAM_FLAGS = ("non_cash_reward", "token_exchange_scheme", "duplicated_title_spam")
+HARD_SPAM_FLAGS = ("non_cash_reward", "token_exchange_scheme", "duplicated_title_spam", "off_skill")
 SCAM_RISK_FLOOR = 40
 
 
