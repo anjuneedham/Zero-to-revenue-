@@ -138,5 +138,42 @@ class RatesApiTest(unittest.TestCase):
         self.assertEqual((c, json.loads(out)["crypto_usd"]["BTC"]), (200, 1))
 
 
+class DismissApiTest(unittest.TestCase):
+    def setUp(self):
+        import dashboard.app as dash
+        self.dash = dash
+        self.conn = make_conn()
+        self.tok, _, _ = session(self.conn)
+
+    def seed(self, oid):
+        self.conn.execute("INSERT INTO opportunities(id,title,status,discovered_at,source_url) VALUES (?,?,?,?,?)",
+                          (oid, "junk", "REVIEW_REQUIRED", "now", "https://x/" + oid))
+
+    def call(self, body):
+        c, _, out = self.dash.handle("POST", "/api/opportunities/dismiss", f"Bearer {self.tok}", self.conn, json.dumps(body).encode())
+        return c, json.loads(out)
+
+    def test_requires_auth(self):
+        c, _, _ = self.dash.handle("POST", "/api/opportunities/dismiss", None, self.conn, json.dumps({"ids": ["opp_000000000000"]}).encode())
+        self.assertEqual(c, 401)
+
+    def test_removes_listed_ids_and_rejects_bad_input(self):
+        self.seed("opp_111111111111")
+        self.seed("opp_222222222222")
+        c, r = self.call({"ids": ["opp_111111111111", "opp_222222222222", "not-a-real-id"]})
+        self.assertEqual((c, r["removed"]), (200, 2))
+        self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 0)
+        self.assertEqual(self.call({"ids": []})[0], 400)
+        self.assertEqual(self.call({})[0], 400)
+
+    def test_never_removes_a_touched_opportunity(self):
+        run_scout(self.conn, [Source([good()])])
+        oid = self.conn.execute("select id from opportunities").fetchone()[0]
+        self.conn.execute("update opportunities set status='REVIEW_REQUIRED' where id=?", (oid,))
+        c, r = self.call({"ids": [oid]})
+        self.assertEqual((c, r["removed"], r["skipped"]), (200, 0, 1))
+        self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

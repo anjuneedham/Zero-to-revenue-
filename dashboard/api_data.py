@@ -1,4 +1,5 @@
-"""Read models for the agent pages. Everything here is read-only except the plan ticks."""
+"""Read models for the agent pages. Everything here is read-only except the plan ticks and the
+owner's own manual dismissal of opportunities."""
 
 import json
 import os
@@ -6,6 +7,7 @@ import re
 from decimal import Decimal
 
 from core import budget
+from core.audit import audit
 from core.db import now
 from core.policy import policy
 from core.policy.chains import KNOWN_EVM_CHAINS, ChainNotAllowed, allowed_chain_ids
@@ -15,6 +17,8 @@ EXPLORERS = {1: "https://etherscan.io", 56: "https://bscscan.com", 204: "https:/
              42161: "https://arbiscan.io", 59144: "https://lineascan.build"}
 PLAN_ID = re.compile(r"^[a-z0-9_-]{1,60}$")
 MAX_TICKS = 300
+OPP_ID = re.compile(r"^opp_[a-f0-9]{12}$")
+MAX_DISMISS_BATCH = 100
 
 
 def _clean(v):
@@ -108,3 +112,21 @@ def plan_set(conn, item_id: str, done: bool) -> dict:
     conn.execute("INSERT INTO settings(key, value, updated_at) VALUES ('plan_ticks', ?, ?) ON CONFLICT (key) DO UPDATE "
                  "SET value=EXCLUDED.value, updated_at=EXCLUDED.updated_at", (json.dumps(ticks), now()))
     return {"ticks": ticks}
+
+
+def dismiss_opportunities(conn, owner: str, ids: list[str]) -> dict:
+    """The owner manually picking which opportunities to remove - out of scope, not worth it,
+    still looks spammy to them even though it cleared the automatic filters. Same safety as the
+    automatic cleanup: never deletes one a task or payment has already touched."""
+    clean = [i for i in dict.fromkeys(ids) if isinstance(i, str) and OPP_ID.match(i)][:MAX_DISMISS_BATCH]
+    if not clean:
+        return {"removed": 0, "skipped": len(ids)}
+    rows = conn.execute(
+        f"SELECT id FROM opportunities WHERE id IN ({','.join('?' * len(clean))}) "
+        "AND NOT EXISTS (SELECT 1 FROM tasks t WHERE t.opportunity_id=opportunities.id) "
+        "AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.opportunity_id=opportunities.id)", clean).fetchall()
+    removable = [r["id"] for r in rows]
+    if removable:
+        conn.execute(f"DELETE FROM opportunities WHERE id IN ({','.join('?' * len(removable))})", removable)
+        audit(conn, owner, "scout.dismiss", None, f"owner removed {len(removable)} opportunity(ies) by hand")
+    return {"removed": len(removable), "skipped": len(clean) - len(removable)}

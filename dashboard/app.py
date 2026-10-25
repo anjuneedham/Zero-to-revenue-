@@ -139,6 +139,15 @@ def handle(method, path, authz, conn, body: bytes = b""):
             "required_capital,deadline,scam_indicators,missing_information,recommended_action "
             "FROM opportunities ORDER BY (status='QUALIFIED') DESC, opportunity_score DESC, discovered_at DESC LIMIT 100").fetchall()
         return _json(200, {"opportunities": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
+    if method == "POST" and path == "/api/opportunities/dismiss":
+        try:
+            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+            ids = data.get("ids")
+            if not isinstance(ids, list) or not ids:
+                raise ValueError("bad request")
+            return _json(200, api_data.dismiss_opportunities(conn, owner, ids))
+        except (ValueError, json.JSONDecodeError):
+            return _json(400, {"error": "bad request"})
     if method == "POST" and path == "/api/scout/run":
         return _json(200, run_scout(conn, SCOUT_SOURCES, SCOUT_CLIENT))
     if method == "GET" and path == "/api/scout/overview":

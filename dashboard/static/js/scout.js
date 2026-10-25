@@ -1,6 +1,6 @@
 (function () {
   const { el, add, text, pill, btn, card, fmt, nice } = Z;
-  let filter = "ALL", query = "";
+  let filter = "ALL", query = "", selected = new Set();
   const FILTERS = [["ALL", "All"], ["QUALIFIED", "Qualified"], ["REVIEW_REQUIRED", "Needs review"], ["IN_PROGRESS", "Drafted"], ["OTHER", "Other"]];
 
   function detail(o) {
@@ -49,9 +49,21 @@
       ov.sources.forEach(s => { const it = el("div", "item"); add(it, el("div", "t", s.label), el("div", "sub", s.note), add(el("div", "meta"), pill(s.found + " found"), pill("last " + fmt.ago(s.last_seen)))); sc.append(it); });
       src.append(sc); g.append(src);
 
-      const list = card("Opportunities", "Click one for the full picture. Claimed pay is never revenue."); list.classList.add("s12");
+      const list = card("Opportunities", "Click one for the full picture, or tick ones to remove by hand - out of scope, not worth it, still spammy."); list.classList.add("s12");
       const chips = el("div", "chips"); const search = el("input"); search.placeholder = "Search titles and organizations"; search.id = "opp-search"; search.setAttribute("aria-label", "Search"); search.value = query;
       const body = el("div", "list");
+      const bar = el("div", "row");
+      const removeBtn = btn("Remove selected (0)", "bad", async () => {
+        const ids = [...selected];
+        if (!ids.length || !confirm(`Remove ${ids.length} opportunit${ids.length === 1 ? "y" : "ies"}? This cannot be undone.`)) return;
+        try {
+          const r = await Z.api("/api/opportunities/dismiss", "POST", { ids });
+          selected.clear();
+          Z.toast(`Removed ${r.removed}` + (r.skipped ? `, ${r.skipped} skipped (already in progress)` : ""), "ok");
+          await Z.rerender();
+        } catch (e) { Z.toast(e.message, "bad"); }
+      }, "scout");
+      removeBtn.disabled = true; bar.append(removeBtn);
       const known = ["QUALIFIED", "REVIEW_REQUIRED", "IN_PROGRESS"];
       const draw = () => {
         chips.replaceChildren(...FILTERS.map(([k, l]) => {
@@ -64,7 +76,14 @@
         if (!rows.length) body.append(Z.empty(od.opportunities.length ? "Nothing matches" : "No opportunities yet", od.opportunities.length ? "Try another filter." : "Run Scout to look for some."));
         rows.slice(0, 60).forEach(o => {
           const it = el("div", "item click"); it.tabIndex = 0; it.setAttribute("role", "button");
-          add(it, el("div", "t", o.title), add(el("div", "meta"), pill(nice(o.status), Z.statusKind(o.status)), pill("score " + o.opportunity_score), pill("risk " + o.risk_score, o.risk_score > 35 ? "bad" : ""),
+          const cb = el("input"); cb.type = "checkbox"; cb.setAttribute("aria-label", "Select for removal"); cb.checked = selected.has(o.id);
+          cb.onclick = e => {
+            e.stopPropagation();
+            if (cb.checked) selected.add(o.id); else selected.delete(o.id);
+            removeBtn.disabled = selected.size === 0;
+            removeBtn.textContent = `Remove selected (${selected.size})`;
+          };
+          add(it, cb, el("div", "t", o.title), add(el("div", "meta"), pill(nice(o.status), Z.statusKind(o.status)), pill("score " + o.opportunity_score), pill("risk " + o.risk_score, o.risk_score > 35 ? "bad" : ""),
             pill(o.expected_payment == null ? "pay n/a" : "$" + fmt.num(o.expected_payment, 0) + " claimed"), o.organization ? pill(o.organization) : null));
           if (o.scam_indicators) it.append(el("div", "flags", "Flags: " + o.scam_indicators));
           const open = () => Z.openDrawer(o.title.slice(0, 80), detail(o)); it.onclick = open; it.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } };
@@ -72,7 +91,7 @@
         });
       };
       search.oninput = () => { query = search.value; draw(); };
-      add(list, search, chips, body); draw(); g.append(list);
+      add(list, search, chips, bar, body); draw(); g.append(list);
 
       const runs = card("Run history", "Every pass Scout has made"); runs.classList.add("s12");
       if (!ov.runs.length) runs.append(Z.empty("No runs yet"));
