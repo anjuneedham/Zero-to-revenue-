@@ -4,6 +4,7 @@ import json
 import traceback  # noqa: F401  (errors are stored as text, never swallowed)
 
 from agents.scout import sources as src
+from agents.scout.autodraft import auto_send_safe
 from agents.scout.cleanup import purge_junk
 from agents.scout.rescore import rescore
 from agents.scout.enrich import EXTRA_FLAG_RISK, enrich
@@ -69,6 +70,7 @@ def run_scout(conn, sources=None, client=None) -> dict:
             except Exception as e:
                 stats["errors"].append(f"item {item.source_url[:80]}: {type(e).__name__}: {str(e)[:150]}")
     stats["purged"] = purge_junk(conn)  # declutter the forefront every refresh; never touches anything acted on
+    stats["auto_sent"] = auto_send_safe(conn)  # same bulk "send to Operator" call, auto-run for documentation/economics-only holds
     outcome = "ok" if not stats["errors"] else ("error" if stats["seen"] == 0 else "partial")
     conn.execute("UPDATE agent_runs SET finished_at=?, outcome=?, error=? WHERE id=?",
                  (now(), outcome, "; ".join(stats["errors"])[:1000] or None, run_id))

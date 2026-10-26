@@ -34,7 +34,7 @@
       const result = el("p", "sub", "Searches Superteam Earn, GitHub, Freelancer.com, Remotive and Himalayas, scores every result, and queues only well-documented ones for the Operator.");
       const run = btn("Run Scout now", "gold", async () => {
         const r = await Z.api("/api/scout/run", "POST");
-        Z.toast(r.ran ? `Scout: ${r.new} new, ${r.qualified} qualified, ${r.purged || 0} junk removed` + (r.errors.length ? ", with problems" : "") : "Not run: " + r.reason, r.errors && r.errors.length ? "bad" : "ok");
+        Z.toast(r.ran ? `Scout: ${r.new} new, ${r.qualified} qualified, ${r.auto_sent || 0} auto-sent to Operator, ${r.purged || 0} junk removed` + (r.errors.length ? ", with problems" : "") : "Not run: " + r.reason, r.errors && r.errors.length ? "bad" : "ok");
         await Z.rerender();
       }, "scout");
       add(top, head, result, run);

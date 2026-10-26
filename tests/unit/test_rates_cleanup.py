@@ -138,6 +138,65 @@ class RatesApiTest(unittest.TestCase):
         self.assertEqual((c, json.loads(out)["crypto_usd"]["BTC"]), (200, 1))
 
 
+class AutoSendSafeTest(unittest.TestCase):
+    def setUp(self):
+        self.conn = make_conn()
+        self.env = mock.patch.dict(os.environ, {"OWNER_SKILLS": "python"}, clear=True)
+        self.env.start()
+
+    def tearDown(self):
+        self.env.stop()
+
+    def seed(self, oid, **row):
+        base = dict(id=oid, title="work", status="REVIEW_REQUIRED", discovered_at="now",
+                    source_url="https://x/" + oid, opportunity_score=70, risk_score=0, scam_indicators="")
+        base.update(row)
+        cols = list(base)
+        self.conn.execute(f"INSERT INTO opportunities({','.join(cols)}) VALUES ({','.join('?' * len(cols))})",
+                          tuple(base[c] for c in cols))
+
+    def test_sends_documentation_and_economics_only_holds(self):
+        from agents.scout.autodraft import auto_send_safe
+        self.seed("opp_a", scam_indicators="insufficient_terms")
+        self.seed("opp_b", scam_indicators="under_$500_bar_and_not_clearly_easy")
+        self.seed("opp_c", scam_indicators="unknown_organization; unclear_payment_terms")
+        n = auto_send_safe(self.conn)
+        self.assertEqual(n, 3)
+        for oid in ("opp_a", "opp_b", "opp_c"):
+            self.assertEqual(self.conn.execute("select status from opportunities where id=?", (oid,)).fetchone()[0], "QUALIFIED")
+            self.assertEqual(self.conn.execute("select count(*) from tasks where opportunity_id=?", (oid,)).fetchone()[0], 1)
+
+    def test_never_sends_a_risk_flagged_human_only_or_off_skill_listing(self):
+        from agents.scout.autodraft import auto_send_safe
+        self.seed("opp_scam", scam_indicators="token_exchange_scheme", risk_score=40)
+        self.seed("opp_human", scam_indicators="human_only_listing", risk_score=0)
+        self.seed("opp_skill", scam_indicators="off_skill", risk_score=0)
+        self.seed("opp_mixed", scam_indicators="insufficient_terms; unverified_sponsor", risk_score=15)
+        n = auto_send_safe(self.conn)
+        self.assertEqual(n, 0)
+        for oid in ("opp_scam", "opp_human", "opp_skill", "opp_mixed"):
+            self.assertEqual(self.conn.execute("select status from opportunities where id=?", (oid,)).fetchone()[0], "REVIEW_REQUIRED")
+
+    def test_risk_ceiling_blocks_even_a_nominally_benign_flag(self):
+        from agents.scout.autodraft import auto_send_safe
+        self.seed("opp_risky", scam_indicators="insufficient_terms", risk_score=25)
+        self.assertEqual(auto_send_safe(self.conn), 0)
+
+    def test_never_resends_one_a_task_already_touched(self):
+        from agents.scout.autodraft import auto_send_safe
+        self.seed("opp_x", scam_indicators="insufficient_terms")
+        auto_send_safe(self.conn)
+        self.conn.execute("update opportunities set status='REVIEW_REQUIRED' where id='opp_x'")
+        self.assertEqual(auto_send_safe(self.conn), 0)  # already has a task now
+
+    def test_wired_into_run_scout_end_to_end(self):
+        undocumented = good(title="Fix a flaky test", source_url="https://github.com/acme/repo/issues/2",
+                            payment_method="", deadline=None)
+        r = run_scout(self.conn, [Source([undocumented])])
+        self.assertEqual(r["auto_sent"], 1)
+        self.assertEqual(self.conn.execute("select status from opportunities").fetchone()[0], "QUALIFIED")
+
+
 class ApproveForDraftingApiTest(unittest.TestCase):
     def setUp(self):
         import dashboard.app as dash
