@@ -170,4 +170,42 @@ class RemotiveFreelance:
         return out
 
 
-DEFAULT_SOURCES = [SuperteamEarn, GitHubBounties, FreelancerCom, RemotiveFreelance]
+class HimalayasContract:
+    """Himalayas' public remote-jobs API (himalayas.app/jobs/api/search), no key needed, filtered to
+    employmentType=Contractor (its own docs: "includes freelance and contract roles"). Pay is a rate
+    (hourly/annual), not a fixed project price, so it is never passed through as expected_payment -
+    only shown as a caveat - to avoid it being compared against the $500 one-off-job floor as if it
+    were a lump sum. Per Himalayas' terms, applicationLink (not the bare guid) is the link to credit
+    and send the owner to."""
+    name = "himalayas-contract"
+    hosts = {"himalayas.app"}
+
+    def __init__(self, fetch=fetch_json, pages: int = 2):
+        self.fetch, self.pages = fetch, pages
+
+    def items(self) -> list[RawItem]:
+        out = []
+        for page in range(1, self.pages + 1):
+            data = self.fetch(f"https://himalayas.app/jobs/api/search?employment_type=Contractor&page={page}",
+                               self.hosts, {"Accept": "application/json"})
+            jobs = (data.get("jobs") if isinstance(data, dict) else None) or []
+            if not jobs:
+                break
+            for j in jobs:
+                if not isinstance(j, dict) or not j.get("applicationLink") or not j.get("title"):
+                    continue
+                caveats = []
+                if j.get("minSalary") or j.get("maxSalary"):
+                    period = j.get("salaryPeriod") or "annual"
+                    lo, hi = j.get("minSalary"), j.get("maxSalary")
+                    amount = f"{lo}-{hi}" if lo and hi and lo != hi else (lo or hi)
+                    caveats.append(f"rate stated as {amount} {j.get('currency') or ''} per {period}, not a fixed project price".strip())
+                out.append(RawItem(
+                    title=str(j["title"]), source=self.name, source_url=str(j["applicationLink"]),
+                    body=sanitize.clean(j.get("excerpt") or "", 3000), organization=str(j.get("companyName") or ""),
+                    category="freelance/contract role", required_skills=[c for c in (j.get("categories") or []) if isinstance(c, str)][:6],
+                    caveats=caveats))
+        return out
+
+
+DEFAULT_SOURCES = [SuperteamEarn, GitHubBounties, FreelancerCom, RemotiveFreelance, HimalayasContract]

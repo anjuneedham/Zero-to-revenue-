@@ -25,7 +25,7 @@
       const top = el("section", "card hero s8");
       const head = el("div", "agent"); add(head, el("div", "shirt", "11"), el("h3", null, "Scout"), el("div", "label", "Winger · finds the chances"),
         el("div", "sub", ov.runs.length ? "Last run " + fmt.ago(ov.runs[0].started_at) + " · " + (ov.runs[0].outcome || "running") : "Has not run yet"));
-      const result = el("p", "sub", "Searches Superteam Earn and GitHub, scores every result, and queues only well-documented ones for the Operator.");
+      const result = el("p", "sub", "Searches Superteam Earn, GitHub, Freelancer.com, Remotive and Himalayas, scores every result, and queues only well-documented ones for the Operator.");
       const run = btn("Run Scout now", "gold", async () => {
         const r = await Z.api("/api/scout/run", "POST");
         Z.toast(r.ran ? `Scout: ${r.new} new, ${r.qualified} qualified, ${r.purged || 0} junk removed` + (r.errors.length ? ", with problems" : "") : "Not run: " + r.reason, r.errors && r.errors.length ? "bad" : "ok");

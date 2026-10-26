@@ -68,7 +68,7 @@
     },
     sys(redraw) { const c = card("Zero-to-Revenue: your checklist", "Setup that only you can do."); c.append(list(data.system, redraw)); return c; },
     sources(redraw) {
-      const c = card("Where to get more jobs", "Scout already reads these automatically: Superteam Earn, GitHub's bounty label, Freelancer.com, Remotive (contract/freelance only). Everything below needs a login, so Scout can't read it - this is what unlocks more and bigger work.");
+      const c = card("Where to get more jobs", "Scout already reads these automatically: Superteam Earn, GitHub's bounty label, Freelancer.com, Remotive and Himalayas (contract/freelance only). Everything below needs a login, so Scout can't read it - this is what unlocks more and bigger work.");
       c.append(list(data.sources_setup, redraw));
       c.append(el("p", "sub", "Checked and skipped: OpenStreetMap Overpass (blocked here), Nominatim (refuses automated bulk use), WeWorkRemotely (almost entirely full-time salaried roles, not one-off paid work)."));
       return c;

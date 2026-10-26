@@ -179,3 +179,55 @@ class RemotiveFreelanceTest(unittest.TestCase):
     def test_malformed_response_never_crashes(self):
         self.assertEqual(self.items({"jobs": "not a list"}), [])
         self.assertEqual(self.items({}), [])
+
+
+class HimalayasContractTest(unittest.TestCase):
+    PAGE1 = {"jobs": [
+        {"title": "Senior UX Designer", "applicationLink": "https://himalayas.app/companies/acme/jobs/ux-1?utm_source=api",
+         "companyName": "Acme", "excerpt": "Design work.", "categories": ["UI-UX-Designer"],
+         "minSalary": None, "maxSalary": None, "salaryPeriod": "annual", "currency": "USD"},
+        {"title": "AI Coding Contractor", "applicationLink": "https://himalayas.app/companies/askable/jobs/x?utm_source=api",
+         "companyName": "Askable", "excerpt": "Contract coding.", "categories": ["Software-Engineer"],
+         "minSalary": 100, "maxSalary": 100, "salaryPeriod": "hourly", "currency": "USD"},
+        "garbage", {"title": "no link"}, {"applicationLink": "https://x/no-title"},
+    ]}
+
+    def items(self, pages=None):
+        from agents.scout.sources import HimalayasContract
+        seen = []
+
+        def fake(url, hosts, headers=None):
+            seen.append(url)
+            if pages is not None:
+                return pages.pop(0) if pages else {"jobs": []}
+            return self.PAGE1 if len(seen) == 1 else {"jobs": []}
+        out = HimalayasContract(fetch=fake).items()
+        self.assertTrue(seen[0].startswith("https://himalayas.app/jobs/api/search?employment_type=Contractor"))
+        return out
+
+    def test_keeps_valid_rows_and_drops_malformed_ones(self):
+        items = self.items()
+        self.assertEqual({i.title for i in items}, {"Senior UX Designer", "AI Coding Contractor"})
+
+    def test_never_treats_a_rate_as_a_fixed_project_price(self):
+        items = self.items()
+        for i in items:
+            self.assertIsNone(i.expected_payment)
+        hourly = next(i for i in items if "Coding" in i.title)
+        self.assertTrue(any("100" in c and "hourly" in c and "not a fixed project price" in c for c in hourly.caveats), hourly.caveats)
+
+    def test_stops_paging_on_an_empty_page(self):
+        self.items()  # PAGE1 then one empty page from fake(); only 2 fetches should happen
+        from agents.scout.sources import HimalayasContract
+        calls = []
+
+        def fake(url, hosts, headers=None):
+            calls.append(url)
+            return self.PAGE1 if len(calls) == 1 else {"jobs": []}
+        HimalayasContract(fetch=fake, pages=5).items()
+        self.assertEqual(len(calls), 2)
+
+    def test_malformed_response_never_crashes(self):
+        from agents.scout.sources import HimalayasContract
+        self.assertEqual(HimalayasContract(fetch=lambda *a, **k: {"jobs": "nope"}).items(), [])
+        self.assertEqual(HimalayasContract(fetch=lambda *a, **k: {}).items(), [])
