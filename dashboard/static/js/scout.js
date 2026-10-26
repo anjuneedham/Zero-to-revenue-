@@ -1,7 +1,13 @@
 (function () {
   const { el, add, text, pill, btn, card, fmt, nice } = Z;
-  let filter = "ALL", query = "", selected = new Set();
+  let filter = "ALL", query = "", selected = new Set(), sort = "best";
   const FILTERS = [["ALL", "All"], ["QUALIFIED", "Qualified"], ["REVIEW_REQUIRED", "Needs review"], ["IN_PROGRESS", "Drafted"], ["OTHER", "Other"]];
+  const SORTS = {
+    best: ["Best match", (a, b) => b.opportunity_score - a.opportunity_score],
+    pay: ["Highest pay", (a, b) => (b.expected_payment ?? -1) - (a.expected_payment ?? -1)],
+    newest: ["Newest", (a, b) => (b.discovered_at || "").localeCompare(a.discovered_at || "")],
+    risk: ["Lowest risk", (a, b) => a.risk_score - b.risk_score],
+  };
 
   function detail(o) {
     const w = el("div", "list");
@@ -51,6 +57,8 @@
 
       const list = card("Opportunities", "Click one for the full picture, or tick ones to remove by hand - out of scope, not worth it, still spammy."); list.classList.add("s12");
       const chips = el("div", "chips"); const search = el("input"); search.placeholder = "Search titles and organizations"; search.id = "opp-search"; search.setAttribute("aria-label", "Search"); search.value = query;
+      const sortSel = el("select"); sortSel.setAttribute("aria-label", "Sort by");
+      Object.entries(SORTS).forEach(([k, [l]]) => { const o = el("option", null, l); o.value = k; o.selected = sort === k; sortSel.append(o); });
       const body = el("div", "list");
       const bar = el("div", "row");
       const removeBtn = btn("Remove selected (0)", "bad", async () => {
@@ -74,7 +82,8 @@
           const b = el("button", null, l + " (" + n + ")"); b.type = "button"; b.setAttribute("aria-pressed", filter === k); b.onclick = () => { filter = k; draw(); }; return b;
         }));
         const q = query.toLowerCase();
-        const rows = od.opportunities.filter(o => (filter === "ALL" || (filter === "OTHER" ? !known.includes(o.status) : o.status === filter)) && (!q || (o.title + " " + (o.organization || "")).toLowerCase().includes(q)));
+        const rows = od.opportunities.filter(o => (filter === "ALL" || (filter === "OTHER" ? !known.includes(o.status) : o.status === filter)) && (!q || (o.title + " " + (o.organization || "")).toLowerCase().includes(q)))
+          .sort(SORTS[sort][1]);
         body.replaceChildren();
         if (!rows.length) body.append(Z.empty(od.opportunities.length ? "Nothing matches" : "No opportunities yet", od.opportunities.length ? "Try another filter." : "Run Scout to look for some."));
         rows.slice(0, 60).forEach(o => {
@@ -94,7 +103,8 @@
         });
       };
       search.oninput = () => { query = search.value; draw(); };
-      add(list, search, chips, bar, body); draw(); g.append(list);
+      sortSel.onchange = () => { sort = sortSel.value; draw(); };
+      add(list, search, sortSel, chips, bar, body); draw(); g.append(list);
 
       const runs = card("Run history", "Every pass Scout has made"); runs.classList.add("s12");
       if (!ov.runs.length) runs.append(Z.empty("No runs yet"));

@@ -136,7 +136,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
     if method == "GET" and path == "/api/opportunities":
         rows = conn.execute(
             "SELECT id,title,organization,source_url,status,opportunity_score,risk_score,confidence,expected_payment,"
-            "required_capital,deadline,scam_indicators,missing_information,recommended_action "
+            "required_capital,deadline,scam_indicators,missing_information,recommended_action,discovered_at "
             "FROM opportunities ORDER BY (status='QUALIFIED') DESC, opportunity_score DESC, discovered_at DESC LIMIT 100").fetchall()
         return _json(200, {"opportunities": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
     if method == "POST" and path == "/api/opportunities/dismiss":
