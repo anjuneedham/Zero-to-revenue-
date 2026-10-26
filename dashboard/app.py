@@ -43,7 +43,7 @@ MAX_BODY = 4096
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
-ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send)$")
+ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send|submit-email)$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
@@ -269,6 +269,9 @@ def handle(method, path, authz, conn, body: bytes = b""):
             elif verb == "send":
                 data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
                 return _json(200, outreach.send_outreach(conn, aid, owner, data.get("edited_body") or None))
+            elif verb == "submit-email":
+                data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+                return _json(200, outreach.send_submission_email(conn, aid, owner, data.get("to_email", ""), data.get("edited_body") or None))
             else:
                 (proof,) = _fields(body, "proof_url")
                 actions.mark_submitted(conn, aid, owner, proof)

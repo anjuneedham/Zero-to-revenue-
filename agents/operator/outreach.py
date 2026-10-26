@@ -144,6 +144,41 @@ def send_outreach(conn, action_id: str, owner: str, edited_body: str | None = No
     return {"sent": True, "message_id": result["message_id"]}
 
 
+def send_submission_email(conn, action_id: str, owner: str, to_email: str, edited_body: str | None = None) -> dict:
+    """Submits a job application/proposal by email, for a listing whose contact method is email
+    rather than a platform login - the owner supplies the address (nothing here guesses or scrapes
+    one). Same hard gate as outreach: core.policy.policy keeps SUBMIT_APPLICATION in
+    APPROVAL_REQUIRED_ACTIONS, so this is refused on anything not already APPROVED. On success it
+    goes through the same mark_submitted path a manual submission does (so Treasury starts
+    watching for payment), with the Gmail message id as proof instead of a submission URL."""
+    if not authorize(Agent.OPERATOR, Action.SUBMIT_APPLICATION, paused=is_paused(conn), owner_approved=True).allowed:
+        raise SendError("system is paused")
+    to_email = (to_email or "").strip()
+    if not EMAIL_RE.match(to_email):
+        raise SendError("a valid recipient email is required")
+    a = conn.execute("SELECT * FROM user_actions WHERE action_id=?", (action_id,)).fetchone()
+    if a is None:
+        raise SendError("action not found")
+    if a["kind"] == "send_outreach":
+        raise SendError("use send_outreach for outreach, not a job submission")
+    if a["status"] != "APPROVED":
+        raise SendError("approve the draft before sending it")
+    text = (edited_body or a["exact_action"] or "").strip()
+    if not text:
+        raise SendError("draft is empty")
+    subject, body = parse_subject_body(text)
+    if edited_body is not None:
+        conn.execute("UPDATE user_actions SET exact_action=? WHERE action_id=?", (text, action_id))
+    try:
+        result = gmail.send_email(to_email, subject, body)
+    except gmail.GmailError as e:
+        raise SendError(str(e)) from e
+    from core.actions import mark_submitted
+    mark_submitted(conn, action_id, owner, "")
+    audit(conn, owner, "action.submitted_via_gmail", action_id, f"to={to_email} message_id={result['message_id']}")
+    return {"sent": True, "message_id": result["message_id"]}
+
+
 def send_outreach_batch(conn, owner: str, action_ids: list[str]) -> dict:
     """Sends several already-approved outreach emails in one owner-triggered call. Each one still
     individually requires APPROVED status - this never sends anything the owner hasn't personally

@@ -175,6 +175,57 @@ class ManualPaymentTest(Base):
         self.assertEqual(c, 400)
 
 
+class SubmitEmailTest(Base):
+    GMAIL_ENV = {"GMAIL_CLIENT_ID": "cid", "GMAIL_CLIENT_SECRET": "secret",
+                "GMAIL_REFRESH_TOKEN": "refresh", "GMAIL_SENDER_EMAIL": "me@yardscaledigital.com"}
+
+    def setUp(self):
+        super().setUp()
+        self.genv = mock.patch.dict(os.environ, {**ENV, **self.GMAIL_ENV}, clear=True)
+        self.genv.start()
+
+    def tearDown(self):
+        self.genv.stop()
+        super().tearDown()
+
+    def test_submits_by_email_once_approved_and_starts_the_payment_watch(self):
+        from agents.operator import outreach
+        from core import actions
+        aid = self.qualified_task()
+        with self.assertRaises(outreach.SendError):
+            outreach.send_submission_email(self.conn, aid, "owner", "client@example.com")  # not approved yet
+        actions.approve(self.conn, aid, "owner")
+        with mock.patch("agents.operator.outreach.gmail.send_email", return_value={"message_id": "m1"}) as send:
+            r = outreach.send_submission_email(self.conn, aid, "owner", "client@example.com")
+        self.assertEqual(r, {"sent": True, "message_id": "m1"})
+        send.assert_called_once()
+        self.assertEqual(send.call_args[0][0], "client@example.com")
+        self.assertEqual(self.one("select status from user_actions")["status"], "DONE")
+        self.assertEqual(self.one("select status from opportunities")["status"], "AWAITING_PAYMENT")
+        self.assertEqual(self.conn.execute("select count(*) c from audit_events where action='action.submitted_via_gmail'").fetchone()["c"], 1)
+
+    def test_rejects_bad_email_and_outreach_kind(self):
+        from agents.operator import outreach
+        from core import actions
+        aid = self.qualified_task()
+        actions.approve(self.conn, aid, "owner")
+        with self.assertRaises(outreach.SendError):
+            outreach.send_submission_email(self.conn, aid, "owner", "not-an-email")
+        with self.assertRaises(outreach.SendError):
+            outreach.send_submission_email(self.conn, "ua_lead_x", "owner", "x@example.com")
+
+    def test_api_route(self):
+        import dashboard.app as dash
+        from core import actions
+        aid = self.qualified_task()
+        actions.approve(self.conn, aid, "owner")
+        tok, _, _ = session(self.conn)
+        with mock.patch("agents.operator.outreach.gmail.send_email", return_value={"message_id": "m2"}):
+            c, _, out = dash.handle("POST", f"/api/actions/{aid}/submit-email", f"Bearer {tok}", self.conn,
+                                    json.dumps({"to_email": "client@example.com"}).encode())
+        self.assertEqual((c, json.loads(out)["message_id"]), (200, "m2"))
+
+
 class PayPalTreasuryTest(Base):
     def test_request_then_verify_end_to_end(self):
         pid = self.submitted_payment()

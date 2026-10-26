@@ -147,8 +147,15 @@
         Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
     } else if (a.status === "APPROVED") {
       const inp = Z.el("input"); inp.placeholder = "Link to your submission (optional, https)"; inp.id = "proof-" + a.action_id; inp.setAttribute("aria-label", "Proof link");
-      it.append(inp);
-      row.append(Z.btn("I submitted it", "gold small", () => done("submitted", { proof_url: inp.value.trim() }, "Marked submitted. Waiting for payment.")),
+      const mail = Z.el("input"); mail.placeholder = "Or: contact's email, to submit via Gmail"; mail.type = "email"; mail.setAttribute("aria-label", "Recipient email");
+      it.append(inp, mail);
+      row.append(
+        Z.btn("I submitted it", "gold small", () => done("submitted", { proof_url: inp.value.trim() }, "Marked submitted. Waiting for payment.")),
+        Z.btn("Submit via email", "gold small", async () => {
+          if (!mail.value.trim()) { Z.toast("Enter the contact's email first", "bad"); return; }
+          try { const r = await Z.api("/api/actions/" + a.action_id + "/submit-email", "POST", { to_email: mail.value.trim() }); Z.goal("Submitted by email (id " + r.message_id.slice(0, 8) + "…)"); await refresh(); }
+          catch (e) { Z.toast(e.message, "bad"); }
+        }),
         Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
     }
     it.append(row); return it;
