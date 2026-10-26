@@ -27,6 +27,11 @@ a{color:inherit}
 #loader .bar{position:absolute;bottom:18vh;width:min(220px,50vw);height:3px;background:var(--line);overflow:hidden}
 #loader .bar:after{content:"";display:block;height:100%;background:var(--blue);transform:translateX(-100%);animation:load 1.7s .1s forwards ease-out}
 @keyframes pop{to{opacity:1;transform:none}}@keyframes load{to{transform:none}}
+/* preview notice (shown only while CFG.endpoint is empty) */
+#pv{display:none;background:#FFE9A8;color:#4a3800;font-size:13.5px;text-align:center;padding:10px 16px;font-weight:500;line-height:1.4}
+.pvnote{display:none;background:#FFF4CC;border-left:4px solid #E0A800;color:#4a3800;padding:12px 14px;font-size:13.5px;margin-bottom:18px;line-height:1.45}
+.nopv #pv,.nopv .pvnote{display:none}
+.showpv #pv{display:block}.showpv .pvnote{display:block}
 /* nav */
 header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
@@ -153,6 +158,7 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
      The variant is pushed to dataLayer and saved with every lead so conversion can be compared. -->
 <div id="loader" aria-hidden="true"><img src="images/logo-full.jpg" alt=""><div class="bar"></div></div>
 
+<div id="pv"><b>Preview draft.</b> Enquiries sent from this page are not delivered to World Builders yet. This is for review only.</div>
 <header><div class="wrap nav">
  <a class="brand" href="#top" aria-label="World Builders Construction">
   <img src="images/logo-mark.jpg" alt="">
@@ -240,6 +246,7 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
   <div class="hours"><b>Site operations:</b> Mon–Fri 7:30am–5:00pm · Sat 7:30am–1:00pm<br><b>Office:</b> Mon–Fri 8:00am–5:00pm · Sat 8:00am–1:00pm<br>Sundays &amp; public holidays by prior arrangement.</div>
  </div>
  <form id="f" novalidate>
+  <div class="pvnote"><b>Test only:</b> this preview does not send enquiries to World Builders. Please do not use it for a real enquiry. Call or WhatsApp 876-513-4962 instead.</div>
   <div class="prog"><i class="on"></i><i></i><i></i></div><div class="stepno" id="sn">Step 1 of 3</div>
   <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off">
   <fieldset class="on"><legend>What are we building?</legend>
@@ -274,7 +281,7 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
    <div class="nav-btns"><button type="button" class="back">← Back</button><button type="submit" class="btn" id="go">Send my enquiry</button></div>
    <p class="fine">We only use your details to respond to this enquiry.</p>
   </fieldset>
-  <div class="thanks" id="ok"><h3>Enquiry received</h3><p id="okp">Thank you. Mr. Gayle will contact you shortly to arrange your site visit.</p><a class="btn wa" id="wa" target="_blank" rel="noopener">Send details on WhatsApp for a faster reply</a></div>
+  <div class="thanks" id="ok"><h3 id="okh">Enquiry received</h3><p id="okp">Thank you. Mr. Gayle will contact you shortly to arrange your site visit.</p><a class="btn wa" id="wa" target="_blank" rel="noopener">Send details on WhatsApp for a faster reply</a></div>
  </form>
 </div></section>
 </main>
@@ -301,6 +308,7 @@ var GALLERY=[
 ];
 (function(){
  document.getElementById('yr').textContent=new Date().getFullYear();
+ if(!CFG.endpoint)document.documentElement.classList.add('showpv');
  document.getElementById('gal').innerHTML=GALLERY.map(function(g){return '<figure><img loading="lazy" src="'+g.src+'" alt="'+g.cap+'"><figcaption>'+g.cap+'</figcaption></figure>'}).join('');
  /* loader A/B */
  var q=new URLSearchParams(location.search).get('loader'),v;
@@ -342,8 +350,8 @@ var GALLERY=[
   var btn=document.getElementById('go');btn.disabled=true;btn.textContent='Sending…';
   function done(sent){fs.forEach(function(x){x.classList.remove('on')});f.querySelector('.prog').style.display='none';sn.style.display='none';
    document.getElementById('wa').href=wa;document.getElementById('ok').style.display='block';
-   if(!sent)document.getElementById('okp').textContent='Thank you. To get the fastest response, tap below to send your details to us on WhatsApp.';
-   track('lead_submitted');if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead');
+   if(!sent)document.getElementById('okp').textContent=CFG.endpoint?'Thank you. To get the fastest response, tap below to send your details to us on WhatsApp.':'TEST ONLY: this preview did not send your enquiry to World Builders. To really enquire, tap below to send these details on WhatsApp.';
+   if(!CFG.endpoint)document.getElementById('okh').textContent='Test received (not sent)';track('lead_submitted');if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead');
    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'})}
   if(CFG.endpoint){fetch(CFG.endpoint,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(d)}).then(function(r){done(r.ok)}).catch(function(){done(false)})}
   else done(false)})
