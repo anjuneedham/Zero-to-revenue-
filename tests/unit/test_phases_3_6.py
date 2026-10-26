@@ -236,6 +236,32 @@ class PayPalTreasuryTest(Base):
         with self.assertRaises(treasury.VerifyError):
             treasury.request_paypal_payment(self.conn, pid)
 
+    def test_get_approval_link_round_trips_through_the_api(self):
+        pid = self.submitted_payment()
+        self.conn.execute("update payments set expected_amount=600, tx_hash='ORDER9' where id=?", (pid,))
+        with mock.patch("agents.treasury.run.paypal.get_order",
+                        return_value={"status": "CREATED", "links": [{"rel": "self", "href": "https://x/self"},
+                                                                      {"rel": "approve", "href": "https://x/approve/ORDER9"}]}):
+            r = treasury.get_paypal_approval_link(self.conn, pid)
+            self.assertEqual(r["approval_link"], "https://x/approve/ORDER9")
+            tok, _, _ = session(self.conn)
+            c, _, out = dash.handle("GET", f"/api/payments/{pid}/paypal/link", f"Bearer {tok}", self.conn, b"")
+        self.assertEqual((c, json.loads(out)["approval_link"]), (200, "https://x/approve/ORDER9"))
+
+    def test_get_approval_link_errors_once_no_longer_available(self):
+        pid = self.submitted_payment()
+        self.conn.execute("update payments set tx_hash='ORDER10' where id=?", (pid,))
+        with mock.patch("agents.treasury.run.paypal.get_order", return_value={"status": "COMPLETED", "links": []}):
+            with self.assertRaises(treasury.VerifyError) as cm:
+                treasury.get_paypal_approval_link(self.conn, pid)
+        self.assertIn("no approval link available", str(cm.exception))
+
+    def test_get_approval_link_requires_an_order_id(self):
+        pid = self.submitted_payment()
+        with self.assertRaises(treasury.VerifyError) as cm:
+            treasury.get_paypal_approval_link(self.conn, pid)
+        self.assertIn("request a payment first", str(cm.exception))
+
     def test_verify_requires_an_order_id(self):
         pid = self.submitted_payment()
         with self.assertRaises(treasury.VerifyError) as cm:

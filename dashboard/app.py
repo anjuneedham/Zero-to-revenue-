@@ -46,6 +46,7 @@ TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
 ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft)$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
+PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
 HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
@@ -272,6 +273,12 @@ def handle(method, path, authz, conn, body: bytes = b""):
             return _json(422, {"error": str(e)})
         except ValueError:
             return _json(400, {"error": "chain_id must be a number"})
+    m = PAYPAL_LINK_RE.match(path)
+    if m and method == "GET":
+        try:
+            return _json(200, treasury.get_paypal_approval_link(conn, m.group(1)))
+        except treasury.VerifyError as e:
+            return _json(422, {"error": str(e)})
     m = PAYPAL_RE.match(path)
     if m and method == "POST":
         pid, verb = m.groups()

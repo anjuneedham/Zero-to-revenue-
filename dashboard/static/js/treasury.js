@@ -13,24 +13,41 @@
     add(f, l1, l2, b); return f;
   }
 
+  function linkRow(url) {
+    const row = el("div", "row");
+    const a = el("a", null, "Open the payment page"); a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer";
+    add(row, a, btn("Copy link", "ghost small", () => Z.copy(url, "Payment link"), "copy"));
+    return row;
+  }
+
   function paypalForm(p) {
     const f = el("div", "form");
     p = { ...p, paypal_order_id: p.chain_id == null ? p.tx_hash : null };
     if (!p.paypal_order_id) {
-      f.append(btn("Request PayPal payment (card or bank transfer)", "gold small", async () => {
-        const r = await Z.api(`/api/payments/${p.id}/paypal/request`, "POST", {});
-        Z.toast("Payment link ready - send it to the client yourself", "ok"); await Z.rerender();
-        if (r.approval_link) Z.copy(r.approval_link, "Payment link");
-      }));
+      const reqBtn = btn("Request PayPal payment (card or bank transfer)", "gold small", async () => {
+        try {
+          const r = await Z.api(`/api/payments/${p.id}/paypal/request`, "POST", {});
+          Z.toast("Payment link ready - send it to the client yourself", "ok");
+          if (r.approval_link) add(f, linkRow(r.approval_link));
+          reqBtn.disabled = true;
+        } catch (e) { Z.toast(e.message, "bad"); }
+      });
+      f.append(reqBtn);
       return f;
     }
     const row = el("div", "row"); const code = el("code", "key", p.paypal_order_id); code.style.margin = "0";
     add(row, el("small", null, "PayPal order"), code, btn("Copy", "ghost small", () => Z.copy(p.paypal_order_id, "Order id"), "copy"));
+    const linkBtn = btn("Get payment link", "ghost small", async () => {
+      try {
+        const r = await Z.api(`/api/payments/${p.id}/paypal/link`, "GET");
+        linkBtn.replaceWith(linkRow(r.approval_link));
+      } catch (e) { Z.toast(e.message, "bad"); }
+    });
     const b = btn("Check if paid", "gold small", async () => {
       try { const r = await Z.api(`/api/payments/${p.id}/paypal/verify`, "POST", {}); Z.goal(r.amount + " " + r.asset + " verified"); await Z.rerender(); }
       catch (e) { Z.toast(e.message, "bad"); }
     });
-    add(f, row, b); return f;
+    add(f, row, linkBtn, b); return f;
   }
 
   Z.pages.treasury = {

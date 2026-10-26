@@ -198,6 +198,28 @@ def request_paypal_payment(conn, payment_id: str, currency: str = "USD", descrip
     return order
 
 
+def get_paypal_approval_link(conn, payment_id: str) -> dict:
+    """Re-fetches the approval link for an already-requested order - read-only, so it can be called
+    any time the owner needs to see or re-send the link, not just once right after creation."""
+    if not authorize(Agent.TREASURY, Action.READ_WALLET, paused=is_paused(conn)).allowed:
+        raise VerifyError("system is paused")
+    pay = conn.execute("SELECT * FROM payments WHERE id=?", (payment_id,)).fetchone()
+    if pay is None:
+        raise VerifyError("payment not found")
+    order_id = (pay["tx_hash"] or "").strip()
+    if not order_id:
+        raise VerifyError("no PayPal order id on this payment - request a payment first")
+    try:
+        order = paypal.get_order(order_id)
+    except paypal.PayPalError as e:
+        raise VerifyError(f"could not reach PayPal: {e}") from e
+    link = next((l["href"] for l in order.get("links") or [] if l.get("rel") == "approve"), None)
+    if not link:
+        raise VerifyError(f"PayPal order is {order.get('status', 'unknown')}; no approval link available "
+                          "(it may already be paid, or expired)")
+    return {"approval_link": link, "status": order.get("status")}
+
+
 def verify_paypal_payment(conn, payment_id: str, order_id: str = "") -> dict:
     """Confirms a PayPal order was actually paid (captures it if the payer has approved but it
     hasn't been captured yet - the final step of RECEIVING money the payer already agreed to pay,
