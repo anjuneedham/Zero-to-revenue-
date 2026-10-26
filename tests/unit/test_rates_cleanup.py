@@ -138,6 +138,55 @@ class RatesApiTest(unittest.TestCase):
         self.assertEqual((c, json.loads(out)["crypto_usd"]["BTC"]), (200, 1))
 
 
+class ApproveForDraftingApiTest(unittest.TestCase):
+    def setUp(self):
+        import dashboard.app as dash
+        self.dash = dash
+        self.conn = make_conn()
+        self.tok, _, _ = session(self.conn)
+        self.env = mock.patch.dict(os.environ, {"OWNER_SKILLS": "python"}, clear=True)
+        self.env.start()
+
+    def tearDown(self):
+        self.env.stop()
+
+    def seed(self, oid, **row):
+        base = dict(id=oid, title="junk", status="REVIEW_REQUIRED", discovered_at="now",
+                    source_url="https://x/" + oid, opportunity_score=70, scam_indicators="")
+        base.update(row)
+        cols = list(base)
+        self.conn.execute(f"INSERT INTO opportunities({','.join(cols)}) VALUES ({','.join('?' * len(cols))})",
+                          tuple(base[c] for c in cols))
+
+    def call(self, body):
+        c, _, out = self.dash.handle("POST", "/api/opportunities/approve", f"Bearer {self.tok}", self.conn, json.dumps(body).encode())
+        return c, json.loads(out)
+
+    def test_requires_auth(self):
+        c, _, _ = self.dash.handle("POST", "/api/opportunities/approve", None, self.conn, json.dumps({"ids": ["opp_000000000000"]}).encode())
+        self.assertEqual(c, 401)
+
+    def test_queues_a_draft_task_and_requalifies(self):
+        self.seed("opp_111111111111")
+        c, r = self.call({"ids": ["opp_111111111111"]})
+        self.assertEqual((c, r["approved"]), (200, 1))
+        self.assertEqual(self.conn.execute("select status from opportunities where id='opp_111111111111'").fetchone()[0], "QUALIFIED")
+        self.assertEqual(self.conn.execute("select count(*) from tasks where opportunity_id='opp_111111111111'").fetchone()[0], 1)
+        self.assertEqual(self.call({"ids": []})[0], 400)
+
+    def test_never_approves_a_human_only_listing(self):
+        self.seed("opp_222222222222", scam_indicators="human_only_listing")
+        c, r = self.call({"ids": ["opp_222222222222"]})
+        self.assertEqual((c, r["approved"], r["skipped"]), (200, 0, 1))
+        self.assertEqual(self.conn.execute("select status from opportunities where id='opp_222222222222'").fetchone()[0], "REVIEW_REQUIRED")
+        self.assertEqual(self.conn.execute("select count(*) from tasks").fetchone()[0], 0)
+
+    def test_skips_ones_not_pending_review(self):
+        self.seed("opp_333333333333", status="QUALIFIED")
+        c, r = self.call({"ids": ["opp_333333333333"]})
+        self.assertEqual((c, r["approved"], r["skipped"]), (200, 0, 1))
+
+
 class DismissApiTest(unittest.TestCase):
     def setUp(self):
         import dashboard.app as dash

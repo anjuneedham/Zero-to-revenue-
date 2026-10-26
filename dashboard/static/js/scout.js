@@ -61,6 +61,17 @@
       Object.entries(SORTS).forEach(([k, [l]]) => { const o = el("option", null, l); o.value = k; o.selected = sort === k; sortSel.append(o); });
       const body = el("div", "list");
       const bar = el("div", "row");
+      const approveBtn = btn("Send selected to Operator (0)", "gold", async () => {
+        const ids = [...selected];
+        if (!ids.length || !confirm(`Send ${ids.length} opportunit${ids.length === 1 ? "y" : "ies"} to Operator to draft? You'll still review and approve every draft before anything goes out.`)) return;
+        try {
+          const r = await Z.api("/api/opportunities/approve", "POST", { ids });
+          selected.clear();
+          Z.toast(`Sent ${r.approved} to Operator` + (r.skipped ? `, ${r.skipped} skipped (human-only listing, or no longer pending)` : ""), "ok");
+          await Z.rerender();
+        } catch (e) { Z.toast(e.message, "bad"); }
+      }, "scout");
+      approveBtn.disabled = true; bar.append(approveBtn);
       const removeBtn = btn("Remove selected (0)", "bad", async () => {
         const ids = [...selected];
         if (!ids.length || !confirm(`Remove ${ids.length} opportunit${ids.length === 1 ? "y" : "ies"}? This cannot be undone.`)) return;
@@ -88,12 +99,14 @@
         if (!rows.length) body.append(Z.empty(od.opportunities.length ? "Nothing matches" : "No opportunities yet", od.opportunities.length ? "Try another filter." : "Run Scout to look for some."));
         rows.slice(0, 60).forEach(o => {
           const it = el("div", "item click"); it.tabIndex = 0; it.setAttribute("role", "button");
-          const cb = el("input"); cb.type = "checkbox"; cb.setAttribute("aria-label", "Select for removal"); cb.checked = selected.has(o.id);
+          const cb = el("input"); cb.type = "checkbox"; cb.setAttribute("aria-label", "Select"); cb.checked = selected.has(o.id);
           cb.onclick = e => {
             e.stopPropagation();
             if (cb.checked) selected.add(o.id); else selected.delete(o.id);
             removeBtn.disabled = selected.size === 0;
             removeBtn.textContent = `Remove selected (${selected.size})`;
+            approveBtn.disabled = selected.size === 0;
+            approveBtn.textContent = `Send selected to Operator (${selected.size})`;
           };
           add(it, cb, el("div", "t", o.title), add(el("div", "meta"), pill(nice(o.status), Z.statusKind(o.status)), pill("score " + o.opportunity_score), pill("risk " + o.risk_score, o.risk_score > 35 ? "bad" : ""),
             pill(o.expected_payment == null ? "pay n/a" : "$" + fmt.num(o.expected_payment, 0) + " claimed"), o.organization ? pill(o.organization) : null));

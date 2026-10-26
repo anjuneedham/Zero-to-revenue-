@@ -115,6 +115,35 @@ def plan_set(conn, item_id: str, done: bool) -> dict:
     return {"ticks": ticks}
 
 
+def approve_for_drafting(conn, owner: str, ids: list[str]) -> dict:
+    """The owner's own bulk judgment call on a batch of REVIEW_REQUIRED opportunities: "these are
+    fine, have Operator draft them" - instead of opening each one's drawer one at a time. This only
+    ever queues a DRAFT; Operator still never submits/signs/pays, and the owner still approves each
+    draft before anything goes out, same as the automatic QUALIFIED path.
+    Never overrides a human_only_listing flag - that is the sponsor's own platform rule, not the
+    owner's risk call, and a bulk approval can't be the thing that gets the owner's account banned
+    for AI-produced work on a listing that explicitly forbids it."""
+    clean = [i for i in dict.fromkeys(ids) if isinstance(i, str) and OPP_ID.match(i)][:MAX_DISMISS_BATCH]
+    if not clean:
+        return {"approved": 0, "skipped": len(ids)}
+    rows = conn.execute(
+        f"SELECT id, opportunity_score, scam_indicators FROM opportunities WHERE id IN ({','.join('?' * len(clean))}) "
+        "AND status='REVIEW_REQUIRED'", clean).fetchall()
+    approved = []
+    for r in rows:
+        if "human_only_listing" in (r["scam_indicators"] or ""):
+            continue
+        conn.execute("UPDATE opportunities SET status='QUALIFIED' WHERE id=?", (r["id"],))
+        score = r["opportunity_score"] or 50
+        queue.enqueue(conn, "operator", "research_opportunity", f"opp:{r['id']}:research",
+                      inputs=json.dumps({"opportunity_id": r["id"]}), opportunity_id=r["id"],
+                      priority=max(1, 10 - score // 10))
+        approved.append(r["id"])
+    if approved:
+        audit(conn, owner, "scout.approve_for_drafting", None, f"owner sent {len(approved)} opportunity(ies) to Operator by hand")
+    return {"approved": len(approved), "skipped": len(clean) - len(approved)}
+
+
 def dismiss_opportunities(conn, owner: str, ids: list[str], force: bool = False) -> dict:
     """The owner manually picking which opportunities to remove - out of scope, not worth it,
     still looks spammy to them even though it cleared the automatic filters. Never deletes one with
