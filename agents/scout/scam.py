@@ -15,6 +15,12 @@ INDICATORS = {
     "non_cash_reward": (35, re.compile(r"gift\s*card|voucher|\bsteam\b.{0,20}(card|key|wallet)|v-?bucks|robux|itunes|coupon", re.I | re.S)),
     "token_exchange_scheme": (40, re.compile(r"exchange\s+[\d,\.]+\s*[kKmMbB]?\s+\S+(\s+\(\$?\w+\))?\s+for\b|(?-i:\$w[A-Z0-9]{2,}\b)|airdrop|free\s+tokens?|claim\s+your\s+(reward|tokens?)", re.I)),
     "token_promotion": (25, re.compile(r"fair\s+launch|trading\s+competition|\bshill|(write|create|post)\b.{0,25}(thread|tweet|post).{0,40}(?-i:\$[A-Za-z]{3,10}\b)", re.I | re.S)),
+    # Not a one-off paid job at all: an ongoing commission-only/equity-only sales or "partner" role
+    # with no guaranteed pay for the work itself - ask-your-skills jobs boards are full of these
+    # disguised as freelance projects. High enough to force REVIEW_REQUIRED and block auto-send.
+    "commission_only_role": (40, re.compile(r"commission[\s-]only|100\s*%\s*commission|uncapped\s+commission|"
+                              r"no\s+base\s+(pay|salary)|equity\s+only|unpaid\s+(trial|probation)|"
+                              r"(percentage|%)\s+of\s+(sales|revenue)\s+only|revenue\s+share\s+only", re.I)),
 }
 UNVERIFIED_SPONSOR_RISK = 15
 INJECTION_RISK = 40

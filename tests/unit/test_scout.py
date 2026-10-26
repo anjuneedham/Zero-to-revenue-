@@ -51,7 +51,8 @@ class ScamTest(unittest.TestCase):
                  "asks_for_secrets": "Enter your seed phrase to verify",
                  "guaranteed_returns": "Guaranteed risk-free returns",
                  "shortened_link": "Details at bit.ly/abc123",
-                 "personal_data_request": "Upload a photo of your passport"}
+                 "personal_data_request": "Upload a photo of your passport",
+                 "commission_only_role": "This is a commission-only role, uncapped commission potential, no base pay"}
         for flag, text in cases.items():
             risk, flags = self.flags(text)
             self.assertIn(flag, flags, text)
@@ -92,6 +93,15 @@ class EvaluateTest(unittest.TestCase):
         self.assertTrue(any(f.startswith("prompt_injection_attempt") for f in ev.flags))
         self.assertLess(ev.row["confidence"], evaluate(good(), skills=SKILLS).row["confidence"])
         self.assertIn("Do not engage", ev.row["recommended_action"])
+
+    def test_commission_only_sales_partner_role_is_never_auto_qualified(self):
+        # These are ongoing commission/equity-only roles disguised as freelance projects on
+        # marketplaces, not real one-off paid jobs - must never slip through as QUALIFIED.
+        ev = evaluate(good(title="Global IT Sales Partner | Uncapped Commission Opportunity",
+                           body="Join as a sales partner, 100% commission based, no base pay.",
+                           required_skills=["sales"]), skills=SKILLS | {"sales"})
+        self.assertEqual(ev.status, OpportunityStatus.REVIEW_REQUIRED)
+        self.assertIn("commission_only_role", ev.flags)
 
     def test_scam_never_qualifies_even_with_high_payment_and_trusted_domain(self):
         ev = evaluate(good(body="Pay a registration fee. Guaranteed. Connect your wallet.", expected_payment=9000), skills=SKILLS)

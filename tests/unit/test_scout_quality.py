@@ -61,6 +61,18 @@ class SkillFitTest(unittest.TestCase):
             e = evaluate(item, skills=self.OWNER)
             self.assertNotIn("off_skill", e.flags, title)
 
+    def test_generic_body_buzzwords_never_fake_a_fit(self):
+        # Regression: a massage/construction/etc listing's own description routinely contains
+        # words like "process", "growth", "support", "strategy", "automation" - skill_fit must
+        # never be fooled by those appearing in the BODY; only the title (and real platform tags)
+        # count. This was a real bug: off_skill silently never fired for exactly this case.
+        noisy_body = ("This project needs a good process and growth mindset, strong support for "
+                     "the client, automation of workflow and operations, and a clear strategy.")
+        for title in ("Mobile Deep Tissue Massage", "Wood Framed Garage Construction", "Sweet Romantic Poem Needed"):
+            item = good(title=title, body=noisy_body, required_skills=[], source="freelancer-com")
+            e = evaluate(item, skills=self.OWNER)
+            self.assertIn("off_skill", e.flags, title)
+
     def test_no_configured_skills_means_neutral_fit(self):
         item = good(title="Mobile Deep Tissue Massage", body="", required_skills=[], source="freelancer-com")
         e = evaluate(item, skills=set())

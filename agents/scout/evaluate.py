@@ -2,6 +2,7 @@
 
 import hashlib
 import os
+import re
 from decimal import Decimal, InvalidOperation
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -20,49 +21,56 @@ HARD_WORDS = ("full", "platform", "build from scratch", "end to end", "end-to-en
 # totally unrelated job (massage, AC repair, poetry, zoning plans) apart from a real fit, even when
 # a source (e.g. Freelancer.com) doesn't tag skills at all. This never raises a score - it only
 # decides whether an otherwise-unqualified listing is worth showing the owner at all.
+# Deliberately free of single common words ("support", "growth", "process", "strategy",
+# "operations", "software" alone) - a massage or construction listing routinely contains those in
+# its description, which silently defeated this filter for exactly the junk it exists to catch.
+# Matched against the TITLE only (never the body), with \b word-boundary regexes - a body
+# description is long and noisy enough that almost any short word shows up in it somewhere.
 SKILL_KEYWORDS = {
-    "sales": ("sales", "lead gen", "leads", "appointment", "crm", "cold call", "cold email", "outbound",
-              "outreach", "closing", "closer", "telemarketing", "b2b", "prospecting"),
-    "customer service": ("customer service", "support", "helpdesk", "help desk", "client support",
-                          "customer success", "live chat", "virtual assistant", "va ", "call center"),
-    "business operations": ("business operations", "operations", "business consult", "sop", "process",
+    "sales": ("lead gen", "cold call", "cold email", "outbound sales", "sales outreach",
+              "telemarketing", "b2b", "prospecting", "appointment setter"),
+    "customer service": ("customer service", "helpdesk", "help desk", "client support",
+                          "customer success", "live chat support", "virtual assistant", "call center"),
+    "business operations": ("business operations", "business consult", "sop documentation",
                              "project management", "ops manager", "admin support", "back office"),
     "websites": ("website", "web design", "web development", "wordpress", "webflow", "squarespace",
-                 "wix", "landing page", "shopify", "ecommerce", "e-commerce", "web developer", "html",
-                 "css", "ui/ux", "ux design", "web page"),
-    "funnels": ("funnel", "clickfunnels", "landing page", "conversion rate", "lead magnet", "cro",
-                "sales page", "opt-in"),
-    "marketing": ("marketing", "seo", "ad campaign", "advertising", "google ads", "facebook ads",
-                  "meta ads", "ppc", "social media", "social media manager", "copywriting",
-                  "copywriter", "content writ", "content market", "email campaign", "email marketing",
-                  "growth hack", "branding", "influencer"),
-    "growth planning": ("growth", "go-to-market", "gtm", "business plan", "roadmap", "strategy",
-                         "market research", "competitive analysis"),
-    "app development": ("app development", "mobile app", "ios app", "android app", "web app", "software",
-                         "saas", "api", "automation", "zapier", "make.com", "n8n", "bot", "chatbot",
-                         "no-code", "integration", " app", "application", "backend", "back-end",
-                         "database", "deploy", "develop", "programming", "coding", "code review",
-                         "script", "node.js", "python", "javascript", "react", "crm setup"),
+                 "wix site", "landing page", "shopify", "ecommerce site", "e-commerce site",
+                 "web developer", "ui/ux", "ux design"),
+    "funnels": ("sales funnel", "clickfunnels", "landing page", "conversion rate optimization",
+                "lead magnet", "sales page"),
+    "marketing": ("marketing", "seo", "ad campaign", "google ads", "facebook ads", "meta ads",
+                  "social media manager", "copywriting", "copywriter", "content marketing",
+                  "email marketing", "growth hacking", "branding", "influencer marketing"),
+    "growth planning": ("go-to-market", "business plan", "growth strategy", "market research",
+                         "competitive analysis"),
+    "app development": ("app development", "mobile app", "ios app", "android app", "web app",
+                         "saas", "automation workflow", "zapier", "make.com", "chatbot", "no-code app",
+                         "application developer", "backend developer", "database developer",
+                         "programming", "coding", "code review", "node.js", "python developer",
+                         "javascript developer", "react developer", "crm setup"),
 }
 
 
 GENERIC_MARKETPLACE_SOURCES = {"freelancer-com", "remotive-freelance"}
 
 
-def skill_fit(text: str, skills: set[str], required_skills: list[str] | None = None) -> bool:
-    """True if the text plausibly matches one of the owner's configured skills, the listing's own
+def skill_fit(title: str, skills: set[str], required_skills: list[str] | None = None) -> bool:
+    """True if the TITLE plausibly matches one of the owner's configured skills, the listing's own
     stated required_skills literally overlap with them, or no skills are configured (then skill fit
-    is neutral, never a reason to hide anything)."""
+    is neutral, never a reason to hide anything). Deliberately ignores the body: a full project
+    description is long enough that almost any keyword appears in it somewhere, by coincidence."""
     if not skills:
         return True
     if required_skills and skills & {s.lower() for s in required_skills}:
         return True
-    low = text.lower()
+    low = title.lower()
+    # Leading \b only (no trailing one): stops a short word matching mid-word ("api" inside
+    # "rapid") while still matching plurals and suffixes ("appointment setter" in "...setters").
     for s in skills:
-        if s in low:
+        if re.search(r"\b" + re.escape(s), low):
             return True
         for kw in SKILL_KEYWORDS.get(s, ()):
-            if kw in low:
+            if re.search(r"\b" + re.escape(kw), low):
                 return True
     return False
 
@@ -205,7 +213,7 @@ def evaluate(item: RawItem, now: datetime | None = None, skills: set[str] | None
     # Gated to the general-purpose marketplaces: GitHub bounty labels and Superteam Earn are already
     # software/crypto work by construction. Freelancer.com and Remotive pull every category of
     # freelance work, so that's where an unrelated job (massage, AC repair, poetry) needs filtering.
-    if item.source in GENERIC_MARKETPLACE_SOURCES and not skill_fit(text, skills, item.required_skills) \
+    if item.source in GENERIC_MARKETPLACE_SOURCES and not skill_fit(title, skills, item.required_skills) \
             and "human_only_listing" not in flags:
         flags.append("off_skill")
         status = OpportunityStatus.REVIEW_REQUIRED

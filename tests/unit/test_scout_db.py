@@ -260,6 +260,21 @@ class RescoreTest(unittest.TestCase):
         self.assertEqual(self.conn.execute("select status from user_actions").fetchone()[0], "APPROVED")
         self.assertEqual(self.conn.execute("select status from opportunities where id='opp_ok'").fetchone()[0], "REVIEW_REQUIRED")
 
+    def test_downgraded_opportunity_with_a_cancelled_task_can_still_be_purged(self):
+        # Regression: a rescore downgrade cancels the task but leaves it referencing the
+        # opportunity; purge_junk must not crash on the foreign key, and a cancelled (dead) task
+        # must not protect obvious junk from cleanup forever.
+        from agents.operator import run as operator
+        from agents.scout.rescore import rescore
+        from agents.scout.cleanup import purge_junk
+        operator.step(self.conn)
+        rescore(self.conn)
+        self.assertEqual(self.conn.execute("select status from tasks").fetchone()[0], "CANCELLED")
+        n = purge_junk(self.conn)
+        self.assertEqual(n, 1)
+        self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 0)
+        self.assertEqual(self.conn.execute("select opportunity_id from tasks").fetchone()[0], None)
+
 
 class ScoutApiTest(unittest.TestCase):
     def setUp(self):

@@ -68,7 +68,7 @@ def step(conn) -> dict:
         return {"ran": True, "task": task["id"], "result": "error", "error": str(e)[:200]}
 
 
-def run(conn, max_tasks: int = 3) -> list[dict]:
+def run(conn, max_tasks: int = 40) -> list[dict]:
     out = []
     for _ in range(max_tasks):
         r = step(conn)
