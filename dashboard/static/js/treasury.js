@@ -50,6 +50,8 @@
     add(f, row, linkBtn, b); return f;
   }
 
+  Z.verifyForm = verifyForm; Z.paypalForm = paypalForm;
+
   Z.pages.treasury = {
     title: "Treasury", sub: "Watches your wallet and verifies payments. Read-only.", icon: "treasury",
     async render(root) {

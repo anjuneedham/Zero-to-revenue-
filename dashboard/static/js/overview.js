@@ -6,7 +6,7 @@
   Z.pages.overview = {
     title: "Overview", sub: "Everything that needs you, at a glance", icon: "home",
     async render(root) {
-      const [s, n] = await Promise.all([Z.api("/api/status"), Z.api("/api/notifications")]);
+      const [s, n, t, pay] = await Promise.all([Z.api("/api/status"), Z.api("/api/notifications"), Z.api("/api/treasury/overview"), Z.api("/api/payments")]);
       Z.state.status = s; Z.paintStatus(s);
       const g = el("div", "grid");
 
@@ -18,10 +18,37 @@
         .forEach(([l, v]) => { const t = el("div", "tile"); add(t, el("div", "label", l), el("div", "stat", v)); tiles.append(t); });
       hero.append(tiles); g.append(hero);
 
+      const qa = card("Quick actions", "Run the agents from here - no need to open their page first."); qa.classList.add("s4");
+      qa.append(
+        btn("Run Scout now", "gold", async () => {
+          const r = await Z.api("/api/scout/run", "POST");
+          Z.toast(r.ran ? `Scout: ${r.new} new, ${r.qualified} qualified, ${r.auto_sent || 0} auto-sent, ${r.purged || 0} removed` : "Not run: " + r.reason, r.errors && r.errors.length ? "bad" : "ok");
+          await Z.rerender();
+        }, "scout"),
+        btn("Run Operator now", "gold", async () => {
+          const r = await Z.api("/api/operator/run", "POST"); const n = r.steps.filter(x => x.task).length;
+          Z.toast(r.steps[0] && r.steps[0].ran === false ? "Not run: " + r.steps[0].reason : n ? n + " draft(s) prepared - check below" : "Nothing to draft right now", "ok");
+          await Z.rerender();
+        }, "operator"));
+      g.append(qa);
+
       const ks = card("Kill switch", "Stops every agent and scheduled job. Resuming needs your sign-in."); ks.classList.add("s4");
       ks.append(btn("Red card · pause all agents", "red", async () => { await Z.api("/api/pause", "POST"); Z.toast("All agents paused", "bad"); await Z.rerender(); }, "stop"),
         btn("Resume play", "gold", async () => { await Z.api("/api/resume", "POST"); Z.toast("Play resumed", "ok"); await Z.rerender(); }, "play"));
       g.append(ks);
+
+      const owe = card("Payments needing you", "Request a PayPal link, check if one's paid, or verify a crypto tx - right here."); owe.classList.add("s4");
+      const owl = el("div", "list");
+      const outstanding = pay.payments.filter(p => p.status !== "PAYMENT_VERIFIED");
+      if (!outstanding.length) owl.append(Z.empty("Nothing pending", "Payments appear here once work is submitted or you add one on Treasury."));
+      outstanding.slice(0, 5).forEach(p => {
+        const it = el("div", "item"); add(it, el("div", "t", p.title || p.id),
+          pill((p.expected_amount == null ? "?" : fmt.num(p.expected_amount, 2)) + " " + (p.asset || "") + " expected"));
+        if (t.chains.length) it.append(Z.verifyForm(p, t.chains));
+        if (t.paypal) it.append(Z.paypalForm(p));
+        owl.append(it);
+      });
+      owe.append(owl); g.append(owe);
 
       const team = card("Team sheet", "Three agents, each with only the permissions its position needs."); team.classList.add("s12");
       const row = el("div", "cols");
