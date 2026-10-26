@@ -63,7 +63,17 @@
       });
       team.append(row); g.append(team);
 
-      const dec = card("Manager's decisions", "Drafts wait here. You review, submit on the platform yourself, then confirm."); dec.classList.add("s6");
+      const dec = card("Manager's decisions", "Drafts wait here. You review (and can edit outreach emails), then approve."); dec.classList.add("s6");
+      const approvedOutreach = s.open_user_actions.filter(a => a.kind === "send_outreach" && a.status === "APPROVED");
+      if (approvedOutreach.length > 1) {
+        dec.append(btn(`Send all ${approvedOutreach.length} approved emails`, "gold small", async () => {
+          try {
+            const r = await Z.api("/api/leads/send-batch", "POST", { action_ids: approvedOutreach.map(a => a.action_id) });
+            Z.toast(`Sent ${r.sent}` + (r.failed.length ? `, ${r.failed.length} failed - check them below` : ""), r.failed.length ? "bad" : "ok");
+            await Z.rerender();
+          } catch (e) { Z.toast(e.message, "bad"); }
+        }));
+      }
       const dl = el("div", "list");
       if (!s.open_user_actions.length) dl.append(Z.empty("No decisions needed", "When the Operator drafts something, it appears here."));
       s.open_user_actions.forEach(a => dl.append(Z.decisionCard(a, () => Z.rerender())));

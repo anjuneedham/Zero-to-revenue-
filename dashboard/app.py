@@ -43,7 +43,7 @@ MAX_BODY = 4096
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
-ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft)$")
+ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send)$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
@@ -201,11 +201,21 @@ def handle(method, path, authz, conn, body: bytes = b""):
                 "created_at, kind, submission_id) VALUES (?, NULL, ?, ?, ?, 'LOW', 'OPEN', ?, 'send_outreach', NULL) "
                 "ON CONFLICT (action_id) DO NOTHING",
                 (action_id, f"Send outreach to {lead['business'] or lead['name'] or lead['email']}"[:200],
-                 "Sending needs your review and your own email client. The system never emails anyone for you.",
+                 "Needs your review and approval before it goes out - edit it if you want, then send "
+                 "it yourself through Gmail here, or confirm you sent it another way.",
                  draft, now()))
             conn.execute("UPDATE leads SET status='DRAFTED' WHERE id=?", (lead["id"],))
             made.append(action_id)
         return _json(200, {"drafted": len(made)})
+    if method == "POST" and path == "/api/leads/send-batch":
+        try:
+            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+            ids = data.get("action_ids")
+            if not isinstance(ids, list) or not ids:
+                raise ValueError("bad request")
+            return _json(200, outreach.send_outreach_batch(conn, owner, ids))
+        except (ValueError, json.JSONDecodeError):
+            return _json(400, {"error": "bad request"})
     if method == "GET" and path == "/api/plan":
         return _json(200, api_data.plan_get(conn))
     if method == "POST" and path == "/api/plan":
@@ -256,12 +266,17 @@ def handle(method, path, authz, conn, body: bytes = b""):
                 actions.reject(conn, aid, owner)
             elif verb == "sent":
                 actions.mark_sent(conn, aid, owner)
+            elif verb == "send":
+                data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+                return _json(200, outreach.send_outreach(conn, aid, owner, data.get("edited_body") or None))
             else:
                 (proof,) = _fields(body, "proof_url")
                 actions.mark_submitted(conn, aid, owner, proof)
             return _json(200, {"ok": True})
         except actions.ActionError as e:
             return _json(409, {"error": str(e)})
+        except outreach.SendError as e:
+            return _json(422, {"error": str(e)})
         except (ValueError, json.JSONDecodeError):
             return _json(400, {"error": "bad request"})
     m = PAY_RE.match(path)

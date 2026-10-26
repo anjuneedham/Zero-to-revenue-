@@ -120,15 +120,31 @@
     it.append(Z.el("p", "sub", a.why_required));
     if (a.verified_url) { const l = Z.el("a", null, "Open the source page"); l.href = a.verified_url; l.target = "_blank"; l.rel = "noopener noreferrer"; it.append(l); }
     const row = Z.el("div", "row");
-    row.append(Z.btn(isOutreach ? "View draft email" : "View draft", "ghost small", async () => {
-      const d = await Z.api("/api/actions/" + a.action_id + "/draft"); const pre = Z.el("pre", "draft", d.draft || "No draft."); Z.openDrawer(isOutreach ? "Draft outreach email" : "Draft submission", pre);
-    }));
     const done = async (path, body, msg) => { await Z.api("/api/actions/" + a.action_id + "/" + path, "POST", body); Z.toast(msg, "ok"); await refresh(); };
+    if (isOutreach) {
+      const ta = Z.el("textarea", "draft"); ta.rows = 10; ta.placeholder = "Loading draft…"; ta.disabled = true;
+      Z.api("/api/actions/" + a.action_id + "/draft").then(d => { ta.value = d.draft || ""; ta.disabled = false; });
+      it.append(ta);
+      if (a.status === "OPEN") {
+        row.append(Z.btn("Approve", "small", () => done("approve", {}, "Approved. Edit above if you like, then send from here or confirm you sent it elsewhere.")),
+          Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
+      } else if (a.status === "APPROVED") {
+        row.append(
+          Z.btn("Send via Gmail", "gold small", async () => {
+            try { const r = await Z.api("/api/actions/" + a.action_id + "/send", "POST", { edited_body: ta.value }); Z.goal("Email sent (id " + r.message_id.slice(0, 8) + "…)"); await refresh(); }
+            catch (e) { Z.toast(e.message, "bad"); }
+          }),
+          Z.btn("I sent it another way", "ghost small", () => done("sent", {}, "Marked sent.")),
+          Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
+      }
+      it.append(row); return it;
+    }
+    row.append(Z.btn("View draft", "ghost small", async () => {
+      const d = await Z.api("/api/actions/" + a.action_id + "/draft"); const pre = Z.el("pre", "draft", d.draft || "No draft."); Z.openDrawer("Draft submission", pre);
+    }));
     if (a.status === "OPEN") {
-      row.append(Z.btn("Approve", "small", () => done("approve", {}, isOutreach ? "Approved. Send it yourself, then confirm." : "Approved. Submit it yourself, then confirm.")),
+      row.append(Z.btn("Approve", "small", () => done("approve", {}, "Approved. Submit it yourself, then confirm.")),
         Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
-    } else if (a.status === "APPROVED" && isOutreach) {
-      row.append(Z.btn("I sent it", "gold small", () => done("sent", {}, "Marked sent.")), Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
     } else if (a.status === "APPROVED") {
       const inp = Z.el("input"); inp.placeholder = "Link to your submission (optional, https)"; inp.id = "proof-" + a.action_id; inp.setAttribute("aria-label", "Proof link");
       it.append(inp);
