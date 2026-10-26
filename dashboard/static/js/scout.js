@@ -57,9 +57,12 @@
         const ids = [...selected];
         if (!ids.length || !confirm(`Remove ${ids.length} opportunit${ids.length === 1 ? "y" : "ies"}? This cannot be undone.`)) return;
         try {
-          const r = await Z.api("/api/opportunities/dismiss", "POST", { ids });
+          let r = await Z.api("/api/opportunities/dismiss", "POST", { ids });
+          if (r.skipped && confirm(`${r.skipped} skipped - still has an active task. Cancel that task too and remove anyway? Only do this if it's genuinely not worth pursuing, not to discard real paid work.`)) {
+            r = await Z.api("/api/opportunities/dismiss", "POST", { ids, force: true });
+          }
           selected.clear();
-          Z.toast(`Removed ${r.removed}` + (r.skipped ? `, ${r.skipped} skipped (already in progress)` : ""), "ok");
+          Z.toast(`Removed ${r.removed}` + (r.skipped ? `, ${r.skipped} still skipped (has a payment on record)` : ""), "ok");
           await Z.rerender();
         } catch (e) { Z.toast(e.message, "bad"); }
       }, "scout");

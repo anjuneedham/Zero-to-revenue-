@@ -143,9 +143,10 @@ def handle(method, path, authz, conn, body: bytes = b""):
         try:
             data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
             ids = data.get("ids")
-            if not isinstance(ids, list) or not ids:
+            force = data.get("force", False)
+            if not isinstance(ids, list) or not ids or not isinstance(force, bool):
                 raise ValueError("bad request")
-            return _json(200, api_data.dismiss_opportunities(conn, owner, ids))
+            return _json(200, api_data.dismiss_opportunities(conn, owner, ids, force=force))
         except (ValueError, json.JSONDecodeError):
             return _json(400, {"error": "bad request"})
     if method == "POST" and path == "/api/scout/run":

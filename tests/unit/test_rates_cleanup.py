@@ -182,6 +182,28 @@ class DismissApiTest(unittest.TestCase):
         self.assertEqual((c, r["removed"]), (200, 1))
         self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 0)
 
+    def test_force_cancels_the_live_task_and_its_open_action_then_removes(self):
+        run_scout(self.conn, [Source([good()])])
+        oid = self.conn.execute("select id from opportunities").fetchone()[0]
+        aid = operator.step(self.conn)["action_id"]
+        self.assertEqual(self.conn.execute("select status from user_actions where action_id=?", (aid,)).fetchone()[0], "OPEN")
+        c, r = self.call({"ids": [oid], "force": False})
+        self.assertEqual((c, r["removed"], r["skipped"]), (200, 0, 1))  # not forced: still blocked
+        c, r = self.call({"ids": [oid], "force": True})
+        self.assertEqual((c, r["removed"]), (200, 1))
+        self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 0)
+        self.assertEqual(self.conn.execute("select status from user_actions where action_id=?", (aid,)).fetchone()[0], "REJECTED")
+
+    def test_force_never_removes_one_with_a_payment(self):
+        run_scout(self.conn, [Source([good()])])
+        oid = self.conn.execute("select id from opportunities").fetchone()[0]
+        operator.step(self.conn)
+        self.conn.execute("INSERT INTO payments(id,opportunity_id,status,expected_amount,asset,created_at) "
+                          "VALUES ('pay1',?,'PENDING',600,'USDC','now')", (oid,))
+        c, r = self.call({"ids": [oid], "force": True})
+        self.assertEqual((c, r["removed"], r["skipped"]), (200, 0, 1))
+        self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 1)
+
     def test_still_blocked_while_a_second_task_is_live(self):
         run_scout(self.conn, [Source([good()])])
         oid = self.conn.execute("select id from opportunities").fetchone()[0]
