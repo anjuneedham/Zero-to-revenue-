@@ -13,6 +13,26 @@
     add(f, l1, l2, b); return f;
   }
 
+  function paypalForm(p) {
+    const f = el("div", "form");
+    p = { ...p, paypal_order_id: p.chain_id == null ? p.tx_hash : null };
+    if (!p.paypal_order_id) {
+      f.append(btn("Request PayPal payment (card or bank transfer)", "gold small", async () => {
+        const r = await Z.api(`/api/payments/${p.id}/paypal/request`, "POST", {});
+        Z.toast("Payment link ready - send it to the client yourself", "ok"); await Z.rerender();
+        if (r.approval_link) Z.copy(r.approval_link, "Payment link");
+      }));
+      return f;
+    }
+    const row = el("div", "row"); const code = el("code", "key", p.paypal_order_id); code.style.margin = "0";
+    add(row, el("small", null, "PayPal order"), code, btn("Copy", "ghost small", () => Z.copy(p.paypal_order_id, "Order id"), "copy"));
+    const b = btn("Check if paid", "gold small", async () => {
+      try { const r = await Z.api(`/api/payments/${p.id}/paypal/verify`, "POST", {}); Z.goal(r.amount + " " + r.asset + " verified"); await Z.rerender(); }
+      catch (e) { Z.toast(e.message, "bad"); }
+    });
+    add(f, row, b); return f;
+  }
+
   Z.pages.treasury = {
     title: "Treasury", sub: "Watches your wallet and verifies payments. Read-only.", icon: "treasury",
     async render(root) {
@@ -79,7 +99,7 @@
       });
       ch.append(cols); g.append(ch);
 
-      const pc = card("Payments you are owed", "Paste the transaction hash the payer sends you and Treasury checks it on-chain."); pc.classList.add("s12");
+      const pc = card("Payments you are owed", "Paste the transaction hash the payer sends you to check it on-chain, or request a PayPal payment link for card/bank transfer."); pc.classList.add("s12");
       const pl = el("div", "list");
       if (!pay.payments.length) pl.append(Z.empty("No payments expected yet", "They appear after you mark work as submitted."));
       pay.payments.forEach(p => {
@@ -91,7 +111,12 @@
           if (!tok && /^(USD|USDC|USDT|DAI|USDG)$/i.test(p.asset || "")) it.append(el("div", "flags", "Paid in " + ra + ", not the " + p.asset + " you expected. Check the amount with the payer."));
           else if (tok) it.append(el("div", "sub", "A token arrived. Confirm it is the asset and amount you agreed."));
         }
-        if (p.status !== "PAYMENT_VERIFIED" && t.chains.length) it.append(verifyForm(p, t.chains)); pl.append(it);
+        if (p.status !== "PAYMENT_VERIFIED") {
+          if (t.chains.length) it.append(verifyForm(p, t.chains));
+          if (t.paypal) it.append(paypalForm(p));
+          else if (!t.chains.length) it.append(el("p", "sub", "No chains or PayPal configured yet."));
+        }
+        pl.append(it);
       });
       pc.append(pl); g.append(pc);
 

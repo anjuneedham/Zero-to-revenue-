@@ -136,6 +136,82 @@ class ActionsTest(Base):
             actions.approve(self.conn, aid, "owner")
 
 
+class PayPalTreasuryTest(Base):
+    def test_request_then_verify_end_to_end(self):
+        pid = self.submitted_payment()
+        self.conn.execute("update payments set expected_amount=600 where id=?", (pid,))
+        with mock.patch("agents.treasury.run.paypal.create_payment_request",
+                        return_value={"order_id": "ORDER1", "approval_link": "https://x/approve", "status": "CREATED"}) as created:
+            req = treasury.request_paypal_payment(self.conn, pid)
+        self.assertEqual(req["order_id"], "ORDER1")
+        created.assert_called_once_with("600.00", "USD", f"Payment for {self.one('select opportunity_id from payments')[0]}", pid)
+        row = self.one("select tx_hash, chain_id, asset from payments")
+        self.assertEqual((row["tx_hash"], row["chain_id"], row["asset"]), ("ORDER1", None, "USD"))
+        completed = {"status": "COMPLETED", "purchase_units": [{"payments": {"captures": [{"amount": {"value": "600", "currency_code": "USD"}}]}}]}
+        with mock.patch("agents.treasury.run.paypal.get_order", return_value=completed):
+            r = treasury.verify_paypal_payment(self.conn, pid)
+        self.assertEqual((r["amount"], r["asset"], r["usd"]), ("600", "USD", 600.0))
+        self.assertEqual(self.one("select status from payments")["status"], "PAYMENT_VERIFIED")
+        self.assertEqual(self.one("select status from tasks")["status"], "COMPLETED")
+        led = self.one("select chain_id, transaction_hash, usd_value from ledger_entries")
+        self.assertEqual((led["chain_id"], led["transaction_hash"], led["usd_value"]), (None, "ORDER1", 600.0))
+
+    def test_approved_but_not_captured_gets_captured_automatically(self):
+        pid = self.submitted_payment()
+        self.conn.execute("update payments set expected_amount=100, tx_hash='ORDER2' where id=?", (pid,))
+        with mock.patch("agents.treasury.run.paypal.get_order", return_value={"status": "APPROVED"}), \
+             mock.patch("agents.treasury.run.paypal.capture_order", return_value={
+                 "status": "COMPLETED", "purchase_units": [{"payments": {"captures": [{"amount": {"value": "100", "currency_code": "USD"}}]}}]}) as cap:
+            r = treasury.verify_paypal_payment(self.conn, pid)
+        cap.assert_called_once_with("ORDER2")
+        self.assertEqual(r["amount"], "100")
+
+    def test_not_yet_paid_is_rejected_and_nothing_recorded(self):
+        pid = self.submitted_payment()
+        self.conn.execute("update payments set tx_hash='ORDER3' where id=?", (pid,))
+        with mock.patch("agents.treasury.run.paypal.get_order", return_value={"status": "CREATED"}):
+            with self.assertRaises(treasury.VerifyError) as cm:
+                treasury.verify_paypal_payment(self.conn, pid)
+        self.assertIn("not yet paid", str(cm.exception))
+        self.assertEqual(self.one("select count(*) c from ledger_entries")["c"], 0)
+
+    def test_duplicate_order_cannot_be_counted_twice(self):
+        pid = self.submitted_payment()
+        self.conn.execute("update payments set expected_amount=50, tx_hash='ORDER4' where id=?", (pid,))
+        completed = {"status": "COMPLETED", "purchase_units": [{"payments": {"captures": [{"amount": {"value": "50", "currency_code": "USD"}}]}}]}
+        with mock.patch("agents.treasury.run.paypal.get_order", return_value=completed):
+            treasury.verify_paypal_payment(self.conn, pid)
+        self.conn.execute("insert into payments(id, opportunity_id, status, tx_hash, created_at) values "
+                          "('pay_dup', (select id from opportunities), 'AWAITING_PAYMENT', 'ORDER4', 'now')")
+        with mock.patch("agents.treasury.run.paypal.get_order", return_value=completed):
+            with self.assertRaises(treasury.VerifyError) as cm:
+                treasury.verify_paypal_payment(self.conn, "pay_dup")
+        self.assertIn("already recorded", str(cm.exception))
+
+    def test_request_rejects_without_amount_or_when_already_verified(self):
+        pid = self.submitted_payment()
+        self.conn.execute("update payments set expected_amount=NULL where id=?", (pid,))
+        with self.assertRaises(treasury.VerifyError):
+            treasury.request_paypal_payment(self.conn, pid)
+        self.conn.execute("update payments set status='PAYMENT_VERIFIED' where id=?", (pid,))
+        with self.assertRaises(treasury.VerifyError):
+            treasury.request_paypal_payment(self.conn, pid)
+
+    def test_verify_requires_an_order_id(self):
+        pid = self.submitted_payment()
+        with self.assertRaises(treasury.VerifyError) as cm:
+            treasury.verify_paypal_payment(self.conn, pid)
+        self.assertIn("request a payment first", str(cm.exception))
+
+    def test_respects_kill_switch(self):
+        pid = self.submitted_payment()
+        killswitch.pause_all(self.conn, "owner")
+        with self.assertRaises(treasury.VerifyError):
+            treasury.request_paypal_payment(self.conn, pid)
+        with self.assertRaises(treasury.VerifyError):
+            treasury.verify_paypal_payment(self.conn, pid, "ORDER5")
+
+
 class TreasuryTest(Base):
     def test_native_payment_verified_end_to_end(self):
         pid = self.submitted_payment()

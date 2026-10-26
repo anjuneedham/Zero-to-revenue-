@@ -88,6 +88,7 @@ def treasury_overview(conn) -> dict:
     return {"address": addr, "address_url": f"{EXPLORERS[56]}/address/{addr}" if addr else None, "problem": problem,
             "chains": out, "ledger": ledger, "revenue_usd": sum((e["usd_value"] or 0) for e in ledger if e["status"] == "VERIFIED" and e["type"] == "receipt"),
             "min_confirmations": int(os.environ.get("MIN_CONFIRMATIONS", "12") or 12),
+            "paypal": bool(os.environ.get("PAYPAL_CLIENT_ID")) and bool(os.environ.get("PAYPAL_CLIENT_SECRET")),
             "safety": {"wallet_mode": policy.WALLET_MODE, "signing": policy.TRANSACTION_SIGNING_ENABLED,
                        "spending": policy.AUTO_SPENDING_ENABLED, "trading": policy.TRADING_ENABLED}}
 

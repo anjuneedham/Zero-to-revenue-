@@ -45,6 +45,7 @@ SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
 ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft)$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
+PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
@@ -262,6 +263,18 @@ def handle(method, path, authz, conn, body: bytes = b""):
             return _json(422, {"error": str(e)})
         except ValueError:
             return _json(400, {"error": "chain_id must be a number"})
+    m = PAYPAL_RE.match(path)
+    if m and method == "POST":
+        pid, verb = m.groups()
+        try:
+            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+            if verb == "request":
+                return _json(200, treasury.request_paypal_payment(conn, pid, data.get("currency", "USD") or "USD", data.get("description", "")))
+            return _json(200, treasury.verify_paypal_payment(conn, pid, data.get("order_id", "")))
+        except treasury.VerifyError as e:
+            return _json(422, {"error": str(e)})
+        except json.JSONDecodeError:
+            return _json(400, {"error": "bad request"})
     if method == "POST" and path == "/api/auth/logout":
         ol.logout(conn, token)
         return _json(200, {"ok": True})
