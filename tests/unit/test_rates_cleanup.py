@@ -174,6 +174,23 @@ class DismissApiTest(unittest.TestCase):
         self.assertEqual((c, r["removed"], r["skipped"]), (200, 0, 1))
         self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 1)
 
+    def test_removable_once_its_only_task_is_cancelled_or_failed(self):
+        run_scout(self.conn, [Source([good()])])
+        oid = self.conn.execute("select id from opportunities").fetchone()[0]
+        self.conn.execute("update tasks set status='CANCELLED' where opportunity_id=?", (oid,))
+        c, r = self.call({"ids": [oid]})
+        self.assertEqual((c, r["removed"]), (200, 1))
+        self.assertEqual(self.conn.execute("select count(*) from opportunities").fetchone()[0], 0)
+
+    def test_still_blocked_while_a_second_task_is_live(self):
+        run_scout(self.conn, [Source([good()])])
+        oid = self.conn.execute("select id from opportunities").fetchone()[0]
+        self.conn.execute("update tasks set status='CANCELLED' where opportunity_id=?", (oid,))
+        self.conn.execute("INSERT INTO tasks(id,opportunity_id,owner_agent,kind,status,created_at,updated_at,idempotency_key) "
+                          "VALUES ('t_retry',?,'operator','draft','IN_PROGRESS','now','now','t_retry_key')", (oid,))
+        c, r = self.call({"ids": [oid]})
+        self.assertEqual((c, r["removed"], r["skipped"]), (200, 0, 1))
+
 
 if __name__ == "__main__":
     unittest.main()

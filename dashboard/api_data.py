@@ -116,17 +116,26 @@ def plan_set(conn, item_id: str, done: bool) -> dict:
 
 def dismiss_opportunities(conn, owner: str, ids: list[str]) -> dict:
     """The owner manually picking which opportunities to remove - out of scope, not worth it,
-    still looks spammy to them even though it cleared the automatic filters. Same safety as the
-    automatic cleanup: never deletes one a task or payment has already touched."""
+    still looks spammy to them even though it cleared the automatic filters. Never deletes one with
+    a payment, or with a task that is still live (OPEN/IN_PROGRESS/SECURITY_HOLD): that work is
+    actually happening. A task that was CANCELLED or FAILED is a dead end, not live work, so an
+    opportunity whose only tasks are in those terminal states can still be removed by hand - the
+    owner rejecting or abandoning a job should let them clear it from the board, not lock it in
+    forever."""
     clean = [i for i in dict.fromkeys(ids) if isinstance(i, str) and OPP_ID.match(i)][:MAX_DISMISS_BATCH]
     if not clean:
         return {"removed": 0, "skipped": len(ids)}
     rows = conn.execute(
         f"SELECT id FROM opportunities WHERE id IN ({','.join('?' * len(clean))}) "
-        "AND NOT EXISTS (SELECT 1 FROM tasks t WHERE t.opportunity_id=opportunities.id) "
+        "AND NOT EXISTS (SELECT 1 FROM tasks t WHERE t.opportunity_id=opportunities.id "
+        "AND t.status NOT IN ('CANCELLED', 'FAILED')) "
         "AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.opportunity_id=opportunities.id)", clean).fetchall()
     removable = [r["id"] for r in rows]
     if removable:
-        conn.execute(f"DELETE FROM opportunities WHERE id IN ({','.join('?' * len(removable))})", removable)
+        placeholders = ",".join("?" * len(removable))
+        # Dead (cancelled/failed) tasks are detached, not deleted, so the task/deliverable/audit
+        # history survives the opportunity row being removed - opportunity_id is nullable for this.
+        conn.execute(f"UPDATE tasks SET opportunity_id=NULL WHERE opportunity_id IN ({placeholders})", removable)
+        conn.execute(f"DELETE FROM opportunities WHERE id IN ({placeholders})", removable)
         audit(conn, owner, "scout.dismiss", None, f"owner removed {len(removable)} opportunity(ies) by hand")
     return {"removed": len(removable), "skipped": len(clean) - len(removable)}
