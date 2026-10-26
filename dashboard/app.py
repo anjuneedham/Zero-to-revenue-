@@ -225,6 +225,15 @@ def handle(method, path, authz, conn, body: bytes = b""):
                             "LEFT JOIN opportunities o ON o.id=p.opportunity_id LEFT JOIN ledger_entries l ON l.entry_id=p.ledger_entry_id "
                             "ORDER BY p.created_at DESC LIMIT 50")
         return _json(200, {"payments": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
+    if method == "POST" and path == "/api/payments/manual":
+        try:
+            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+            return _json(200, api_data.create_manual_payment(conn, owner, data.get("title", ""), data.get("amount", ""),
+                                                             data.get("currency", "USD") or "USD", data.get("organization", "")))
+        except ValueError as e:
+            return _json(400, {"error": str(e)})
+        except json.JSONDecodeError:
+            return _json(400, {"error": "bad request"})
     if method == "GET" and path == "/api/notifications":
         rows = conn.execute("SELECT priority, channel, title, body, status, created_at FROM notifications ORDER BY created_at DESC LIMIT 30")
         return _json(200, {"notifications": [dict(r) for r in rows]})

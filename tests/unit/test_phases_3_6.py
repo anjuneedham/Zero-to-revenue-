@@ -136,6 +136,45 @@ class ActionsTest(Base):
             actions.approve(self.conn, aid, "owner")
 
 
+class ManualPaymentTest(Base):
+    def test_creates_an_anchor_opportunity_and_an_awaiting_payment_row(self):
+        from dashboard import api_data
+        r = api_data.create_manual_payment(self.conn, "owner", "BuildFlow subscription - Acme Co", "49.99", "USD", "Acme Co")
+        self.assertTrue(r["payment_id"].startswith("pay_"))
+        opp = self.one("select title, status, approval_required, organization from opportunities where id=?", r["opportunity_id"])
+        self.assertEqual((opp["title"], opp["status"], opp["approval_required"], opp["organization"]),
+                         ("BuildFlow subscription - Acme Co", "APPROVED", 0, "Acme Co"))
+        pay = self.one("select opportunity_id, expected_amount, asset, status from payments where id=?", r["payment_id"])
+        self.assertEqual((pay["opportunity_id"], float(pay["expected_amount"]), pay["asset"], pay["status"]),
+                         (r["opportunity_id"], 49.99, "USD", "AWAITING_PAYMENT"))
+
+    def test_then_works_with_the_existing_paypal_flow(self):
+        from dashboard import api_data
+        r = api_data.create_manual_payment(self.conn, "owner", "Direct client work", "600")
+        with mock.patch("agents.treasury.run.paypal.create_payment_request",
+                        return_value={"order_id": "ORDERX", "approval_link": "https://x", "status": "CREATED"}):
+            treasury.request_paypal_payment(self.conn, r["payment_id"])
+        completed = {"status": "COMPLETED", "purchase_units": [{"payments": {"captures": [{"amount": {"value": "600", "currency_code": "USD"}}]}}]}
+        with mock.patch("agents.treasury.run.paypal.get_order", return_value=completed):
+            v = treasury.verify_paypal_payment(self.conn, r["payment_id"])
+        self.assertEqual(v["amount"], "600")
+
+    def test_rejects_bad_input(self):
+        from dashboard import api_data
+        for title, amount in [("", "10"), ("ok", "0"), ("ok", "-5"), ("ok", "not-a-number")]:
+            with self.assertRaises(ValueError):
+                api_data.create_manual_payment(self.conn, "owner", title, amount)
+
+    def test_api_route(self):
+        tok, _, _ = session(self.conn)
+        c, _, out = dash.handle("POST", "/api/payments/manual", f"Bearer {tok}", self.conn,
+                                json.dumps({"title": "Test", "amount": "25"}).encode())
+        self.assertEqual(c, 200)
+        self.assertEqual(dash.handle("POST", "/api/payments/manual", None, self.conn, b"{}")[0], 401)
+        c, _, out = dash.handle("POST", "/api/payments/manual", f"Bearer {tok}", self.conn, json.dumps({"title": "", "amount": "5"}).encode())
+        self.assertEqual(c, 400)
+
+
 class PayPalTreasuryTest(Base):
     def test_request_then_verify_end_to_end(self):
         pid = self.submitted_payment()

@@ -100,8 +100,19 @@
       ch.append(cols); g.append(ch);
 
       const pc = card("Payments you are owed", "Paste the transaction hash the payer sends you to check it on-chain, or request a PayPal payment link for card/bank transfer."); pc.classList.add("s12");
+      const addForm = el("div", "form");
+      const t1 = el("input"); t1.placeholder = "What's this for? (e.g. BuildFlow subscription - Acme Co)";
+      const t2 = el("input"); t2.placeholder = "Amount"; t2.type = "number"; t2.min = "0.01"; t2.step = "0.01";
+      const t3 = el("input"); t3.placeholder = "Currency"; t3.value = "USD"; t3.style.maxWidth = "90px";
+      const addBtn = btn("Add a payment you're owed", "gold small", async () => {
+        try {
+          await Z.api("/api/payments/manual", "POST", { title: t1.value.trim(), amount: t2.value, currency: t3.value.trim() || "USD" });
+          Z.toast("Added - request PayPal or paste a tx hash below", "ok"); await Z.rerender();
+        } catch (e) { Z.toast(e.message, "bad"); }
+      });
+      add(addForm, t1, t2, t3, addBtn); pc.append(addForm);
       const pl = el("div", "list");
-      if (!pay.payments.length) pl.append(Z.empty("No payments expected yet", "They appear after you mark work as submitted."));
+      if (!pay.payments.length) pl.append(Z.empty("No payments expected yet", "Add one above, for work outside the automated pipeline (like a BuildFlow subscription), or they appear automatically after you mark Scout work as submitted."));
       pay.payments.forEach(p => {
         const it = el("div", "item"); add(it, el("div", "t", p.title || p.id), add(el("div", "meta"), pill(nice(p.status), Z.statusKind(p.status)),
           pill((p.expected_amount == null ? "?" : fmt.num(p.expected_amount, 2)) + " " + (p.asset || "") + " expected")));

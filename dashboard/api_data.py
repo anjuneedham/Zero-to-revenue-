@@ -4,7 +4,8 @@ owner's own manual dismissal of opportunities."""
 import json
 import os
 import re
-from decimal import Decimal
+import uuid
+from decimal import Decimal, InvalidOperation
 
 from core import actions, budget
 from core.audit import audit
@@ -91,6 +92,33 @@ def treasury_overview(conn) -> dict:
             "paypal": bool(os.environ.get("PAYPAL_CLIENT_ID")) and bool(os.environ.get("PAYPAL_CLIENT_SECRET")),
             "safety": {"wallet_mode": policy.WALLET_MODE, "signing": policy.TRANSACTION_SIGNING_ENABLED,
                        "spending": policy.AUTO_SPENDING_ENABLED, "trading": policy.TRADING_ENABLED}}
+
+
+def create_manual_payment(conn, owner: str, title: str, amount: str, currency: str = "USD", organization: str = "") -> dict:
+    """A payment the owner wants to collect for work with no Scout opportunity behind it - a
+    BuildFlow subscription, a direct client, anything outside the automated pipeline. Creates a
+    minimal opportunity record to anchor it (every verified dollar must trace back to a named
+    source - core.policy.counts_as_verified_revenue requires it) plus an AWAITING_PAYMENT row, so
+    the existing PayPal/on-chain verification controls work on it exactly like an automated one."""
+    title = (title or "").strip()[:300]
+    if not title:
+        raise ValueError("a title/description is required")
+    try:
+        amt = Decimal(str(amount))
+    except InvalidOperation:
+        raise ValueError("amount must be a number") from None
+    if amt <= 0:
+        raise ValueError("amount must be greater than zero")
+    oid = "opp_manual_" + uuid.uuid4().hex[:12]
+    pid = "pay_" + uuid.uuid4().hex[:12]
+    conn.execute(
+        "INSERT INTO opportunities(id,title,category,source,source_url,organization,discovered_at,status,approval_required) "
+        "VALUES (?,?,'manual','owner',?,?,?,'APPROVED',0)",
+        (oid, title, f"manual:{oid}", (organization or "").strip()[:200] or None, now()))
+    conn.execute("INSERT INTO payments(id,opportunity_id,expected_amount,asset,status,created_at) VALUES (?,?,?,?,'AWAITING_PAYMENT',?)",
+                 (pid, oid, amt, currency.strip().upper()[:10] or "USD", now()))
+    audit(conn, owner, "payment.create_manual", pid, title)
+    return {"payment_id": pid, "opportunity_id": oid}
 
 
 def plan_get(conn) -> dict:
