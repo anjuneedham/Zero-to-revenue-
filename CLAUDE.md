@@ -2,6 +2,8 @@
 
 **First action of every session:** read `docs/master/STATE.md` (about 1 page). It is the single source of truth for who the owner is, what the ventures are, what is decided, what is done, and what is next. Do not ask the owner for anything STATE.md already answers. If it is missing something the owner tells you, that is a bug: record it (see below).
 
+The plan is `docs/master/MASTER_PLAN.md`: the first unchecked box is your task. STATE.md says which step is current.
+
 ## Capture rule (the fix for "it asked me again")
 When the owner states a fact, decision, plan, name or preference, write it into `docs/master/STATE.md` in the SAME turn, before doing anything else. Chat is not memory; only committed files are. A new session sees nothing but the repo.
 

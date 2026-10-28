@@ -15,11 +15,12 @@ Last updated: 2026-10-28 by the token/continuity audit session.
 - The earlier handoff said "founder must confirm which e-commerce repo is the brand". The owner has since said it is a fashion/clothing brand, and no repo matched. Treat that as unresolved until the owner gives the name and repo (or says none exists yet).
 
 ## Done (newest first)
+- 2026-10-28: Wrote MASTER_PLAN.md (fashion is a placeholder until step 0).
 - 2026-10-28: Diagnosed lost-context cause; added CLAUDE.md and this STATE.md.
 - 2026-10-28: HANDOFF.md and IMPLEMENTATION_AUDIT.md written (1b1c990, de0ad30).
 
 ## Next (exactly one)
-Owner supplies the fashion brand name, plan and repo, which gets recorded above. Then: docs/master/CURRENT_STATE_AUDIT.md and MASTER_PLAN.md from the evidence in HANDOFF.md.
+Plan: docs/master/MASTER_PLAN.md, step 0. Owner supplies the fashion brand name, plan and repo, which gets recorded above. Then: docs/master/CURRENT_STATE_AUDIT.md and MASTER_PLAN.md from the evidence in HANDOFF.md.
 
 ## Open questions
 - Fashion brand: name, plan, repo, current state.
