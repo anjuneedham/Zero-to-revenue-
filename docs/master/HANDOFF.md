@@ -1,6 +1,6 @@
 # Handoff for the Zero to Hero OS master-plan chat (28 Oct 2026)
 
-Start a NEW chat with: "Read docs/master/HANDOFF.md in anjuneedham/Zero-to-revenue- and continue." Nothing else needed.
+Start a NEW chat with just: "continue". CLAUDE.md loads automatically and points to docs/master/STATE.md, which holds current facts, decisions and the next step. This file is the evidence appendix (verified 28 Oct); STATE.md wins on any conflict.
 
 ## Token rules for every chat (policy, not optional)
 - One task per chat; new chat when a task is done. Never reuse a chat across days.
