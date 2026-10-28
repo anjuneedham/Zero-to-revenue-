@@ -1,3 +1,5 @@
+> **Status (28 Oct 2026): describes the original crypto / zero-capital product and is partly stale.** Current direction: `docs/master/STATUS.md` and `docs/master/MASTER_PLAN.md` (multi-venture OS).
+
 # Scout (Phase 2) — mode: READ_ONLY (reads public sources, writes only to the database)
 
 ## Flow

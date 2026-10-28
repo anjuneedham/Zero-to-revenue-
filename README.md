@@ -1,3 +1,5 @@
+> **Status (28 Oct 2026): describes the original crypto / zero-capital product and is partly stale.** Current direction: `docs/master/STATUS.md` and `docs/master/MASTER_PLAN.md` (multi-venture OS).
+
 # Zero-to-Revenue Agent System
 
 Three cooperating agents — **Scout** (find opportunities), **Operator** (do the
