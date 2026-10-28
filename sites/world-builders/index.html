@@ -4,7 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>World Builders Construction | Quality You Can Trust. Transparency You Deserve.</title>
-<meta name="description" content="New house construction, extensions, renovations, concrete and masonry across Jamaica. Based in Clarendon. Request a quote and site visit.">
+<meta name="description" content="New house construction, extensions, renovations, roofing, concrete and masonry across Jamaica. Based in Clarendon. Request a written quote or book a site visit.">
+<link rel="canonical" href="https://worldbuildersconstruction.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="World Builders Construction">
+<meta property="og:title" content="World Builders Construction | Quality You Can Trust. Transparency You Deserve.">
+<meta property="og:description" content="From foundation to finish across Jamaica: new homes, extensions, renovations, roofing and masonry. Written quotes, agreed payment schedules, progress updates.">
+<meta property="og:url" content="https://worldbuildersconstruction.com/">
+<meta property="og:image" content="https://worldbuildersconstruction.com/images/og-share.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"GeneralContractor","name":"World Builders Construction","slogan":"Quality You Can Trust. Transparency You Deserve.","url":"https://worldbuildersconstruction.com/","telephone":"+1-876-513-4962","image":"https://worldbuildersconstruction.com/images/og-share.jpg","address":{"@type":"PostalAddress","addressRegion":"Clarendon","addressCountry":"JM"},"areaServed":{"@type":"Country","name":"Jamaica"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"17:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"08:00","closes":"13:00"}],"sameAs":["https://www.facebook.com/share/1FN6NYhPkT/?mibextid=wwXIfr","https://www.instagram.com/worldbuilders123","https://www.tiktok.com/@worldbuilder123"]}</script>
 <meta name="theme-color" content="#0A2A66">
 <link rel="icon" href="images/logo-mark.jpg">
 <link rel="preload" as="image" href="images/logo-full.jpg">
@@ -94,11 +104,43 @@ h2{font-size:clamp(38px,6vw,70px);font-weight:700;max-width:780px;color:var(--na
 .checks li{padding:14px 0 14px 34px;border-bottom:1px solid var(--line);position:relative;font-weight:500}
 .checks li:before{content:"";position:absolute;left:4px;top:19px;width:14px;height:8px;border-left:3px solid var(--blue);border-bottom:3px solid var(--blue);transform:rotate(-45deg)}
 /* gallery */
-.gal{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:340px;gap:10px;margin-top:44px}
-.gal figure{position:relative;overflow:hidden;background:var(--mist);margin:0}
-.gal figure img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
+.filters button{border:1.5px solid var(--line);background:#fff;padding:10px 18px;font:600 14px 'Inter Tight';color:var(--navy);cursor:pointer;transition:.15s}
+.filters button:hover{border-color:var(--navy)}
+.filters button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.gal{column-count:3;column-gap:10px;margin-top:22px}
+.gal figure{break-inside:avoid;margin:0 0 10px;position:relative;overflow:hidden;background:var(--mist)}
+.gal figure.off{display:none}
+.gal figure button{display:block;width:100%;border:0;padding:0;background:none;cursor:zoom-in}
+.gal figure img{display:block;width:100%;height:auto;transition:transform .6s}
 .gal figure:hover img{transform:scale(1.04)}
-.gal figcaption{position:absolute;left:0;bottom:0;right:0;padding:26px 14px 12px;background:linear-gradient(transparent,rgba(7,29,73,.85));color:#fff;font-size:12.5px;letter-spacing:.04em}
+.gal figcaption{position:absolute;left:0;bottom:0;right:0;padding:26px 14px 12px;background:linear-gradient(transparent,rgba(7,29,73,.85));color:#fff;font-size:12.5px;letter-spacing:.04em;pointer-events:none}
+.gal-note{margin-top:14px;color:var(--mute);font-size:13px}
+/* lightbox */
+#lb{position:fixed;inset:0;z-index:120;background:rgba(4,19,51,.95);display:grid;grid-template-rows:1fr auto;place-items:center;padding:56px 56px 18px}
+#lb[hidden]{display:none}
+#lb img{max-width:100%;max-height:100%;object-fit:contain;min-height:0}
+#lb p{color:#cfe0ff;font-size:14px;padding-top:12px;text-align:center}
+#lb button{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;width:46px;height:46px;font-size:26px;cursor:pointer;line-height:1}
+#lb button:hover{background:rgba(255,255,255,.25)}
+#lb .lbx{top:12px;right:12px}#lb .lbp{left:8px;top:50%}#lb .lbn{right:8px;top:50%}
+/* stages */
+.stg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:44px}
+.stg figure{position:relative;margin:0;aspect-ratio:3/4;overflow:hidden;background:var(--mist)}
+.stg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.stg figure:hover img{transform:scale(1.04)}
+.stg figcaption{position:absolute;left:0;right:0;bottom:0;padding:60px 16px 16px;background:linear-gradient(transparent,rgba(7,29,73,.93));color:#fff}
+.stg .k{font-size:12px;letter-spacing:.2em;color:var(--sky);font-weight:600}
+.stg b{display:block;font-family:'Barlow Condensed';font-size:28px;text-transform:uppercase;line-height:1;margin:4px 0 6px}
+.stg span.d{font-size:13.5px;color:#c9d7f0;display:block}
+/* extra calls to action */
+.btn.ghost-w{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.7)}.btn.ghost-w:hover{background:#fff;color:var(--navy)}
+.svc-cta{margin-top:44px}
+.band{background:linear-gradient(rgba(7,29,73,.84),rgba(7,29,73,.92)),url(images/home-dark-roof-aerial.jpg) center/cover;color:#fff;text-align:center;padding:84px 0}
+.band h2{color:#fff;margin:0 auto}.band p{max-width:560px;margin:18px auto 30px;color:#c9d7f0;font-size:17px}
+.band .cta{justify-content:center}
+.intent{background:#EAF2FF;border-left:4px solid var(--blue);color:var(--navy);padding:12px 14px;font-size:14px;margin-bottom:18px;line-height:1.45}
+.links .tel{color:var(--navy);font-weight:600;white-space:nowrap}
 /* quote */
 .quote{background:var(--navy2);color:#fff}
 .quote .wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px}
@@ -139,14 +181,14 @@ footer b{color:#fff;font-family:'Barlow Condensed';font-size:22px;letter-spacing
 footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
 .sticky{position:fixed;bottom:0;left:0;right:0;z-index:60;display:none;gap:1px;background:#fff}
 .sticky a{flex:1;text-align:center;padding:16px;font-weight:600;color:#fff;text-decoration:none;background:var(--blue)}
-.sticky a+a{background:var(--ok)}
+.sticky a.v{background:var(--navy)}.sticky a.c{background:var(--ok)}.sticky a{padding:16px 6px;font-size:14.5px}
 .reveal{opacity:0;transform:translateY(24px);transition:.7s}.reveal.in{opacity:1;transform:none}
 @media(max-width:900px){
  .hero .wrap,.quote .wrap,.promise .wrap,.spec{grid-template-columns:1fr}
  .frame{margin:0 14px 18px 0}
  .steps{grid-template-columns:1fr;border-top:0;border-left:2px solid var(--navy);margin-left:6px}
  .step{padding:0 0 28px 24px}.step:before{top:4px;left:-8px}
- .gal{grid-auto-rows:220px}
+ .gal{column-count:2}.stg{grid-template-columns:1fr 1fr}.band{padding:64px 0}#lb{padding:56px 8px 14px}
  section{padding:60px 0}.links a:not(.btn){display:none}.links .btn{display:none}.sticky{display:flex}form{padding:22px}.row{grid-template-columns:1fr}
  .brand img{height:40px}.brand b{font-size:19px}
 }
@@ -164,7 +206,7 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
   <img src="images/logo-mark.jpg" alt="">
   <span><b>World Builders</b><small>Construction</small></span>
  </a>
- <nav class="links"><a href="#services">Services</a><a href="#process">Process</a><a href="#promise">Our promise</a><a href="#work">Projects</a><a class="btn" href="#quote">Request a quote</a></nav>
+ <nav class="links"><a href="#services">Services</a><a href="#process">Process</a><a href="#promise">Our promise</a><a href="#work">Projects</a><a class="tel" href="tel:+18765134942" data-cta="nav_call">Call now</a><a class="btn" href="#quote" data-cta="nav_quote" data-intent="quote">Request a quote</a></nav>
 </div></header>
 
 <main id="top">
@@ -173,7 +215,7 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
   <div class="tag">Clarendon · Island-wide</div>
   <h1>Quality you can trust.<em>Transparency you deserve.</em></h1>
   <p class="lead">From new homes to extensions and renovations, we build your vision from the foundation to the finish, with every cost, quantity and change put in writing.</p>
-  <div class="cta"><a class="btn" href="#quote">Request a quote →</a><a class="btn ghost" href="#process">How it works</a></div>
+  <div class="cta"><a class="btn" href="#quote" data-cta="hero_quote" data-intent="quote">Request a quote →</a><a class="btn ghost" href="#quote" data-cta="hero_visit" data-intent="site_visit">Book a site visit</a><a class="btn wa" href="tel:+18765134942" data-cta="hero_call">Call now</a></div>
   <div class="trust"><span>Written quotations</span><span>Agreed payment schedules</span><span>Progress updates</span></div>
  </div>
  <div class="frame reveal"><img src="images/site-team-house.jpg" alt="World Builders team on site in front of a completed house"><div class="cap">Site visit · Clarendon</div></div>
@@ -196,6 +238,19 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
   <li><span class="n">10</span><h3>Site Visits &amp; Consultations</h3><p>We assess your site, discuss requirements and advise on next steps.</p></li>
   <li><span class="n">11</span><h3>General Construction &amp; Maintenance</h3><p>Building repairs, maintenance and other agreed construction tasks.</p></li>
  </ul>
+ <div class="cta svc-cta"><a class="btn" href="#quote" data-cta="services_quote" data-intent="quote">Request a quote →</a><a class="btn ghost-w" href="#quote" data-cta="services_visit" data-intent="site_visit">Book a site visit</a><a class="btn wa" href="tel:+18765134942" data-cta="services_call">Call now</a></div>
+</div></section>
+
+<section class="stages" id="stages"><div class="wrap">
+ <div class="eyebrow">On site</div>
+ <h2 class="reveal">From the first block to the final coat.</h2>
+ <p class="sec-sub">Real work from our sites, at every stage of a build.</p>
+ <div class="stg reveal">
+  <figure><img loading="lazy" width="1600" height="1200" src="images/blockwork-walls.jpg" alt="Block walls rising on a new build"><figcaption><span class="k">Stage 1</span><b>Blockwork</b><span class="d">Walls set out, laid and levelled.</span></figcaption></figure>
+  <figure><img loading="lazy" width="1600" height="1200" src="images/block-columns.jpg" alt="Block and column structure with an arched entrance"><figcaption><span class="k">Stage 2</span><b>Structure</b><span class="d">Columns, beams, slabs and openings.</span></figcaption></figure>
+  <figure><img loading="lazy" width="1280" height="960" src="images/roof-tile-install.jpg" alt="Tile roof nearing completion, seen from above"><figcaption><span class="k">Stage 3</span><b>Roofing</b><span class="d">Framing, metal and tile roofing.</span></figcaption></figure>
+  <figure><img loading="lazy" width="900" height="1600" src="images/render-gable.jpg" alt="Rendered gable wall with a feature window"><figcaption><span class="k">Stage 4</span><b>Finishing</b><span class="d">Rendering, plaster and detail work.</span></figcaption></figure>
+ </div>
 </div></section>
 
 <section id="process"><div class="wrap">
@@ -232,7 +287,16 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
 <section id="work"><div class="wrap">
  <div class="eyebrow">Projects</div>
  <h2 class="reveal">Real sites. Real crews.</h2>
- <div class="gal reveal" id="gal"></div>
+ <p class="sec-sub">Roofs, structures and finishes from sites across Jamaica. Tap any photo to enlarge.</p>
+ <div class="filters" id="flt" role="group" aria-label="Filter projects"></div>
+ <div class="gal" id="gal"></div>
+</div></section>
+
+<section class="band" id="visit"><div class="wrap">
+ <div class="eyebrow" style="color:var(--sky)">Ready when you are</div>
+ <h2>Let's see your site.</h2>
+ <p>Larger projects can't be priced from a photo. Book a site visit and we'll measure, discuss your plans and follow up with a detailed written quote.</p>
+ <div class="cta"><a class="btn" href="#quote" data-cta="band_visit" data-intent="site_visit">Book a site visit →</a><a class="btn wa" href="tel:+18765134942" data-cta="band_call">Call now: 876-513-4942</a><a class="btn ghost-w" href="#quote" data-cta="band_quote" data-intent="quote">Request a quote</a></div>
 </div></section>
 
 <section class="quote" id="quote"><div class="wrap">
@@ -246,6 +310,7 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
   <div class="hours"><b>Site operations:</b> Mon–Fri 7:30am–5:00pm · Sat 7:30am–1:00pm<br><b>Office:</b> Mon–Fri 8:00am–5:00pm · Sat 8:00am–1:00pm<br>Sundays &amp; public holidays by prior arrangement.</div>
  </div>
  <form id="f" novalidate>
+  <div class="intent" id="intent" hidden></div>
   <div class="pvnote"><b>Test only:</b> this preview does not send enquiries to World Builders. Please do not use it for a real enquiry. Call or WhatsApp 876-513-4962 instead.</div>
   <div class="prog"><i class="on"></i><i></i><i></i></div><div class="stepno" id="sn">Step 1 of 3</div>
   <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off">
@@ -291,7 +356,8 @@ footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
  <div>WhatsApp <a href="https://wa.me/18765134962">876-513-4962</a><br>Tel <a href="tel:+18765134942">876-513-4942</a><br><a href="mailto:gayle.r.ricardo@gmail.com">gayle.r.ricardo@gmail.com</a></div>
  <div><a href="https://www.facebook.com/share/1FN6NYhPkT/?mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a> · <a href="https://www.instagram.com/worldbuilders123" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.tiktok.com/@worldbuilder123" target="_blank" rel="noopener">TikTok</a><br>© <span id="yr"></span> World Builders Construction</div>
 </div></footer>
-<div class="sticky"><a href="#quote">Get a quote</a><a href="https://wa.me/18765134962">WhatsApp</a></div>
+<div class="sticky"><a href="#quote" data-cta="sticky_quote" data-intent="quote">Get a quote</a><a class="v" href="#quote" data-cta="sticky_visit" data-intent="site_visit">Site visit</a><a class="c" href="tel:+18765134942" data-cta="sticky_call">Call now</a></div>
+<div id="lb" role="dialog" aria-modal="true" aria-label="Project photo" hidden><button type="button" class="lbx" aria-label="Close photo">&times;</button><button type="button" class="lbp" aria-label="Previous photo">&#8249;</button><img alt=""><p></p><button type="button" class="lbn" aria-label="Next photo">&#8250;</button></div>
 
 <script>
 /* ===== CONFIG ===== */
@@ -299,17 +365,59 @@ var CFG={
   whatsapp:'18765134962',
   /* Paste a form endpoint (Formspree / Web3Forms / own API) to receive each lead by email.
      Until set, leads are saved in the browser and the visitor is handed to WhatsApp with the enquiry prefilled. */
-  endpoint:''
+  endpoint:'api/lead.php'
 };
-/* Gallery: add or remove entries to update the site. src is a file in /images. */
+/* Gallery: add or remove entries to update the site. src is a file in /images; c = roof | structure | finish. */
+var CATS=[['all','All'],['roof','Roofing'],['structure','Concrete & block'],['finish','Finishing']];
 var GALLERY=[
- {src:'images/site-team-house.jpg',cap:'Site team at a completed house'},
- {src:'images/block-laying.jpg',cap:'Block laying on site'}
+ {src:'images/roof-metal-hip.jpg',w:1080,h:500,c:'roof',cap:'Standing-seam metal roofing, hip design'},
+ {src:'images/blockwork-walls.jpg',w:1600,h:1200,c:'structure',cap:'Block walls rising on a new build'},
+ {src:'images/render-gable.jpg',w:900,h:1600,c:'finish',cap:'Rendered gable with feature window'},
+ {src:'images/home-dark-roof-aerial.jpg',w:1280,h:719,c:'roof',cap:'Two-storey home with dark roofing'},
+ {src:'images/block-columns.jpg',w:1600,h:1200,c:'structure',cap:'Block and column structure with arched entrance'},
+ {src:'images/roof-terracotta-aerial.jpg',w:1280,h:960,c:'roof',cap:'Terracotta-tone tile roof, aerial view'},
+ {src:'images/paved-walkway.jpg',w:1600,h:1200,c:'finish',cap:'Paved walkway with timber steps'},
+ {src:'images/concrete-seating.jpg',w:900,h:1600,c:'structure',cap:'Finished concrete seating'},
+ {src:'images/roof-blue-multistorey.jpg',w:1280,h:719,c:'roof',cap:'Blue roofing on a multi-storey build'},
+ {src:'images/staircase-glass.jpg',w:900,h:1600,c:'finish',cap:'Staircase with glass balustrade'},
+ {src:'images/block-shell.jpg',w:1600,h:1200,c:'structure',cap:'Block shell with window openings'},
+ {src:'images/roof-blue-block-home.jpg',w:1280,h:960,c:'roof',cap:'Blue metal roof over a block structure'},
+ {src:'images/render-wall-upper.jpg',w:1200,h:1600,c:'finish',cap:'Rendered upper walls and eaves'},
+ {src:'images/home-tile-roof-finished.jpg',w:1280,h:960,c:'roof',cap:'Completed two-storey home with tile roof'},
+ {src:'images/block-laying.jpg',w:524,h:567,c:'structure',cap:'Block laying on site'},
+ {src:'images/roof-tile-install.jpg',w:1280,h:960,c:'roof',cap:'Tile roofing nearing completion'},
+ {src:'images/roof-metal-multilevel.jpg',w:1280,h:960,c:'roof',cap:'Multi-level metal roofing on site'},
+ {src:'images/roof-framing-interior.jpg',w:900,h:1600,c:'roof',cap:'Timber roof framing'}
 ];
 (function(){
  document.getElementById('yr').textContent=new Date().getFullYear();
- if(!CFG.endpoint)document.documentElement.classList.add('showpv');
- document.getElementById('gal').innerHTML=GALLERY.map(function(g){return '<figure><img loading="lazy" src="'+g.src+'" alt="'+g.cap+'"><figcaption>'+g.cap+'</figcaption></figure>'}).join('');
+ if(!CFG.endpoint||/(\.vercel\.app|localhost|127\.0\.0\.1)$/.test(location.hostname))document.documentElement.classList.add('showpv');
+ var gal=document.getElementById('gal'),flt=document.getElementById('flt'),lb=document.getElementById('lb'),lbi=lb.querySelector('img'),lbp=lb.querySelector('p'),cur=0,vis=[],opener=null;
+ function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+ gal.innerHTML=GALLERY.map(function(g,n){return '<figure data-c="'+g.c+'"><button type="button" data-n="'+n+'" aria-label="Enlarge photo: '+esc(g.cap)+'"><img loading="lazy" width="'+g.w+'" height="'+g.h+'" src="'+g.src+'" alt="'+esc(g.cap)+'"></button><figcaption>'+esc(g.cap)+'</figcaption></figure>'}).join('');
+ flt.innerHTML=CATS.map(function(c,n){return '<button type="button" data-c="'+c[0]+'" aria-pressed="'+(n===0)+'">'+esc(c[1])+'</button>'}).join('');
+ flt.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  [].forEach.call(flt.children,function(x){x.setAttribute('aria-pressed',x===b)});
+  [].forEach.call(gal.children,function(f){f.classList.toggle('off',b.dataset.c!=='all'&&f.dataset.c!==b.dataset.c)});
+  (window.dataLayer=window.dataLayer||[]).push({event:'gallery_filter',filter:b.dataset.c})});
+ function lbShow(n){vis=[].filter.call(gal.children,function(f){return !f.classList.contains('off')}).map(function(f){return +f.querySelector('button').dataset.n});
+  cur=(n+vis.length)%vis.length;var g=GALLERY[vis[cur]];lbi.src=g.src;lbi.alt=g.cap;lbp.textContent=g.cap+'  ('+(cur+1)+' / '+vis.length+')'}
+ function openLb(n){opener=document.activeElement;vis=[].filter.call(gal.children,function(f){return !f.classList.contains('off')}).map(function(f){return +f.querySelector('button').dataset.n});
+  lbShow(vis.indexOf(n));lb.hidden=false;document.documentElement.style.overflow='hidden';lb.querySelector('.lbx').focus()}
+ function closeLb(){lb.hidden=true;document.documentElement.style.overflow='';lbi.removeAttribute('src');if(opener)opener.focus()}
+ gal.addEventListener('click',function(e){var b=e.target.closest('button');if(b)openLb(+b.dataset.n)});
+ lb.addEventListener('click',function(e){if(e.target.closest('.lbx')||e.target===lb)closeLb();else if(e.target.closest('.lbp'))lbShow(cur-1);else if(e.target.closest('.lbn'))lbShow(cur+1)});
+ document.addEventListener('keydown',function(e){if(lb.hidden)return;if(e.key==='Escape')closeLb();else if(e.key==='ArrowLeft')lbShow(cur-1);else if(e.key==='ArrowRight')lbShow(cur+1);
+  else if(e.key==='Tab'){var f=lb.querySelectorAll('button');if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus()}}});
+ var sx=null;lb.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
+ lb.addEventListener('touchend',function(e){if(sx===null)return;var d=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(d)>50)lbShow(cur+(d<0?1:-1))},{passive:true});
+ /* calls to action: remember what the visitor wanted (quote vs site visit) and track every click */
+ var intent='quote',note=document.getElementById('intent');
+ function setIntent(v){intent=v;if(v==='site_visit'){note.hidden=false;note.innerHTML='<b>Booking a site visit.</b> Answer a few quick questions and Mr. Gayle will contact you to confirm a time.'}else{note.hidden=true}}
+ document.addEventListener('click',function(e){var a=e.target.closest('[data-cta]');if(!a)return;
+  (window.dataLayer=window.dataLayer||[]).push({event:'cta_click',cta:a.dataset.cta,variant:window.WB_VARIANT});
+  if(a.dataset.intent)setIntent(a.dataset.intent);
+  if(/^tel:/.test(a.getAttribute('href'))){if(window.fbq)fbq('track','Contact');if(window.gtag)gtag('event','click_to_call')}});
  /* loader A/B */
  var q=new URLSearchParams(location.search).get('loader'),v;
  try{v=localStorage.getItem('wb_loader')}catch(e){}
@@ -343,15 +451,14 @@ var GALLERY=[
   if(name.length<2){er.textContent='Please enter your name.';return}
   if(ph.length<7){er.textContent='Please enter a valid phone or WhatsApp number.';return}
   if(!f.location.value.trim()){er.textContent='Please add the project location.';return}
-  var d={name:name,phone:f.phone.value.trim(),email:f.email.value.trim(),location:f.location.value.trim(),project:f.project.value,size:f.size.value,plans:f.plans.value,budget_jmd:f.budget.value,timeframe:f.timeframe.value,message:f.message.value.trim(),variant:window.WB_VARIANT,page:location.href,time:new Date().toISOString()};
-  try{var a=JSON.parse(localStorage.getItem('wb_leads')||'[]');a.push(d);localStorage.setItem('wb_leads',JSON.stringify(a))}catch(x){}
-  var msg='Hello World Builders, I would like a quote.\n\nName: '+d.name+'\nPhone: '+d.phone+'\nLocation: '+d.location+'\nProject: '+d.project+'\nSize: '+d.size+'\nPlans: '+d.plans+'\nBudget (JMD): '+d.budget_jmd+'\nStart: '+d.timeframe+(d.message?'\nNotes: '+d.message:'');
+  var d={intent:intent,company_website:'',name:name,phone:f.phone.value.trim(),email:f.email.value.trim(),location:f.location.value.trim(),project:f.project.value,size:f.size.value,plans:f.plans.value,budget_jmd:f.budget.value,timeframe:f.timeframe.value,message:f.message.value.trim(),variant:window.WB_VARIANT,page:location.href,time:new Date().toISOString()};
+  var msg='Hello World Builders, I would like '+(d.intent==='site_visit'?'to book a site visit.':'a quote.')+'\n\nName: '+d.name+'\nPhone: '+d.phone+'\nLocation: '+d.location+'\nProject: '+d.project+'\nSize: '+d.size+'\nPlans: '+d.plans+'\nBudget (JMD): '+d.budget_jmd+'\nStart: '+d.timeframe+(d.message?'\nNotes: '+d.message:'');
   var wa='https://wa.me/'+CFG.whatsapp+'?text='+encodeURIComponent(msg);
   var btn=document.getElementById('go');btn.disabled=true;btn.textContent='Sending…';
   function done(sent){fs.forEach(function(x){x.classList.remove('on')});f.querySelector('.prog').style.display='none';sn.style.display='none';
    document.getElementById('wa').href=wa;document.getElementById('ok').style.display='block';
-   if(!sent)document.getElementById('okp').textContent=CFG.endpoint?'Thank you. To get the fastest response, tap below to send your details to us on WhatsApp.':'TEST ONLY: this preview did not send your enquiry to World Builders. To really enquire, tap below to send these details on WhatsApp.';
-   if(!CFG.endpoint)document.getElementById('okh').textContent='Test received (not sent)';track('lead_submitted');if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead');
+   if(sent){document.getElementById('okh').textContent=d.intent==='site_visit'?'Site visit request received':'Enquiry received';track('lead_submitted');if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead')}
+   else{document.getElementById('okh').textContent='One more step';document.getElementById('okp').textContent='We could not send your enquiry automatically. Please tap below to send these details on WhatsApp so it reaches us, or call 876-513-4962.';track('lead_failed')}
    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'})}
   if(CFG.endpoint){fetch(CFG.endpoint,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(d)}).then(function(r){done(r.ok)}).catch(function(){done(false)})}
   else done(false)})
