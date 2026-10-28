@@ -26,4 +26,7 @@ Single-tenant, opportunity/lead-centric model; no projects, tasks (beyond agent 
 2. docs/master/ventures/{BUILDFLOW,AGRILOOP,TRADING,ECOMMERCE}.md with: report, audit, risks, MVP scope, roadmap, growth plan, metrics, acceptance criteria.
 3. Phase 1 build: `ventures`, `tasks`, `decisions`, `experiments`, `metrics` tables (reversible migration 007), venture-scoped views, weekly-allocation page. Keep Python/Neon/Vercel stack.
 4. Then the BuildFlow sidekick work from the earlier brief (needs ANTHROPIC_API_KEY).
-Open decisions: which e-commerce repo is the brand; Gmail token expires ~2 Nov; Agriloop live data source.
+## Decisions (founder, 28 Oct 2026)
+- E-commerce brand: NEITHER Kadeform- nor NF-Fragrance-. The brand is a new one: "yaad and abroad", a pain-into-art, Jamaica-inspired clothing line. Launch range: shirts, sweatshirts, sweatpants, pullovers. No repo exists yet; ECOMMERCE.md must plan it from zero (the two existing storefronts are parked, not the brand).
+- Gmail OAuth token (expires ~2 Nov): not a priority. Reissue or publish the app later.
+- Agriloop live data source: Firebase (founder statement). Live web app and APK target 15 Nov while Google Play and Apple App Store approvals are pending. CONFLICT: repo docs say Supabase Auth + in-memory data source; AGRILOOP.md must flag this and verify against the live deployment before relying on either.
