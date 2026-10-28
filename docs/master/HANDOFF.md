@@ -1,6 +1,6 @@
 # Handoff for the Zero to Hero OS master-plan chat (28 Oct 2026)
 
-Start a NEW chat with: "Read docs/master/HANDOFF.md in anjuneedham/Zero-to-revenue- and continue." Nothing else needed.
+Start a NEW chat with (or just read NEXT.md, which is the live pointer): "Read docs/master/HANDOFF.md in anjuneedham/Zero-to-revenue- and continue." Nothing else needed.
 
 ## Token rules for every chat (policy, not optional)
 - One task per chat; new chat when a task is done. Never reuse a chat across days.
@@ -26,4 +26,4 @@ Single-tenant, opportunity/lead-centric model; no projects, tasks (beyond agent 
 2. docs/master/ventures/{BUILDFLOW,AGRILOOP,TRADING,ECOMMERCE}.md with: report, audit, risks, MVP scope, roadmap, growth plan, metrics, acceptance criteria.
 3. Phase 1 build: `ventures`, `tasks`, `decisions`, `experiments`, `metrics` tables (reversible migration 007), venture-scoped views, weekly-allocation page. Keep Python/Neon/Vercel stack.
 4. Then the BuildFlow sidekick work from the earlier brief (needs ANTHROPIC_API_KEY).
-Open decisions: which e-commerce repo is the brand; Gmail token expires ~2 Nov; Agriloop live data source.
+Open decisions: which e-commerce repo is the brand (NO fashion repo exists yet); Gmail token expires ~2 Nov. Agriloop has NO live deployment/data source: treat it as pre-launch.

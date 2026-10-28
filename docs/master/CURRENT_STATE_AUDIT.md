@@ -30,6 +30,6 @@ MQL5 "Synthetic Edge EA" for Deriv synthetic indices, 20 files, last commit 26 S
 Kadeform- (Shopify/Dawn, single hero product FlexBack Pro, 446 files) and NF-Fragrance- (static Netlify, five colognes, 24 files). No fashion repo found; Echo-Ai is private/inaccessible.
 
 ## Open decisions
-1. Which e-commerce repo is the brand.
+1. Which e-commerce repo is the brand (no fashion repo exists yet).
 2. Gmail token expires ~2 Nov.
-3. Agriloop live data source.
+3. (Resolved 28 Oct) Agriloop is not live; no production data source exists.
