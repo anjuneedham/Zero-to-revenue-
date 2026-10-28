@@ -75,6 +75,31 @@
   };
   Z.statusKind = s => ({ QUALIFIED: "ok", APPROVED: "gold", IN_PROGRESS: "royal", AWAITING_PAYMENT: "gold", PAYMENT_VERIFIED: "ok", COMPLETED: "ok",
     REVIEW_REQUIRED: "warn", WAITING_FOR_USER: "warn", QUEUED: "", FAILED: "bad", REJECTED: "bad", CANCELLED: "bad", OPEN: "warn" }[s] || "");
+  // One roll-up of every tracked step in the OS: build phases, master-plan steps, and every checklist.
+  Z.progress = (plan, ticks) => {
+    const pc = (items, ok) => { const done = items.filter(ok).length; return { done, total: items.length, pct: items.length ? Math.round(100 * done / items.length) : 0 }; };
+    const t = i => !!ticks[i.id];
+    const week = plan.week.days.flatMap(d => d.items);
+    const areas = [
+      ["Build phases", pc(plan.phases.map(p => ({ id: p[0], st: p[3] })), i => i.st === "done")],
+      ["Master plan", pc(plan.master, t)],
+      ["BuildFlow launch", pc(plan.buildflow, t)],
+      ["Your setup", pc(plan.system.concat(plan.sources_setup), t)],
+      ["This week", pc(week, t)],
+    ];
+    const done = areas.reduce((a, [, x]) => a + x.done, 0), total = areas.reduce((a, [, x]) => a + x.total, 0);
+    return { areas, done, total, pct: total ? Math.round(100 * done / total) : 0 };
+  };
+  Z.progressCard = (plan, ticks) => {
+    const pr = Z.progress(plan, ticks), c = Z.card("OS progress: " + pr.pct + "%", pr.done + " of " + pr.total + " tracked steps done");
+    const bar = Z.el("div", "bar gold"), f = Z.el("i"); f.style.width = pr.pct + "%"; bar.append(f); c.append(bar);
+    pr.areas.forEach(([name, x]) => {
+      const r = Z.el("div"), h = Z.el("div", "row"); h.style.justifyContent = "space-between";
+      Z.add(h, Z.el("span", null, name), Z.el("b", null, x.done + "/" + x.total));
+      const b = Z.el("div", "bar"), i = Z.el("i"); i.style.width = x.pct + "%"; b.append(i); Z.add(r, h, b); c.append(r);
+    });
+    return c;
+  };
   Z.nice = s => String(s || "").replace(/_/g, " ").toLowerCase().replace(/^./, c => c.toUpperCase());
 
   Z.fmt = {

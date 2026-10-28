@@ -6,7 +6,8 @@
   Z.pages.overview = {
     title: "Overview", sub: "Everything that needs you, at a glance", icon: "home",
     async render(root) {
-      const [s, n, t, pay] = await Promise.all([Z.api("/api/status"), Z.api("/api/notifications"), Z.api("/api/treasury/overview"), Z.api("/api/payments")]);
+      const [s, n, t, pay, plan, pt] = await Promise.all([Z.api("/api/status"), Z.api("/api/notifications"), Z.api("/api/treasury/overview"), Z.api("/api/payments"),
+        fetch("/data/plan.json").then(r => r.json()).catch(() => null), Z.api("/api/plan").catch(() => null)]);
       Z.state.status = s; Z.paintStatus(s);
       const g = el("div", "grid");
 
@@ -17,6 +18,8 @@
       [["Payments awaited", s.payments_pending], ["Waiting for you", s.health.operator_waiting_for_you], ["Qualified", s.opportunities.QUALIFIED || 0], ["Found today", s.health.scout_opportunities_today]]
         .forEach(([l, v]) => { const t = el("div", "tile"); add(t, el("div", "label", l), el("div", "stat", v)); tiles.append(t); });
       hero.append(tiles); g.append(hero);
+
+      if (plan && pt) { const pc = Z.progressCard(plan, pt.ticks); pc.classList.add("s12"); g.append(pc); }
 
       const qa = card("Quick actions", "Run the agents from here - no need to open their page first."); qa.classList.add("s4");
       qa.append(
