@@ -19,12 +19,15 @@ Today: Wed 28 Oct 2026 (OS planning day; overrides the rhythm).
 
 ## Status
 - [x] Step 1: CURRENT_STATE_AUDIT.md + MASTER_PLAN.md
-- [ ] Step 2: ventures/{BUILDFLOW,AGRILOOP,TRADING,ECOMMERCE}.md (report, audit, risks, MVP scope, roadmap, growth plan, metrics, acceptance criteria). Use evidence in HANDOFF.md; do not re-gather. Facts: Agriloop NOT live (pre-launch); NO fashion brand repo yet (e-commerce docs must say brand is undecided: Kadeform- / NF-Fragrance- are existing non-fashion storefronts).
+- [~] Step 2 (half done): ventures/{BUILDFLOW,AGRILOOP,TRADING,ECOMMERCE}.md (report, audit, risks, MVP scope, roadmap, growth plan, metrics, acceptance criteria). Use evidence in HANDOFF.md; do not re-gather. Facts: Agriloop NOT live (pre-launch); NO fashion brand repo yet (e-commerce docs must say brand is undecided: Kadeform- / NF-Fragrance- are existing non-fashion storefronts).
 - [ ] Step 3: Phase 1 build: ventures, tasks, decisions, experiments, metrics tables (reversible migration 007), venture-scoped views, weekly-allocation page. Python/Neon/Vercel. Tests once at end.
 - [ ] Step 4: BuildFlow sidekick (needs ANTHROPIC_API_KEY).
 
+## Progress log
+- 28 Oct: Step 2a done: ventures/BUILDFLOW.md and ventures/AGRILOOP.md written (evidence only, unverified items marked).
+
 ## NEXT TASK (do this one)
-Step 2. Split across chats if large: one chat for BUILDFLOW.md + AGRILOOP.md, a second for TRADING.md + ECOMMERCE.md. Then tick the box above, set the next task, commit, push.
+Step 2b: write ventures/TRADING.md + ventures/ECOMMERCE.md using the same section layout as BUILDFLOW.md (report, audit, risks, MVP scope, roadmap, growth plan, metrics, acceptance criteria). Trading: gate is backtest + >=4 weeks paper results, no live capital. E-commerce: brand undecided. Then tick Step 2, set next task to Step 3, update the progress log, commit, push.
 
 ## Open decisions (founder)
 1. E-commerce: no fashion brand repo yet; create one or choose Kadeform-/NF-Fragrance-.
