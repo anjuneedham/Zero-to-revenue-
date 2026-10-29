@@ -44,16 +44,18 @@ class ConfigTest(ChallengeBase):
     def test_defaults_match_the_challenge(self):
         c = challenge.get_config(self.conn)
         self.assertEqual((c["start"], c["end"], c["target_usd"]), ("2026-11-01", "2026-12-31", 10000))
-        self.assertEqual(c["offers"]["buildflow"]["annual_usd"], 600)
         self.assertEqual(c["offers"]["buildflow"]["free_months"], 2)
-        self.assertIsNone(c["offers"]["agriloop"]["annual_usd"])  # no invented Agriloop price
+        by = {p["key"]: p["annual_usd"] for v in challenge.VENTURES for p in challenge.plans(c, v)}
+        # 12 months for the price of 10: $50 -> $500, Buyer Basic $10 -> $100, Farmer Premium $20 -> $200
+        self.assertEqual(by, {"standard": 500, "buyer_basic": 100, "farmer_premium": 200})
 
     def test_save_and_validate(self):
-        c = self.call("POST", "/api/challenge/config", {"target_usd": 12000, "offers": {"agriloop": {"annual_usd": "300", "monthly_usd": "", "free_months": 2}}})[1]
-        self.assertEqual((c["target_usd"], c["offers"]["agriloop"]["annual_usd"]), (12000, 300))
+        c = self.call("POST", "/api/challenge/config", {"target_usd": 12000, "offers": {"agriloop": {"free_months": 2, "tiers": {"farmer_premium": "25"}}}})[1]
+        self.assertEqual((c["target_usd"], c["offers"]["agriloop"]["tiers"]["farmer_premium"]["monthly_usd"]), (12000, 25))
         self.assertEqual(challenge.get_config(self.conn)["target_usd"], 12000)
         for bad in ({"target_usd": -1}, {"start": "nope"}, {"start": "2027-01-01", "end": "2026-12-31"},
-                    {"offers": {"buildflow": {"annual_usd": "x", "free_months": 2}}}, {"offers": {"buildflow": {"annual_usd": "5", "free_months": 99}}}):
+                    {"offers": {"buildflow": {"tiers": {"standard": "x"}}}}, {"offers": {"buildflow": {"free_months": 99}}},
+                    {"offers": {"agriloop": {"tiers": {"nope": "5"}}}}):
             self.assertEqual(self.call("POST", "/api/challenge/config", bad)[0], 400, bad)
 
     def test_requires_login(self):
@@ -118,8 +120,8 @@ class DraftTest(ChallengeBase):
         lid = self.lead()
         for ch in pitches.channels():
             d = self.call("POST", "/api/challenge/draft", {"lead_id": lid, "channel": ch})[1]["draft"]
-            self.assertIn("$600", d)
-            self.assertIn("2 months", d)
+            self.assertIn("$500", d)
+            self.assertIn("12 months for the price of 10", d)
             self.assertIn("one-on-one", d)
             self.assertIn("[OWNER TO FILL]", d)
         email = self.call("POST", "/api/challenge/draft", {"lead_id": lid, "channel": "email"})[1]["draft"]
@@ -127,11 +129,16 @@ class DraftTest(ChallengeBase):
         for banned in ("testimonial", "customers love", "trusted by", "guarantee"):
             self.assertNotIn(banned, email.lower())
 
-    def test_agriloop_without_price_asks_owner_to_fill_it(self):
-        lid = self.lead(venture="agriloop", business="Green Farm")
-        d = self.call("POST", "/api/challenge/draft", {"lead_id": lid, "channel": "whatsapp"})[1]["draft"]
-        self.assertIn("AgriLoop", d)
-        self.assertIn("(annual price)", d)
+    def test_agriloop_drafts_show_the_right_plan_for_the_segment(self):
+        farmer = self.lead(venture="agriloop", business="Green Farm", segment="Farmer")
+        buyer = self.lead(venture="agriloop", business="Hotel X", segment="buyer - hotel")
+        other = self.lead(venture="agriloop", business="Who", segment="")
+        d = lambda lid: self.call("POST", "/api/challenge/draft", {"lead_id": lid, "channel": "whatsapp"})[1]["draft"]
+        self.assertIn("Farmer Premium $200/year", d(farmer))
+        self.assertNotIn("Buyer Basic", d(farmer))
+        self.assertIn("Buyer Basic $100/year", d(buyer))
+        self.assertNotIn("Farmer Premium", d(buyer))
+        self.assertTrue("Buyer Basic $100/year" in d(other) and "Farmer Premium $200/year" in d(other))
 
     def test_follow_up_and_bad_inputs(self):
         lid = self.lead()
@@ -144,26 +151,33 @@ class DealTest(ChallengeBase):
     def test_deal_is_pipeline_until_verified_then_counts_as_cash(self):
         lid = self.lead()
         d = self.call("POST", "/api/challenge/deal", {"lead_id": lid})[1]
-        self.assertEqual(d["amount_usd"], 600)
+        self.assertEqual(d["amount_usd"], 500)
         s = self.call("GET", "/api/challenge")[1]
-        self.assertEqual((s["cash_usd"], s["deals_open"], s["pipeline_usd"], s["deals_paid"]), (0, 1, 600, 0))
+        self.assertEqual((s["cash_usd"], s["deals_open"], s["pipeline_usd"], s["deals_paid"]), (0, 1, 500, 0))
         self.assertEqual(self.conn.execute("SELECT status FROM payments WHERE id=?", (d["payment_id"],)).fetchone()[0], "AWAITING_PAYMENT")
         self.assertEqual(self.call("POST", "/api/challenge/deal", {"lead_id": lid})[0], 400)  # no double deal
-        self.verify(d["payment_id"], 600)
+        self.verify(d["payment_id"], 500)
         s = self.call("GET", "/api/challenge")[1]
-        self.assertEqual((s["cash_usd"], s["deals_paid"], s["deals_open"]), (600, 1, 0))
+        self.assertEqual((s["cash_usd"], s["deals_paid"], s["deals_open"]), (500, 1, 0))
         self.assertEqual(self.conn.execute("SELECT stage FROM leads WHERE id=?", (lid,)).fetchone()[0], "paying")
         self.assertEqual(s["funnel"]["buildflow"]["paying"], 1)
 
-    def test_agriloop_needs_an_amount_until_a_price_is_set(self):
-        lid = self.lead(venture="agriloop")
-        self.assertEqual(self.call("POST", "/api/challenge/deal", {"lead_id": lid})[0], 400)
-        self.assertEqual(self.call("POST", "/api/challenge/deal", {"lead_id": lid, "amount": "250"})[1]["amount_usd"], 250)
+    def test_agriloop_plans_and_prices(self):
+        none = self.lead(venture="agriloop", segment="")
+        r = self.call("POST", "/api/challenge/deal", {"lead_id": none})
+        self.assertEqual(r[0], 400)
+        self.assertIn("Farmer Premium", r[1]["error"])
+        self.assertEqual(self.call("POST", "/api/challenge/deal", {"lead_id": none, "plan": "bogus"})[0], 400)
+        self.assertEqual(self.call("POST", "/api/challenge/deal", {"lead_id": none, "plan": "buyer_basic"})[1]["amount_usd"], 100)
+        farm = self.lead(venture="agriloop", segment="farmer")  # segment implies the plan
+        d = self.call("POST", "/api/challenge/deal", {"lead_id": farm})[1]
+        self.assertEqual((d["amount_usd"], d["plan"]), (200, "Farmer Premium"))
+        self.assertEqual(self.conn.execute("SELECT plan, free_months FROM deals WHERE id=?", (d["deal_id"],)).fetchone().values().__iter__().__next__(), "farmer_premium")
 
     def test_cash_outside_the_window_is_not_challenge_cash(self):
         lid = self.lead()
         d = self.call("POST", "/api/challenge/deal", {"lead_id": lid})[1]
-        self.verify(d["payment_id"], 600, when="2026-10-20T12:00:00+00:00")
+        self.verify(d["payment_id"], 500, when="2026-10-20T12:00:00+00:00")
         self.assertEqual(self.call("GET", "/api/challenge")[1]["cash_usd"], 0)
 
     def test_onboarding_status(self):
@@ -182,7 +196,9 @@ class SummaryTest(ChallengeBase):
         self.assertEqual((s["state"], s["day"], s["days_left"]), ("running", 31, 31))
         self.assertAlmostEqual(s["pace_target_usd"], 10000 * 31 / 61, places=1)
         self.assertLess(s["ahead_by_usd"], 0)
-        self.assertEqual(s["deals_needed"], 17)  # 10,000 / 600 rounded up
+        self.assertEqual(s["deals_needed"], 20)  # 10,000 / $500 BuildFlow annual
+        need = {p["key"]: p["deals_needed"] for p in s["plans"]}
+        self.assertEqual(need, {"standard": 20, "buyer_basic": 100, "farmer_premium": 50})
         self.assertEqual(challenge.summary(self.conn, today=date(2027, 1, 2))["state"], "after")
 
     def test_due_list_orders_replies_first_and_skips_lost(self):

@@ -20,15 +20,25 @@ OUTCOMES = ("sent", "replied", "booked", "declined", "paid", "no_reply")
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 FOLLOW_UP_DAYS = 3
 
-# Annual = 12 x the $50 monthly BuildFlow price; the two free months are on top. Agriloop has no fixed price
-# anywhere in its repo (admin-set per country), so it stays unset until the owner decides.
+# Annual = 12 months of service for the price of (12 - free_months) months: "two months free". BuildFlow is one plan
+# ($50/month -> $500/year). AgriLoop has two (owner, 29 Oct): Buyer Basic $10/month -> $100/year and Farmer Premium
+# $20/month -> $200/year.
 DEFAULT_CONFIG = {
     "start": "2026-11-01", "end": "2026-12-31", "target_usd": 10000,
     "offers": {
-        "buildflow": {"monthly_usd": 50, "annual_usd": 600, "free_months": 2},
-        "agriloop": {"monthly_usd": None, "annual_usd": None, "free_months": 2},
+        "buildflow": {"free_months": 2, "tiers": {"standard": {"label": "BuildFlow", "monthly_usd": 50}}},
+        "agriloop": {"free_months": 2, "tiers": {"buyer_basic": {"label": "Buyer Basic", "monthly_usd": 10},
+                                                 "farmer_premium": {"label": "Farmer Premium", "monthly_usd": 20}}},
     },
 }
+
+
+def plans(cfg: dict, venture: str) -> list[dict]:
+    o = cfg["offers"][venture]
+    return [{"key": k, "label": t["label"], "venture": venture, "monthly_usd": t["monthly_usd"],
+             "annual_usd": round(t["monthly_usd"] * (12 - o["free_months"]), 2), "free_months": o["free_months"]}
+            for k, t in o["tiers"].items()]
+
 
 # Facts from each product's own readiness reports (25-28 Oct). Shown on the Challenge page so a sale is never
 # made on a promise the product cannot keep.
@@ -37,9 +47,10 @@ BLOCKERS = {
                   "No billing: take the first payments by PayPal/bank transfer and mark them paid here",
                   "Legal pages are placeholders; production refuses to start without company details",
                   "Never run on a real phone; no push notifications for new leads"],
-    "agriloop": ["Marketplace data is in-memory demo data (AGRILOOP_DATA_SOURCE=memory): not safe for real customers yet",
-                 "No automated tests; Prisma data adapter is the biggest remaining item",
-                 "No subscription price exists in code: set one in the offer before selling"],
+    "agriloop": ["Database is being set up fully this weekend (owner, 29 Oct); until the live app runs on it, marketplace data is "
+                 "in-memory demo data. Do not take payment before it is confirmed live",
+                 "No automated tests; the Prisma data adapter is the biggest remaining item",
+                 "Subscription prices live in the admin screen, not code: make the in-app plans match $10 Buyer Basic / $20 Farmer Premium"],
 }
 
 
@@ -70,7 +81,11 @@ def get_config(conn) -> dict:
             for k in ("start", "end", "target_usd"):
                 cfg[k] = saved.get(k, cfg[k])
             for v in VENTURES:
-                cfg["offers"][v].update(saved.get("offers", {}).get(v, {}))
+                so = saved.get("offers", {}).get(v, {})
+                cfg["offers"][v]["free_months"] = so.get("free_months", cfg["offers"][v]["free_months"])
+                for k, t in so.get("tiers", {}).items():
+                    if k in cfg["offers"][v]["tiers"]:
+                        cfg["offers"][v]["tiers"][k]["monthly_usd"] = t["monthly_usd"]
         except (ValueError, AttributeError):
             pass
     return cfg
@@ -91,11 +106,13 @@ def set_config(conn, owner: str, data: dict) -> dict:
         if o is None:
             continue
         cur = cfg["offers"][v]
-        cur["annual_usd"] = _num(o.get("annual_usd"), f"{v} annual price", allow_none=True)
-        cur["monthly_usd"] = _num(o.get("monthly_usd"), f"{v} monthly price", allow_none=True)
+        for k, m in (o.get("tiers") or {}).items():
+            if k not in cur["tiers"]:
+                raise ChallengeError(f"unknown plan {k}")
+            cur["tiers"][k]["monthly_usd"] = _num(m, f"{k} monthly price")
         fm = o.get("free_months", cur["free_months"])
-        if not isinstance(fm, int) or isinstance(fm, bool) or not 0 <= fm <= 12:
-            raise ChallengeError("free months must be a whole number from 0 to 12")
+        if not isinstance(fm, int) or isinstance(fm, bool) or not 0 <= fm <= 11:
+            raise ChallengeError("free months must be a whole number from 0 to 11")
         cur["free_months"] = fm
     conn.execute("INSERT INTO settings(key, value, updated_at) VALUES ('challenge', ?, ?) ON CONFLICT (key) DO UPDATE "
                  "SET value=EXCLUDED.value, updated_at=EXCLUDED.updated_at", (json.dumps(cfg), now()))
@@ -187,16 +204,28 @@ def draft_for(conn, lead_id: str, channel: str = "email", follow_up: bool = Fals
     lead = conn.execute("SELECT * FROM leads WHERE id=?", (lead_id,)).fetchone()
     if lead is None:
         raise ChallengeError("lead not found")
-    offer = get_config(conn)["offers"][lead["venture"]]
+    cfg = get_config(conn)
+    offer = {"free_months": cfg["offers"][lead["venture"]]["free_months"], "plans": _plans_for(cfg, dict(lead))}
     fn = pitches.follow_up if follow_up else pitches.draft
     return {"draft": fn(dict(lead), offer, channel), "channel": channel}
 
 
+def _plans_for(cfg: dict, lead: dict, plan: str | None = None) -> list[dict]:
+    """The plan(s) that fit this lead: the one named, else one implied by the segment (farm / buyer), else all."""
+    ps = plans(cfg, lead["venture"])
+    if plan:
+        return [p for p in ps if p["key"] == plan]
+    seg = (lead.get("segment") or "").lower()
+    pick = [p for p in ps if (p["key"].startswith("farmer") and "farm" in seg) or (p["key"].startswith("buyer") and "buy" in seg)]
+    return pick or ps
+
+
 # ---- deals ------------------------------------------------------------------------------------------------
 
-def create_deal(conn, owner: str, lead_id: str, amount=None) -> dict:
+def create_deal(conn, owner: str, lead_id: str, amount=None, plan: str | None = None) -> dict:
     """Records a sale and creates the payment Treasury will verify (PayPal link / on-chain). The amount defaults
-    to the venture's annual price; Agriloop has none until the owner sets one."""
+    to the plan's annual price (monthly x (12 - free months)); AgriLoop needs the plan chosen unless the lead's
+    segment already says farmer or buyer."""
     from dashboard.api_data import create_manual_payment  # same anchor every other manual payment uses
 
     lead = conn.execute("SELECT * FROM leads WHERE id=?", (lead_id,)).fetchone()
@@ -204,16 +233,19 @@ def create_deal(conn, owner: str, lead_id: str, amount=None) -> dict:
         raise ChallengeError("lead not found")
     if conn.execute("SELECT 1 FROM deals WHERE lead_id=? AND status<>'cancelled'", (lead_id,)).fetchone():
         raise ChallengeError("this lead already has a deal")
-    offer = get_config(conn)["offers"][lead["venture"]]
-    amt = _num(amount if amount not in (None, "") else offer.get("annual_usd"), "amount")
-    label = pitches.PRODUCT[lead["venture"]]["name"]
+    cfg = get_config(conn)
+    chosen = _plans_for(cfg, dict(lead), plan or None)
+    if len(chosen) != 1:
+        raise ChallengeError("choose the plan: " + " or ".join(p["label"] for p in plans(cfg, lead["venture"])))
+    pl = chosen[0]
+    amt = _num(amount if amount not in (None, "") else pl["annual_usd"], "amount")
     who = lead["business"] or lead["name"] or "customer"
-    pay = create_manual_payment(conn, owner, f"{label} annual plan - {who}", str(amt), "USD", who)
+    pay = create_manual_payment(conn, owner, f"{pitches.PRODUCT[lead['venture']]['name']} {pl['label']} annual - {who}", str(amt), "USD", who)
     did = "deal_" + uuid.uuid4().hex[:12]
-    conn.execute("INSERT INTO deals(id,lead_id,venture,amount_usd,free_months,payment_id,created_at) VALUES (?,?,?,?,?,?,?)",
-                 (did, lead_id, lead["venture"], amt, int(offer.get("free_months") or 0), pay["payment_id"], now()))
-    audit(conn, owner, "challenge.deal", did, f"{lead['venture']} {amt}")
-    return {"deal_id": did, "payment_id": pay["payment_id"], "amount_usd": amt}
+    conn.execute("INSERT INTO deals(id,lead_id,venture,plan,amount_usd,free_months,payment_id,created_at) VALUES (?,?,?,?,?,?,?,?)",
+                 (did, lead_id, lead["venture"], pl["key"], amt, pl["free_months"], pay["payment_id"], now()))
+    audit(conn, owner, "challenge.deal", did, f"{lead['venture']} {pl['key']} {amt}")
+    return {"deal_id": did, "payment_id": pay["payment_id"], "amount_usd": amt, "plan": pl["label"]}
 
 
 def set_onboarding(conn, owner: str, deal_id: str, status: str) -> dict:
@@ -251,8 +283,8 @@ def summary(conn, today: date | None = None) -> dict:
     remaining = max(0.0, target - cash)
     pace_target = target * elapsed / total_days
     paid = conn.execute("SELECT count(*) n, COALESCE(avg(amount_usd),0) a FROM deals WHERE status='paid'").fetchone()
-    prices = [o["annual_usd"] for o in cfg["offers"].values() if o.get("annual_usd")]
-    avg_deal = float(paid["a"]) if paid["n"] else (min(prices) if prices else 0)
+    all_plans = [dict(p, deals_needed=math.ceil(remaining / p["annual_usd"])) for v in VENTURES for p in plans(cfg, v)]
+    avg_deal = float(paid["a"]) if paid["n"] else plans(cfg, "buildflow")[0]["annual_usd"]
     open_deals = conn.execute("SELECT count(*) n, COALESCE(sum(amount_usd),0) s FROM deals WHERE status='open'").fetchone()
     days_left = max(0, (end - max(today, start)).days + 1) if today <= end else 0
 
@@ -262,7 +294,7 @@ def summary(conn, today: date | None = None) -> dict:
 
     t0 = datetime.now(timezone.utc).isoformat()
     due = [dict(r) for r in conn.execute(
-        "SELECT id,name,business,venture,stage,channel,email,phone,next_action_at,last_contacted_at FROM leads "
+        "SELECT id,name,business,venture,stage,segment,channel,email,phone,next_action_at,last_contacted_at FROM leads "
         "WHERE stage IN ('new','contacted','replied','onboarding_booked','trial') "
         "AND (stage='new' OR (next_action_at IS NOT NULL AND next_action_at <= ?)) "
         "ORDER BY (stage='replied') DESC, (stage='onboarding_booked') DESC, (stage='new'), next_action_at, created_at LIMIT 15", (t0,))]
@@ -277,7 +309,7 @@ def summary(conn, today: date | None = None) -> dict:
         "SELECT d.id,d.venture,d.amount_usd,d.status,d.onboarding_status,d.payment_id,d.created_at,d.paid_at,d.free_months,"
         "l.business,l.name FROM deals d JOIN leads l ON l.id=d.lead_id ORDER BY d.created_at DESC LIMIT 50")]
     return {
-        "config": cfg, "blockers": BLOCKERS,
+        "config": cfg, "plans": all_plans, "blockers": BLOCKERS,
         "day": elapsed, "total_days": total_days, "days_left": days_left,
         "state": "before" if today < start else "after" if today > end else "running",
         "starts_in_days": max(0, (start - today).days),

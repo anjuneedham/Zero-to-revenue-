@@ -10,7 +10,7 @@
   const select = (opts, val) => { const s = el("select"); opts.forEach(o => { const [v, t] = Array.isArray(o) ? o : [o, nice(o)]; const op = el("option", null, t); op.value = v; s.append(op); }); if (val) s.value = val; return s; };
 
   // ---- draft + log drawer for one lead ----
-  async function openLead(l, refresh) {
+  async function openLead(l, refresh, plans) {
     const box = el("div", "list");
     const ch = select(CHANNELS, l.email ? "email" : l.phone ? "whatsapp" : "instagram");
     const ta = el("textarea", "draft"); ta.rows = 12;
@@ -28,8 +28,12 @@
       btn("Onboarding booked", "small", async () => { await Z.api("/api/challenge/touch", "POST", { lead_id: l.id, channel: ch.value, outcome: "booked" }); Z.toast("Onboarding booked", "ok"); Z.$("drawer").close(); await refresh(); }));
     box.append(row);
     const row2 = el("div", "row");
+    const lp = plans.filter(p => p.venture === l.venture); const seg = (l.segment || "").toLowerCase();
+    const planSel = select([["", lp.length > 1 ? "Choose plan…" : lp[0].label], ...(lp.length > 1 ? lp.map(p => [p.key, `${p.label} ${usd0(p.annual_usd)}/yr`]) : [])]);
+    const hint = lp.find(p => (p.key.startsWith("farmer") && seg.includes("farm")) || (p.key.startsWith("buyer") && seg.includes("buy"))); if (hint) planSel.value = hint.key;
+    planSel.hidden = lp.length < 2;
     const reason = input("Why lost? (optional)");
-    add(row2, btn("They paid / close the deal", "gold small", async () => { const r = await Z.api("/api/challenge/deal", "POST", { lead_id: l.id }); Z.toast("Deal created: " + usd0(r.amount_usd) + ". Request the PayPal link below.", "ok"); Z.$("drawer").close(); await refresh(); }),
+    add(row2, planSel, btn("They said yes - create the deal", "gold small", async () => { const r = await Z.api("/api/challenge/deal", "POST", { lead_id: l.id, plan: planSel.value }); Z.toast(r.plan + " deal: " + usd0(r.amount_usd) + ". Request the PayPal link below.", "ok"); Z.$("drawer").close(); await refresh(); }),
       reason, btn("Not interested / opt-out", "ghost small", async () => { await Z.api("/api/challenge/stage", "POST", { lead_id: l.id, stage: "lost", reason: reason.value }); Z.toast("Marked lost. Will not be drafted again.", "ok"); Z.$("drawer").close(); await refresh(); }));
     box.append(row2);
     Z.openDrawer(leadName(l), box);
@@ -67,14 +71,13 @@
     add(f, field("Cash target (USD)", target), field("Starts", start), field("Ends", end));
     const offers = {};
     ["buildflow", "agriloop"].forEach(k => {
-      const o = c.offers[k], ann = input("Annual price USD", "number"), mon = input("Monthly price USD", "number"), fm = input("Free months", "number");
-      ann.value = o.annual_usd == null ? "" : o.annual_usd; mon.value = o.monthly_usd == null ? "" : o.monthly_usd; fm.value = o.free_months;
-      offers[k] = { ann, mon, fm };
-      add(f, el("h3", null, VENT[k] + " offer"), field("Annual price (paid up front)", ann), field("Normal monthly price", mon), field("Free months added", fm));
+      const o = c.offers[k], fm = input("Free months", "number"); fm.value = o.free_months; offers[k] = { fm, tiers: {} };
+      add(f, el("h3", null, VENT[k] + " offer"), field("Free months (annual = 12 minus this, in months billed)", fm));
+      Object.entries(o.tiers).forEach(([tk, t]) => { const m = input("Monthly USD", "number"); m.value = t.monthly_usd; offers[k].tiers[tk] = m; add(f, field(t.label + " - monthly price (USD)", m)); });
     });
     add(f, btn("Save", "gold small", async () => {
       const body = { target_usd: target.value, start: start.value, end: end.value, offers: {} };
-      Object.entries(offers).forEach(([k, o]) => { body.offers[k] = { annual_usd: o.ann.value, monthly_usd: o.mon.value, free_months: parseInt(o.fm.value, 10) }; });
+      Object.entries(offers).forEach(([k, o]) => { body.offers[k] = { free_months: parseInt(o.fm.value, 10), tiers: Object.fromEntries(Object.entries(o.tiers).map(([tk, m]) => [tk, m.value])) }; });
       await Z.api("/api/challenge/config", "POST", body); Z.toast("Saved", "ok"); Z.$("drawer").close(); await refresh();
     }));
     return f;
@@ -95,13 +98,13 @@
       const ahead = s.ahead_by_usd >= 0;
       hero.append(el("p", "sub", s.state === "running" ? (ahead ? `Ahead of pace by ${usd0(s.ahead_by_usd)}.` : `Behind pace by ${usd0(-s.ahead_by_usd)} (pace target today: ${usd0(s.pace_target_usd)}).`) : "Only payments Treasury has verified count as cash. Pipeline is not cash."));
       const tiles = el("div", "tiles");
-      [["Still to earn", usd0(s.remaining_usd)], ["Deals needed", s.deals_needed == null ? "set a price" : s.deals_needed], ["Per week needed", s.per_week_needed == null ? "-" : s.per_week_needed], ["Open deals", `${s.deals_open} · ${usd0(s.pipeline_usd)}`]]
+      [["Still to earn", usd0(s.remaining_usd)], ["BuildFlow deals needed", s.deals_needed == null ? "-" : s.deals_needed], ["Per week needed", s.per_week_needed == null ? "-" : s.per_week_needed], ["Open deals", `${s.deals_open} · ${usd0(s.pipeline_usd)}`]]
         .forEach(([l, v]) => { const x = el("div", "tile"); add(x, el("div", "label", l), el("div", "stat", v)); tiles.append(x); });
       hero.append(tiles); g.append(hero);
 
       // offer + actions
-      const off = card("The offer", "Annual plan, two months free to try, personal 1-on-1 onboarding."); off.classList.add("s4");
-      ["buildflow", "agriloop"].forEach(k => { const o = c.offers[k]; off.append(el("div", "item", `${VENT[k]}: ${o.annual_usd ? usd0(o.annual_usd) + " / year" : "price not set"} + ${o.free_months} months free`)); });
+      const off = card("The offer", "Annual plan: 12 months for the price of 10, personal 1-on-1 onboarding."); off.classList.add("s4");
+      s.plans.forEach(p => off.append(el("div", "item", `${VENT[p.venture]} ${p.venture === "buildflow" ? "" : p.label + " "}$${p.monthly_usd}/mo → ${usd0(p.annual_usd)}/year (${p.free_months} months free) · ${p.deals_needed} deals = the target`)));
       add(off, btn("Edit target & prices", "ghost small", async () => Z.openDrawer("Challenge settings", configForm(c, refresh))),
         btn("Add a lead", "gold small", async () => Z.openDrawer("Add a lead", addLeadForm(async () => { Z.$("drawer").close(); await refresh(); }))),
         btn("Import CSV", "ghost small", async () => Z.openDrawer("Import leads (CSV)", importForm(async () => { Z.$("drawer").close(); await refresh(); }))));
@@ -114,7 +117,7 @@
       s.due.forEach(l => {
         const why = l.stage === "new" ? "first message" : l.stage === "replied" ? "they replied - answer now" : l.stage === "onboarding_booked" ? "onboarding booked" : "follow-up due";
         const it = el("div", "item click"); add(it, add(el("div", "meta"), pill(VENT[l.venture]), pill(why, l.stage === "replied" ? "gold" : ""), l.channel ? pill(l.channel) : null), el("div", "t", leadName(l)));
-        it.onclick = () => openLead(l, refresh); tl.append(it);
+        it.onclick = () => openLead(l, refresh, s.plans); tl.append(it);
       });
       today.append(tl); g.append(today);
 
@@ -167,7 +170,7 @@
           const it = el("div", "item click");
           add(it, add(el("div", "meta"), pill(VENT[l.venture]), pill(nice(l.stage), l.stage === "paying" ? "ok" : l.stage === "lost" ? "bad" : "gold"), l.channel ? pill(l.channel) : null, l.last_contacted_at ? pill("last " + fmt.ago(l.last_contacted_at)) : null), el("div", "t", leadName(l)),
             el("div", "sub", [l.segment, l.location].filter(Boolean).join(" · ")));
-          it.onclick = () => openLead(l, refresh); list.append(it);
+          it.onclick = () => openLead(l, refresh, s.plans); list.append(it);
         });
       };
       flt.onchange = fst.onchange = paint; paint();

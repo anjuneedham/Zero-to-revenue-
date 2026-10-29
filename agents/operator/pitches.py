@@ -21,15 +21,20 @@ PRODUCT = {
 
 
 def _price(offer: dict) -> str:
-    p = offer.get("annual_usd")
-    return f"${p:,.0f}" if isinstance(p, (int, float)) and p else f"{FILL} (annual price)"
+    ps = offer.get("plans") or []
+    if not ps:
+        return f"{FILL} (annual price)"
+    if len(ps) == 1:
+        lab = "" if ps[0]["key"] == "standard" else ps[0]["label"] + " "
+        return f"{lab}${ps[0]['annual_usd']:,.0f}" + ("/year" if lab else " for the year")
+    return " or ".join(f"{p['label']} ${p['annual_usd']:,.0f}/year" for p in ps)
 
 
 def _offer_line(venture: str, offer: dict) -> str:
     n = PRODUCT[venture]["name"]
     fm = int(offer.get("free_months") or 0)
-    free = f" and the first {fm} months are free to try" if fm else ""
-    return (f"I'm offering a founding {n} annual plan at {_price(offer)} for the year{free}. "
+    deal = f"That is 12 months for the price of {12 - fm} ({fm} months free). " if fm else ""
+    return (f"I'm offering a founding {n} annual plan: {_price(offer)}. {deal}"
             "I set it up with you personally, one-on-one: a full onboarding, not a link and good luck.")
 
 
@@ -62,7 +67,7 @@ def follow_up(lead: dict, offer: dict, channel: str = "email") -> str:
     venture = lead.get("venture") if lead.get("venture") in PRODUCT else "buildflow"
     p = PRODUCT[venture]
     name = (lead.get("name") or "").strip() or "there"
-    body = (f"Hi {name}, following up once on {p['name']}. The founding annual offer ({_price(offer)}/year, "
+    body = (f"Hi {name}, following up once on {p['name']}. The founding annual offer ({_price(offer)}, "
             f"{int(offer.get('free_months') or 0)} months free, one-on-one onboarding) is still open for {lead.get('business') or 'you'}. "
             f"{FILL} (one new, true reason to reply: a question, an example, a slot you can offer). "
             "If it's not for you, just say 'not now' and I won't message again.")

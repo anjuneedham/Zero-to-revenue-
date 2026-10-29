@@ -100,7 +100,7 @@ def _challenge_route(method, path, body, conn, owner):
     if path == "/api/challenge/draft":
         return challenge.draft_for(conn, str(data.get("lead_id", "")), str(data.get("channel", "email")), bool(data.get("follow_up")))
     if path == "/api/challenge/deal":
-        return challenge.create_deal(conn, owner, str(data.get("lead_id", "")), data.get("amount"))
+        return challenge.create_deal(conn, owner, str(data.get("lead_id", "")), data.get("amount"), str(data.get("plan", "")))
     if path == "/api/challenge/onboarding":
         return challenge.set_onboarding(conn, owner, str(data.get("deal_id", "")), str(data.get("status", "")))
     raise ValueError("bad request")
