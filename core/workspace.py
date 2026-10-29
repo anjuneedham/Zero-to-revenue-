@@ -119,6 +119,57 @@ def transaction_summary(txns: list[dict]) -> dict:
             "note": "Amounts are never added across currencies; completed deals with no amount or currency are counted but not valued."}
 
 
+def product_view(p: dict) -> dict:
+    """Margin and stock facts for one product, only where the inputs exist (and costs/prices share a currency)."""
+    v = dict(p)
+    v["margin_pct"] = v["margin_amount"] = v["stock_value"] = None
+    if p["price"] is not None and p["unit_cost"] is not None and p["price"] > 0:
+        v["margin_amount"] = round(p["price"] - p["unit_cost"], 2)
+        v["margin_pct"] = round((p["price"] - p["unit_cost"]) / p["price"] * 100, 1)
+    if p["unit_cost"] is not None and p["stock_qty"] is not None:
+        v["stock_value"] = round(p["unit_cost"] * p["stock_qty"], 2)
+    v["stock_flag"] = ("out of stock" if p["stock_qty"] == 0 else "at or below reorder point" if p["stock_qty"] is not None and p["reorder_point"] is not None and p["stock_qty"] <= p["reorder_point"]
+                       else None)
+    v["margin_flag"] = "selling below cost" if v["margin_amount"] is not None and v["margin_amount"] < 0 else None
+    return v
+
+
+def sales_summary(sales: list[dict], today: date) -> dict:
+    """Revenue per currency (never mixed), units, order value and repeat customers, from rows that actually have the data."""
+    by_cur: dict[str, dict] = {}
+    unvalued = 0
+    since = (today - timedelta(days=29)).isoformat()
+    for s in sales:
+        cur = (s.get("currency") or "").strip().upper()
+        if s["revenue"] is None or not cur:
+            unvalued += 1
+            continue
+        c = by_cur.setdefault(cur, {"currency": cur, "orders": 0, "units": 0, "revenue": 0.0, "last_30_days": 0.0})
+        c["orders"] += 1
+        c["units"] += s["quantity"]
+        c["revenue"] = round(c["revenue"] + s["revenue"], 2)
+        if (s["sold_at"] or "")[:10] >= since:
+            c["last_30_days"] = round(c["last_30_days"] + s["revenue"], 2)
+    for c in by_cur.values():
+        c["avg_order_value"] = round(c["revenue"] / c["orders"], 2)
+    refs: dict[str, int] = {}
+    for s in sales:
+        r = _norm(s.get("customer_ref"))
+        if r:
+            refs[r] = refs.get(r, 0) + 1
+    return {"orders_total": len(sales), "by_currency": sorted(by_cur.values(), key=lambda c: c["currency"]), "unvalued_orders": unvalued,
+            "customers_identified": len(refs), "repeat_customers": sum(1 for n in refs.values() if n >= 2),
+            "note": "Revenue is summed per currency only; orders without a revenue or currency are counted but not valued; repeat customers need a customer reference on each sale."}
+
+
+def campaign_view(c: dict) -> dict:
+    v = dict(c)
+    v["roas"] = round(c["attributed_revenue"] / c["spend"], 2) if c["spend"] and c["attributed_revenue"] is not None else None
+    v["cost_per_order"] = round(c["spend"] / c["orders"], 2) if c["spend"] is not None and c["orders"] else None
+    v["roas_note"] = "revenue and spend are in the same recorded currency" if v["roas"] is not None else "needs both spend and attributed revenue"
+    return v
+
+
 def workspace(conn, slug: str, today: date | None = None) -> dict:
     today = today or datetime.now(timezone.utc).date()
     b = founder.get_business(conn, slug)  # NotFound for an unknown slug
@@ -183,6 +234,26 @@ def workspace(conn, slug: str, today: date | None = None) -> dict:
                     "repeat_buyers": sum(1 for n in done.values() if n >= 2), "buyers_with_completed": len(done)}
 
         sec("marketplace", marketplace)
+
+    if slug == "fashion":
+        def shop():
+            products = [product_view(p) for p in rows("SELECT * FROM shop_products WHERE business_id=? ORDER BY created_at DESC LIMIT 200", (bid,))]
+            names = {p["id"]: p["name"] for p in products}
+            sales = rows("SELECT * FROM shop_sales WHERE business_id=? ORDER BY sold_at DESC LIMIT 500", (bid,))
+            for x in sales:
+                x["product_name"] = names.get(x["product_id"])
+            campaigns = [campaign_view(c) for c in rows("SELECT * FROM shop_campaigns WHERE business_id=? ORDER BY created_at DESC LIMIT 100", (bid,))]
+            stock_cost: dict[str, float] = {}
+            for p in products:
+                if p["stock_value"] is not None and (p.get("currency") or "").strip():
+                    k = p["currency"].strip().upper()
+                    stock_cost[k] = round(stock_cost.get(k, 0.0) + p["stock_value"], 2)
+            return {"products": products, "product_counts": {st: sum(1 for p in products if p["status"] == st) for st in ("idea", "sampling", "ready", "live", "discontinued")},
+                    "inventory_value_at_cost": [{"currency": k, "amount": v} for k, v in sorted(stock_cost.items())],
+                    "attention": [{"product": p["name"], "flag": p["stock_flag"] or p["margin_flag"]} for p in products if p["status"] != "discontinued" and (p["stock_flag"] or p["margin_flag"])],
+                    "sales": sales[:40], "sales_summary": sales_summary(sales, today), "campaigns": campaigns}
+
+        sec("shop", shop)
 
     if slug == "buildflow":
         def pipeline():

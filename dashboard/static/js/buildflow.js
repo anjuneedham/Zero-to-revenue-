@@ -74,7 +74,7 @@
     if (bad(W.content)) { root.append(secErr("Content")); return; }
     const s = W.content.summary, c = card("Content", "YouTube Shorts, TikTok, Instagram, Facebook. Numbers are what you recorded, not pulled from the platforms.");
     const tiles = el("div", "tiles"); add(tiles, tile("Posted today", s.posted_today), tile("Posted, last 7 days", s.posted_last_7_days), tile("Posted, no metrics yet", s.posted_missing_metrics), tile("Ideas in the queue", s.by_status.idea + s.by_status.scripted + s.by_status.filmed));
-    c.append(tiles, Z.add(el("div", "row"), btn("Add content", "gold small", async () => Z.formDialog("Add content", CONTENT_FIELDS(false), b => post("/api/founder/businesses/buildflow/content-items", b), { platform: "tiktok" }))));
+    c.append(tiles, Z.add(el("div", "row"), btn("Add content", "gold small", async () => Z.formDialog("Add content", CONTENT_FIELDS(false), b => post("/api/founder/businesses/" + SLUG + "/content-items", b), { platform: "tiktok" }))));
     c.append(el("p", "sub", s.caveat));
     root.append(c);
     const p = card("What is working (so far)"); p.append(groupLines("By platform", s.by_platform.map(r => ({ ...r, name: plat(r.name) }))), groupLines("By format", s.by_format), groupLines("By topic", s.by_topic)); root.append(p);
@@ -93,7 +93,7 @@
     if (bad(W.feedback)) { root.append(secErr("Feedback")); return; }
     const c = card("Customer feedback", "Log what contractors and customers tell you, then turn it into work.");
     c.append(Z.add(el("div", "row"), btn("Log feedback", "gold small", async () => Z.formDialog("Log feedback", [["body", "What did they say?", "text", null, true], ["kind", "Type", "select", KINDS], ["source", "Where from (e.g. WhatsApp, interview)", "text"], ["contact", "Who (optional)", "text"]],
-      b => post("/api/founder/businesses/buildflow/feedback-items", b)))));
+      b => post("/api/founder/businesses/" + SLUG + "/feedback-items", b)))));
     if (!W.feedback.length) c.append(none("No feedback logged yet"));
     const l = el("div", "list");
     W.feedback.forEach(x => { const it = el("div", "item"); it.append(el("div", "t", x.body));
@@ -141,7 +141,7 @@
     root.append(k);
   }
 
-  Z.ws = { overview: (root, w, slug) => { W = w; SLUG = slug; overview(root); }, notes: (root, w, slug) => { W = w; SLUG = slug; notes(root); }, tile, secErr, day, none, post };
+  Z.ws = { overview: (root, w, slug) => { W = w; SLUG = slug; overview(root); }, notes: (root, w, slug) => { W = w; SLUG = slug; notes(root); }, content: (root, w, slug) => { W = w; SLUG = slug; content(root); }, feedback: (root, w, slug) => { W = w; SLUG = slug; feedback(root); }, tile, secErr, day, none, post };
 
   Z.pages.buildflow = {
     title: "BuildFlow", sub: "Priority 1 · product, growth, content, feedback", icon: "plan",

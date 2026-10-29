@@ -71,6 +71,10 @@ Errors: 400 validation (message never contains driver text), 401 no session, 404
 - Migration `010_marketplace.sql`: `market_parties`, `market_listings`, `market_demand`, `market_transactions` (entities `market-parties`, `market-listings`, `market-demand`, `market-transactions`). Listings must belong to a farmer, requests to a buyer; references must stay in one business.
 - `workspace(conn, "agriloop")` adds a `marketplace` section (funnel, liquidity, suggested matches = inference, deals, per-currency totals). UI `dashboard/static/js/agriloop.js`.
 
+## Phase 5 additions (Fashion workspace)
+- Migration `011_shop.sql`: `shop_products`, `shop_sales`, `shop_campaigns` (entities `shop-products`, `shop-sales`, `shop-campaigns`); sets the `fashion` business description to the brand name.
+- `workspace(conn, "fashion")` adds a `shop` section (margins, stock flags, per-currency revenue, repeat customers, ROAS where computable). UI `dashboard/static/js/fashion.js`.
+
 ## Legacy (not deleted; migration strategy)
 Nothing was dropped or altered. Legacy tables (`agents`, `agent_runs`, `opportunities`, `tasks`, `task_events`, `user_actions`,
 `deliverables`, `submissions`, `payments`, `wallets`, `transactions`, `ledger_entries`, `leads`, `notifications`) and the

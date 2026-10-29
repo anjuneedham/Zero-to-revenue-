@@ -2,6 +2,63 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 5: Fashion Workspace. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Built and tested locally (315 tests + browser check at 3 sizes). Not applied to production Neon (awaiting founder approval + backup); no lint/type/build tooling. Phase 4 was reviewed first (no defects found).
+**Branch:** `ccr-9e3eecee-aucmfd` (stacked, PR #1).
+
+### Objective
+Consumer/e-commerce workspace for the founder's brand (Yaad n Abroad: "Pain into Art", Jamaican-inspired wear): products, margins, inventory, sales, campaigns, content, customer feedback. No SaaS metrics.
+
+### Work completed
+- Migration `011_shop.sql`: `shop_products` (stage idea/sampling/ready/live/discontinued, unit cost, price, currency, stock, reorder point), `shop_sales` (units, revenue, currency, channel, customer reference), `shop_campaigns` (spend, attributed revenue, orders). Also updates the `fashion` business **description** to the brand name the founder gave (only if it still holds the Phase 1 "not confirmed" text; name/slug/id unchanged).
+- `core/workspace.py`: `shop` section for `fashion` plus tested helpers `product_view` (margin % only when price and cost exist; stock value; out-of-stock / reorder / below-cost flags), `sales_summary` (revenue per currency, never mixed; average order value; last 30 days; repeat customers only when a customer reference is on each sale; unvalued orders counted), `campaign_view` (ROAS and cost per order only when the inputs exist).
+- Content tracking and customer feedback (feedback -> task) from Phase 3 are reused unchanged for Fashion (business-scoped).
+- UI `dashboard/static/js/fashion.js` (`#fashion`: Overview, Products, Sales, Campaigns, Content, Customers, Notes); shared Overview/Notes/Content/Feedback via `Z.ws`.
+
+### Files
+- Created: `database/migrations/011_shop.sql`, `database/rollback/011_shop_down.sql`, `dashboard/static/js/fashion.js`, `tests/unit/test_shop.py`.
+- Modified: `core/founder.py` (3 entities; `no_updated_at` support; sale timestamp default), `core/workspace.py`, `dashboard/static/js/buildflow.js` (content/feedback parametrised by business), `main.js`, `index.html`, `sw.js`, docs.
+- Removed: none.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| `python3 -m unittest discover -s tests -t .` (local Postgres 16) | **315 OK** (12 new in `test_shop.py`: margin/stock math and flags, currency-safe sales, repeat customers, ROAS inputs, end-to-end flow, validation, isolation, brand description, reuse of content/feedback) | PASS |
+| Headless Chromium, 7 tabs x phone/tablet/desktop | 0 px overflow, 0 console errors; margin shown, product added via the form | PASS |
+| Production Neon, a real storefront (Shopify/Netlify), payment/ad platforms | not exercised | NOT TESTED |
+
+### Acceptance criteria
+- Brand, products, customers/feedback, content, campaigns, pricing, inventory, margins, sales, experiments, decisions: PASS (manual entry)
+- Brand positioning / research: PARTIAL (only via the shared Notes/Research entities; no dedicated positioning view)
+- Margins treat shipping, fees, returns, tax: NOT BUILT (margin is price minus unit cost only; stated on screen)
+- Storefront/payments/ads integration: NOT BUILT (the audit found two storefront repos, neither confirmed as this brand)
+- Business isolation: PASS (tested)
+
+### Known issues and technical debt
+- Everything is manual entry; sales are not pulled from any store. Attribution of campaign revenue is the founder's judgement.
+- No per-size/variant inventory; one stock number per product. No delete UI.
+- Migrations 007_a, 007, 008, 009, 010, 011 are unapplied on production Neon.
+
+### Decisions and assumptions
+- The brand name was taken from the founder's brief; the `fashion` row keeps its short name "Fashion" to avoid breaking references. Currency is never mixed. SaaS metrics are deliberately absent.
+
+### Unfinished work
+Variants/sizes, landed-cost margin (shipping, fees, returns), store integration, positioning workspace.
+
+### Next phase
+Phase 6: Trading Workspace. Prerequisites: founder approval + Neon backup before any deployment is requested. Safety: backtest, paper and live must be separate modes; live requires explicit human approval; nothing may imply profitability.
+
+### Ready-to-paste next-chat instruction
+```
+Read /docs/FOUNDER_OS_BUILD_PROTOCOL.md (section 7 safety rules especially), then /docs/PHASE_HANDOFF.md (Phase 5 entry first), then /docs/FOUNDER_OS_ARCHITECTURE.md.
+Verify first: tests against a throwaway Postgres (expect 315 OK); inspect core/workspace.py, core/founder.py, dashboard/static/js/{buildflow,agriloop,fashion}.js, migrations 007-011.
+Preview and production share one Neon database and migrate on first request: do not open any preview/production URL until I approve and back up Neon.
+Implement only Phase 6: Trading Workspace (slug 'trading'): hypotheses, strategies, data, backtests, validation, risk, paper trading, explicit failure conditions, human-approval boundary for live trading. No profitability claims. Update /docs/PHASE_HANDOFF.md and stop.
+```
+
+---
+
 ## Phase 4: Agriloop Workspace. Completed 2026-10-29
 
 **Overall status: PARTIAL.** Built and tested locally (303 tests + browser check at 3 sizes). Not applied to production Neon (awaiting founder approval + backup); no lint/type/build tooling. Phase 3 was reviewed before starting (no defects found; its handoff lists its limits).

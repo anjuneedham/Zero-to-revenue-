@@ -23,6 +23,8 @@ STATUSES = {
     "market_listings": ("open", "matched", "closed", "expired"),
     "market_demand": ("open", "fulfilled", "closed", "expired"),
     "market_transactions": ("proposed", "agreed", "completed", "cancelled"),
+    "shop_products": ("idea", "sampling", "ready", "live", "discontinued"),
+    "shop_campaigns": ("planned", "running", "done", "cancelled"),
     "research": ("open", "done", "archived"),
     "decisions": ("proposed", "decided", "reversed"),
 }
@@ -80,6 +82,15 @@ ENTITIES = {
                                 parents={"listing_id": "market_listings", "demand_id": "market_demand"},
                                 cols={"listing_id": (T, None), "demand_id": (T, None), "quantity": (N, None), "unit": (T, None), "amount": (N, None), "currency": (T, None),
                                       "status": (T, STATUSES["market_transactions"]), "occurred_at": (T, None), "notes": (T, None)}),
+    "shop_products": dict(prefix="sp", business="required", required=("name",), order="created_at DESC",
+                          cols={"name": (T, None), "category": (T, None), "sku": (T, None), "status": (T, STATUSES["shop_products"]), "unit_cost": (N, None),
+                                "price": (N, None), "currency": (T, None), "stock_qty": (I, None), "reorder_point": (I, None), "notes": (T, None)}),
+    "shop_sales": dict(prefix="ss", business="required", required=(), order="sold_at DESC", no_updated_at=True, parents={"product_id": "shop_products"},
+                       cols={"product_id": (T, None), "quantity": (I, None), "revenue": (N, None), "currency": (T, None), "channel": (T, None),
+                             "customer_ref": (T, None), "sold_at": (T, None)}),
+    "shop_campaigns": dict(prefix="sc", business="required", required=("name",), order="created_at DESC",
+                           cols={"name": (T, None), "channel": (T, None), "status": (T, STATUSES["shop_campaigns"]), "spend": (N, None), "attributed_revenue": (N, None),
+                                 "orders": (I, None), "currency": (T, None), "start_date": (T, None), "end_date": (T, None), "notes": (T, None)}),
     "research": dict(prefix="res", business="required", required=("title",), order="created_at DESC",
                      cols={"title": (T, None), "question": (T, None), "summary": (T, None), "source_url": (T, None),
                            "status": (T, STATUSES["research"])}),
@@ -211,6 +222,8 @@ def create(conn, entity, data, actor):
     _check_party_role(conn, spec, values)
     if entity == "market_transactions" and values.get("status") == "completed" and not values.get("occurred_at"):
         values["occurred_at"] = now()
+    if entity == "shop_sales" and not values.get("sold_at"):
+        values["sold_at"] = now()
     if entity == "work_tasks" and values.get("status") == "done":
         values["completed_at"] = now()
     if entity == "decisions" and values.get("status") == "decided":
@@ -220,7 +233,7 @@ def create(conn, entity, data, actor):
     rid = f"{spec['prefix']}_{uuid.uuid4().hex[:12]}"
     ts = now()
     cols = {"id": rid, "business_id": business_id, **values, "created_at": ts}
-    if not spec.get("immutable"):
+    if not spec.get("immutable") and not spec.get("no_updated_at"):
         cols["updated_at"] = ts
     names = list(cols)
     try:
@@ -258,7 +271,8 @@ def update(conn, entity, rid, data, actor):
         values["posted_at"] = ts
     if entity == "blockers" and "status" in values:
         values["resolved_at"] = ts if values["status"] == "resolved" else None
-    values["updated_at"] = ts
+    if not spec.get("no_updated_at"):
+        values["updated_at"] = ts
     try:
         conn.execute(f"UPDATE {entity} SET {','.join(c + '=?' for c in values)} WHERE id=?", (*values.values(), rid))
     except Exception as e:
