@@ -1,8 +1,8 @@
 (function () {
   const { $, el, add, text, icon } = Z;
-  const NAV = [["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
+  const NAV = [["founder", "Founder"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
   const AUTH = ["msgbox", "setup1", "setup2", "setup3", "login"];
-  let timer = null, seq = 0, current = "overview";
+  let timer = null, seq = 0, current = "founder";
 
   const KO = ["Walking out of the tunnel", "Checking the pitch", "Reading the team sheet", "Warming up the agents"];
   let ki = 0; const kt = setInterval(() => { ki = (ki + 1) % KO.length; text($("ko-msg"), KO[ki]); }, 700); const t0 = Date.now();

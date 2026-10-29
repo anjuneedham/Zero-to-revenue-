@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, rates, scheduler
+from core import actions, founder, rates, scheduler
 from dashboard import api_data
 from dashboard.mcp import handle_mcp
 from core import db
@@ -44,6 +44,9 @@ SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inj
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
 ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send|submit-email)$")
+FOUNDER_CREATE_RE = re.compile(r"^/api/founder/(task|goal|kpi|reading|blocker|experiment|decision)$")
+FOUNDER_TASK_RE = re.compile(r"^/api/founder/tasks/([a-z0-9_]{1,80})/status$")
+FOUNDER_BLOCKER_RE = re.compile(r"^/api/founder/blockers/([a-z0-9_]{1,80})/resolve$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
@@ -308,6 +311,23 @@ def handle(method, path, authz, conn, body: bytes = b""):
         except treasury.VerifyError as e:
             return _json(422, {"error": str(e)})
         except json.JSONDecodeError:
+            return _json(400, {"error": "bad request"})
+    if path == "/api/founder/dashboard" and method == "GET":
+        return _json(200, founder.dashboard(conn))
+    fm = FOUNDER_CREATE_RE.match(path) or FOUNDER_TASK_RE.match(path) or FOUNDER_BLOCKER_RE.match(path)
+    if fm and method == "POST":
+        try:
+            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else None
+            if not isinstance(data, dict):
+                raise ValueError("bad request")
+            if FOUNDER_TASK_RE.match(path):
+                return _json(200, founder.set_task_status(conn, owner, fm.group(1), data.get("status")))
+            if FOUNDER_BLOCKER_RE.match(path):
+                return _json(200, founder.resolve_blocker(conn, owner, fm.group(1)))
+            return _json(200, founder.create(conn, owner, fm.group(1), data))
+        except founder.FounderError as e:
+            return _json(400, {"error": str(e)})
+        except (ValueError, json.JSONDecodeError):
             return _json(400, {"error": "bad request"})
     if method == "POST" and path == "/api/auth/logout":
         ol.logout(conn, token)
