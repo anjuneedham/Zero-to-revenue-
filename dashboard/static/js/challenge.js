@@ -134,7 +134,7 @@
   Z.pages.challenge = {
     title: "Challenge", sub: "60 days, $10k cash: sell annual plans with 1-on-1 onboarding", icon: "target",
     async render(root) {
-      const [s, ld, pay, t] = await Promise.all([Z.api("/api/challenge"), Z.api("/api/challenge/leads"), Z.api("/api/payments"), Z.api("/api/treasury/overview")]);
+      const [s, ld, pay, t, wk] = await Promise.all([Z.api("/api/challenge"), Z.api("/api/challenge/leads"), Z.api("/api/payments"), Z.api("/api/treasury/overview"), Z.api("/api/challenge/weekly")]);
       const refresh = () => Z.rerender();
       const c = s.config, g = el("div", "grid");
 
@@ -189,6 +189,17 @@
       if (!s.by_channel.length) lp.append(Z.empty("No data yet", "Log each message you send; this shows which channel actually converts."));
       s.by_channel.forEach(r => lp.append(add(el("div", "row"), el("b", null, nice(r.channel)), pill(r.sent + " sent"), pill(r.replies + " replied", r.replies ? "gold" : ""), pill(r.paying + " paying", r.paying ? "ok" : ""))));
       g.append(lp);
+
+      // weekly report
+      const wr = card("Weekly report", `Last ${wk.days} days: ${wk.funnel.sent} messages → ${wk.funnel.replies} replies → ${wk.funnel.booked} onboardings booked → ${wk.funnel.paid} paid. Also sent to you every Sunday.`); wr.classList.add("s12");
+      wr.append(el("h3", null, "By channel"));
+      if (!wk.by_channel.length) wr.append(Z.empty("No activity logged this week", "Log each message you send and mark replies and bookings."));
+      wk.by_channel.forEach(c => wr.append(add(el("div", "row"), el("b", null, nice(c.channel)), pill(c.sent + " sent"), pill(c.replies + " replied", c.replies ? "gold" : ""), pill(c.booked + " booked"), pill(c.paid + " paid · " + usd0(c.paid_usd), c.paid ? "ok" : ""))));
+      wr.append(el("h3", null, "By plan"));
+      wk.by_plan.forEach(p => wr.append(add(el("div", "row"), el("b", null, VENT[p.venture] + (p.venture === "agriloop" ? " " + p.label : "")), pill(p.deals_created + " deals created"), pill(p.paid + " paid · " + usd0(p.paid_usd), p.paid ? "ok" : ""))));
+      wr.append(el("h3", null, "Next week"));
+      wk.next_week.forEach((a, i) => wr.append(el("p", "sub", (i + 1) + ". " + a)));
+      g.append(wr);
 
       // deals
       const dl = card("Deals & payments", "Tap Copy PayPal message, paste it to the customer yourself, then Check if paid. Cash counts only once verified."); dl.classList.add("s12");

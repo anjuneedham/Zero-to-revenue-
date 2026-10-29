@@ -339,9 +339,9 @@ def summary(conn, today: date | None = None) -> dict:
         "AND (stage='new' OR (next_action_at IS NOT NULL AND next_action_at <= ?)) "
         "ORDER BY (stage='replied') DESC, (stage='onboarding_booked') DESC, (stage='new'), next_action_at, created_at LIMIT 15", (t0,))]
     week = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
-    touches_week = conn.execute("SELECT count(*) FROM lead_touches WHERE direction='out' AND created_at >= ?", (week,)).fetchone()[0]
+    touches_week = conn.execute("SELECT count(*) FROM lead_touches WHERE direction='out' AND outcome IN ('sent','no_reply') AND created_at >= ?", (week,)).fetchone()[0]
     by_channel = [dict(r) for r in conn.execute(
-        "SELECT t.channel, count(*) FILTER (WHERE t.direction='out') AS sent, "
+        "SELECT t.channel, count(*) FILTER (WHERE t.direction='out' AND t.outcome IN ('sent','no_reply')) AS sent, "
         "count(DISTINCT t.lead_id) FILTER (WHERE t.outcome IN ('replied','booked','paid')) AS replies, "
         "count(DISTINCT t.lead_id) FILTER (WHERE l.stage='paying') AS paying "
         "FROM lead_touches t JOIN leads l ON l.id=t.lead_id GROUP BY t.channel ORDER BY sent DESC")]

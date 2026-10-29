@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, challenge, ingest, rates, scheduler
+from core import actions, challenge, ingest, rates, scheduler, weekly
 from dashboard import api_data
 from dashboard.mcp import handle_mcp
 from core import db
@@ -99,6 +99,8 @@ def _challenge_route(method, path, body, conn, owner):
         raise ValueError("bad request")
     if method == "GET" and path == "/api/challenge":
         return challenge.summary(conn)
+    if method == "GET" and path == "/api/challenge/weekly":
+        return weekly.report(conn)
     if method == "GET" and path == "/api/challenge/leads":
         return {"leads": challenge.list_leads(conn)}
     if method != "POST":
