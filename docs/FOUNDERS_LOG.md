@@ -89,4 +89,30 @@ you know personally or by reputation (not a cold database) for the first warm-ou
 watch the reply rate. That's the actual experiment this challenge runs on.
 
 ---
+
+## 29 Oct 2026 — Agriloop becomes the focal point
+
+**What changed:** a creator with a following of interested people, and an algorithm already pointed at
+them, could start on Tuesday 3 Nov. Agriloop gets the main push; BuildFlow is parked, not dropped.
+Hooks and video strategies are already being shared, slowly, which is the right pace until the
+product can hold what the audience sends.
+
+**The Firebase issue is BuildFlow's, not Agriloop's.** Checked in the repo and the live Vercel
+project: Agriloop has no Firebase; auth is Supabase. Its real blocker is that listings and posts
+live in memory in production, so they can vanish, and the live site shows demo seed data as if real.
+Photos (local disk) and signup emails (console only) also don't work for real users yet.
+
+**Why Agriloop may launch more easily:** she brings an audience that already wants this, so we skip
+the cold-start problem that BuildFlow's directory has (a directory needs both sides). That is a
+hypothesis until her first week gives numbers.
+
+**Hosting decision:** don't migrate before Tuesday. Hosting isn't the blocker. Run Hostinger as a
+staging mirror after Tuesday, with Vercel staying live, and compare. Vercel Hobby is fine for
+Agriloop until payments turn on. Full reasoning and pass criteria: docs/strategy/AGRILOOP_LAUNCH_PLAN.md.
+
+**Lesson carried forward:** the 26th taught that "connected" doesn't mean "correct". The same applies
+here: Agriloop is deployed, returns 200 and looks finished, and still can't keep a listing. Check
+what is persisted, not what renders.
+
+---
 <!-- Next entry goes above this line. Keep entries dated, honest, and short enough to actually read later. -->

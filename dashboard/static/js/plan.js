@@ -1,9 +1,9 @@
 (function () {
   const { el, add, pill, btn, card, fmt } = Z;
-  let tab = "bf", data = null, ticks = {}, who = "ALL";
-  const TABS = [["week", "This week"], ["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
+  let tab = "al", data = null, ticks = {}, who = "ALL";
+  const TABS = [["week", "This week"], ["al", "Agriloop launch"], ["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
   const WHO = { owner: ["You", "gold"], agent: ["Agent", "royal"], both: ["Both", ""] };
-  const CAT = { buildflow: ["BuildFlow", "gold"], jobs: ["Jobs", "ok"], study: ["Study", "royal"], improve: ["Improve", ""] };
+  const CAT = { agriloop: ["Agriloop", "ok"], buildflow: ["BuildFlow", "gold"], jobs: ["Jobs", "ok"], study: ["Study", "royal"], improve: ["Improve", ""] };
 
   const mono = t => { const c = el("code", "key", t); c.style.margin = "0"; c.style.fontSize = "13px"; return c; };
   const table = (heads, rows) => {
@@ -60,7 +60,17 @@
       c.append(add(el("div", "row"), el("b", null, done + " of " + all.length + " done")), bar);
       const l = el("div", "list");
       data.week.days.forEach(day => l.append(weekDay(day, redraw)));
-      c.append(l); return c;
+      c.append(l);
+      if (data.week_next) {
+        const n = card("Next week", data.week_next.range), nl = el("div", "list");
+        data.week_next.days.forEach(day => nl.append(weekDay(day, redraw)));
+        n.append(nl); return add(el("div"), c, n);
+      }
+      return c;
+    },
+    al(redraw) {
+      const c = card("Agriloop: path to launch", "A creator with an engaged following could start Tue 3 Nov. Checked on 29 Oct in the repo and the live Vercel project.");
+      c.append(el("p", "sub", "Agriloop has no Firebase: auth is Supabase. Its real blocker is that marketplace data is in memory in production, so listings and posts vanish. Fix that, then photos and signup emails, and the launch is on. Hosting (Vercel vs Hostinger) is not the blocker; test Hostinger as a staging mirror after Tuesday."), list(data.agriloop, redraw)); return c;
     },
     bf(redraw) {
       const c = card("BuildFlow: path to launch", "Read from the BuildFlow repo on 25 Oct. Verdict in its own report: not ready, with one owner-side blocker (Storage).");

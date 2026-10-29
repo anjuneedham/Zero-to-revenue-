@@ -1,4 +1,7 @@
-# Handoff for the Zero to Hero OS master-plan chat (28 Oct 2026)
+# Handoff for the Zero to Hero OS master-plan chat (28 Oct 2026, updated 29 Oct)
+
+## PRIORITY CHANGE (29 Oct): Agriloop is the focal venture
+A creator could start Tue 3 Nov. Read docs/strategy/AGRILOOP_LAUNCH_PLAN.md first. Verified: Agriloop has NO Firebase (that blocker is BuildFlow's); its blocker is the in-memory data source in production (live Vercel env has only the 2 Supabase vars + ALLOW_SEED_IN_PRODUCTION=true, no DATABASE_URL). First build task: PrismaDataSource on the existing Supabase Postgres in `agriloopmain`, then Supabase Storage for photos, custom SMTP for signup emails. Hosting: stay on Vercel through Tuesday; Hostinger is a staging-mirror test afterwards. BuildFlow is parked; its Firebase options are in the same plan. This overrides the weekly plan below and the "one venture per day" rule for the week of 2 Nov.
 
 Start a NEW chat with: "Read docs/master/HANDOFF.md in anjuneedham/Zero-to-revenue- and continue." Nothing else needed.
 
@@ -26,4 +29,4 @@ Single-tenant, opportunity/lead-centric model; no projects, tasks (beyond agent 
 2. docs/master/ventures/{BUILDFLOW,AGRILOOP,TRADING,ECOMMERCE}.md with: report, audit, risks, MVP scope, roadmap, growth plan, metrics, acceptance criteria.
 3. Phase 1 build: `ventures`, `tasks`, `decisions`, `experiments`, `metrics` tables (reversible migration 007), venture-scoped views, weekly-allocation page. Keep Python/Neon/Vercel stack.
 4. Then the BuildFlow sidekick work from the earlier brief (needs ANTHROPIC_API_KEY).
-Open decisions: which e-commerce repo is the brand; Gmail token expires ~2 Nov; Agriloop live data source.
+Open decisions: which e-commerce repo is the brand; Gmail token expires ~2 Nov. Agriloop live data source is now VERIFIED as memory (see priority note above). Unverified: Vercel team plan (Hobby vs Pro), Hostinger plan pricing, whether Next 16 runs cleanly on Hostinger's managed Node.

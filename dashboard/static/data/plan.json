@@ -581,5 +581,184 @@
     ]
    }
   ]
+ },
+ "agriloop": [
+  {
+   "id": "al-data",
+   "p": "P0",
+   "who": "agent",
+   "title": "Build the Prisma data source on the existing Supabase Postgres",
+   "detail": "Marketplace data is in-memory in production, so listings and posts vanish. Largest item in Agriloop's own roadmap; nothing above the repository layer changes.",
+   "src": "agriloopmain docs/MVP_ROADMAP.md; src/lib/db/datasource.ts"
+  },
+  {
+   "id": "al-dburl",
+   "p": "P0",
+   "who": "owner",
+   "title": "Add DATABASE_URL as a Vercel secret and set AGRILOOP_DATA_SOURCE=prisma",
+   "detail": "Do this after the adapter is merged and tested. Live project currently has only the Supabase URL, publishable key and ALLOW_SEED_IN_PRODUCTION.",
+   "src": "Vercel env names, 29 Oct"
+  },
+  {
+   "id": "al-seedoff",
+   "p": "P0",
+   "who": "owner",
+   "title": "Set ALLOW_SEED_IN_PRODUCTION=false once real data exists",
+   "detail": "Today the live site shows demo farmers and listings as if real. Keep a few genuine listings first so it is not empty.",
+   "src": "Vercel env names; datasource.ts"
+  },
+  {
+   "id": "al-storage",
+   "p": "P0",
+   "who": "both",
+   "title": "Listing photos on Supabase Storage (the Firebase alternative)",
+   "detail": "STORAGE_PROVIDER=local does not persist on Vercel. Supabase Storage is in the project you already have, no Blaze plan or card. Check current free-tier limits.",
+   "src": ".env.example"
+  },
+  {
+   "id": "al-email",
+   "p": "P0",
+   "who": "both",
+   "title": "Real signup emails via custom SMTP (Resend)",
+   "detail": "EMAIL_PROVIDER=console sends nothing, and verification is not enforced. Supabase's built-in mailer is rate-limited, so a creator-driven spike of signups needs your own SMTP.",
+   "src": ".env.example; docs/SECURITY.md"
+  },
+  {
+   "id": "al-ask",
+   "p": "P0",
+   "who": "owner",
+   "title": "Settle the creator ask: one action, one link, one UTM tag per video",
+   "detail": "Sign up and post a listing or request. Tag each video so you can see which hooks bring real signups.",
+   "src": "Creator start Tue 3 Nov"
+  },
+  {
+   "id": "al-seed",
+   "p": "P1",
+   "who": "owner",
+   "title": "Seed 20-30 real listings before her first post",
+   "detail": "A marketplace with nothing in it wastes the first spike of attention.",
+   "src": "MVP roadmap, pilot"
+  },
+  {
+   "id": "al-legal",
+   "p": "P1",
+   "who": "both",
+   "title": "Privacy Policy and Terms pages",
+   "detail": "None exist under src/app (only About and Guidelines). I draft; a person reviews before launch.",
+   "src": "agriloopmain src/app, 29 Oct"
+  },
+  {
+   "id": "al-metrics",
+   "p": "P1",
+   "who": "agent",
+   "title": "Instrument pilot metrics",
+   "detail": "Listings per farmer, requests per buyer, response rate, first-contact time.",
+   "src": "MVP roadmap, pilot"
+  },
+  {
+   "id": "al-hostinger",
+   "p": "P1",
+   "who": "owner",
+   "title": "After Tuesday: stand up a Hostinger staging mirror",
+   "detail": "Business or Cloud plan, Node 22, same env vars, on a subdomain. Vercel stays live. Pass: builds from GitHub, signup and listing round-trip work, logs are readable.",
+   "src": "Hostinger Node.js hosting docs"
+  },
+  {
+   "id": "al-android",
+   "p": "P2",
+   "who": "owner",
+   "title": "Android build for Play Store",
+   "detail": "Web first; her audience arrives on phones via a link.",
+   "src": "agriloopmain docs/PLAY_STORE_TESTING.md"
+  }
+ ],
+ "week_next": {
+  "range": "Mon 2 Nov - Sun 8 Nov 2026",
+  "days": [
+   {
+    "day": "Mon",
+    "date": "2 Nov",
+    "items": [
+     {
+      "id": "wk2-mon-gate",
+      "cat": "agriloop",
+      "title": "Go / no-go for Tuesday",
+      "detail": "Data source on Postgres, photos persist, signup emails arrive, demo seed off. If the adapter slipped, hold her start a few days rather than launch on memory storage."
+     },
+     {
+      "id": "wk2-mon-brief",
+      "cat": "agriloop",
+      "title": "Send the creator her one-page brief",
+      "detail": "The one action, the link, the UTM tags, the first 20 listings she can point to."
+     }
+    ]
+   },
+   {
+    "day": "Tue",
+    "date": "3 Nov",
+    "items": [
+     {
+      "id": "wk2-tue-start",
+      "cat": "agriloop",
+      "title": "Creator starts: first post live",
+      "detail": "Watch signups, listings per farmer and requests per buyer for the first 24 hours."
+     },
+     {
+      "id": "wk2-tue-fix",
+      "cat": "agriloop",
+      "title": "Fix the top friction point from day one",
+      "detail": "One thing, not a list."
+     }
+    ]
+   },
+   {
+    "day": "Wed",
+    "date": "4 Nov",
+    "items": [
+     {
+      "id": "wk2-wed-hooks",
+      "cat": "agriloop",
+      "title": "Review which hook and video drove signups",
+      "detail": "Per-UTM signups against views. Keep the winning hook, drop the rest."
+     }
+    ]
+   },
+   {
+    "day": "Thu",
+    "date": "5 Nov",
+    "items": [
+     {
+      "id": "wk2-thu-host",
+      "cat": "agriloop",
+      "title": "Hostinger staging mirror test",
+      "detail": "Subdomain only; Vercel stays live. Write down pass/fail against the criteria in the Agriloop plan."
+     }
+    ]
+   },
+   {
+    "day": "Fri",
+    "date": "6 Nov",
+    "items": [
+     {
+      "id": "wk2-fri-bf",
+      "cat": "buildflow",
+      "title": "BuildFlow: decide Firebase vs swapping storage",
+      "detail": "Only after Agriloop's first week. Options are in docs/strategy/AGRILOOP_LAUNCH_PLAN.md."
+     }
+    ]
+   },
+   {
+    "day": "Sun",
+    "date": "8 Nov",
+    "items": [
+     {
+      "id": "wk2-sun-review",
+      "cat": "improve",
+      "title": "Weekly review: Agriloop numbers vs the gate",
+      "detail": "Real signups, real listings, response rate. Write one line in the Founder's Log."
+     }
+    ]
+   }
+  ]
  }
 }
