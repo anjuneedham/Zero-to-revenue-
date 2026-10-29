@@ -1,7 +1,7 @@
 // App-shell cache so the installed app opens instantly and shows a shell offline.
 // Never caches /api/*, /mcp/*, or anything with a login token.
-const SHELL = "z2r-shell-v9";
-const FILES = ["/", "/css/fonts.css", "/css/app.css", "/js/core.js", "/js/founder.js", "/js/buildflow.js", "/js/agriloop.js", "/js/fashion.js", "/js/trading.js", "/js/overview.js", "/js/scout.js", "/js/operator.js", "/js/treasury.js",
+const SHELL = "z2r-shell-v10";
+const FILES = ["/", "/css/fonts.css", "/css/app.css", "/js/core.js", "/js/founder.js", "/js/buildflow.js", "/js/agriloop.js", "/js/fashion.js", "/js/trading.js", "/js/lab.js", "/js/overview.js", "/js/scout.js", "/js/operator.js", "/js/treasury.js",
   "/js/plan.js", "/js/main.js", "/data/plan.json", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 self.addEventListener("install", e => e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(

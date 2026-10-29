@@ -29,6 +29,7 @@ STATUSES = {
     "research": ("open", "done", "archived"),
     "decisions": ("proposed", "decided", "reversed"),
 }
+EVIDENCE_LABELS = ("verified", "assumed", "unknown")
 T, I, N, B = "text", "int", "num", "bool"
 
 
@@ -110,8 +111,18 @@ ENTITIES = {
     "decisions": dict(prefix="dec", business="optional", required=("title",), order="created_at DESC",
                       cols={"title": (T, None), "context": (T, None), "decision": (T, None), "rationale": (T, None),
                             "alternatives": (T, None), "status": (T, STATUSES["decisions"])}),
-    "prompts": dict(prefix="pr", business="optional", required=("name", "body"), order="name ASC, version DESC",
+    # Phase 8: versions are immutable and activation goes through core/prompt_lab.py, so the generic path can only
+    # create an inactive version or edit the purpose line.
+    "prompts": dict(prefix="pr", business="optional", required=("name", "body"), order="name ASC, version DESC", force={"active": 0},
+                    update_only=("purpose",),
                     cols={"name": (T, None), "purpose": (T, None), "body": (T, None), "version": (I, None), "active": (B, None)}),
+    "sources": dict(prefix="src", business="required", required=("title",), order="created_at DESC",
+                    cols={"title": (T, None), "url": (T, None), "kind": (T, ("web", "document", "interview", "dataset", "internal", "other")),
+                          "publisher": (T, None), "retrieved_at": (T, None), "reliability": (T, ("high", "medium", "low", "unknown")), "notes": (T, None)}),
+    "evidence": dict(prefix="ev", business="required", required=("claim",), order="created_at DESC",
+                     parents={"research_id": "research", "knowledge_id": "knowledge", "source_id": "sources"},
+                     cols={"claim": (T, None), "label": (T, EVIDENCE_LABELS), "research_id": (T, None), "knowledge_id": (T, None),
+                           "source_id": (T, None), "quote": (T, None), "note": (T, None)}),
     "ai_usage": dict(prefix="use", business="optional", required=("model",), order="created_at DESC", immutable=True,
                      cols={"provider": (T, None), "model": (T, None), "purpose": (T, None), "input_tokens": (I, None),
                            "output_tokens": (I, None), "cost_usd": (N, None)}),
@@ -225,9 +236,20 @@ def _check_party_role(conn, spec, values):
             raise FounderError(f"party_id: must be a {role}")
 
 
+def _check_evidence(values):
+    """A claim hangs off a research item or knowledge note, and is 'verified' only with a source (assumptions never pass as facts)."""
+    if not (values.get("research_id") or values.get("knowledge_id")):
+        raise FounderError("evidence must belong to a research item or a knowledge note")
+    if values.get("label") == "verified" and not values.get("source_id"):
+        raise FounderError("verified evidence needs a source; otherwise label it assumed or unknown")
+
+
 def create(conn, entity, data, actor):
     spec = ENTITIES[entity]
     values = _clean(entity, data, partial=False)
+    values.update(spec.get("force", {}))
+    if entity == "evidence":
+        _check_evidence(values)
     business_id = _bid(conn, entity, data.get("business"), True)
     _check_parents(conn, spec, business_id, values)
     _check_party_role(conn, spec, values)
@@ -266,9 +288,13 @@ def update(conn, entity, rid, data, actor):
     values = _clean(entity, data, partial=True)
     if not values:
         raise FounderError("nothing to update")
+    if spec.get("update_only") and set(values) - set(spec["update_only"]):
+        raise FounderError("only these fields can be edited: " + ", ".join(spec["update_only"]) + " (create a new version instead)")
     row = conn.execute(f"SELECT * FROM {entity} WHERE id=?", (rid,)).fetchone()
     if not row:
         raise NotFound("not found")
+    if entity == "evidence":
+        _check_evidence({**dict(row), **values})
     _check_parents(conn, spec, row["business_id"], values)
     _check_party_role(conn, spec, values)
     ts = now()
@@ -290,7 +316,7 @@ def update(conn, entity, rid, data, actor):
         if e.__class__.__module__.startswith("psycopg") and getattr(e, "sqlstate", "")[:2] == "23":
             raise FounderError("conflicts with an existing record or violates a constraint") from None
         raise
-    audit(conn, actor, f"founder.{entity}.update", rid)
+    audit(conn, actor, f"founder.{entity}.update", rid, f"label {row['label']} -> {values['label']}" if entity == "evidence" and "label" in values else None)
     return dict(conn.execute(f"SELECT * FROM {entity} WHERE id=?", (rid,)).fetchone())
 
 

@@ -8,7 +8,7 @@ GET  /api/founder/<entity>                           list across businesses
 POST /api/founder/<entity>                           create (global entities; business optional in body)
 POST /api/founder/<entity>/<id>                      update
 POST /api/founder/kpis/<id>/readings                 record a KPI value {value, note}
-<entity> = projects goals work-tasks kpis experiments research knowledge decisions prompts ai-usage automations
+<entity> = projects goals work-tasks kpis experiments research knowledge decisions prompts sources evidence ai-usage automations
 """
 
 import json

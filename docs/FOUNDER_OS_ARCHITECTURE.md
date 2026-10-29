@@ -83,6 +83,11 @@ Errors: 400 validation (message never contains driver text), 401 no session, 404
 - `core/ai_config.py` is the single place mapping NO AI / LOW / STANDARD / HIGH to models, limits and task types. `core/ai.py` is the only path for Founder OS model calls: classify (code) -> business-scoped context -> `budget.reserve` (hard cap) -> call -> strict JSON validation -> `budget.settle` -> rows in `llm_usage` (cap) and `ai_usage` (per business, migration `013_ai_command_center.sql`).
 - API: `GET /api/ai/status`, `POST /api/ai/classify`, `POST /api/ai/run`. Advisory only; nothing is executed. Kill switch pauses calls. No real model call has been executed yet.
 
+## Phase 8 additions (Prompt Lab, Research, Knowledge)
+- Migration `014_prompt_lab_knowledge.sql`: `prompts` gains `change_note/source/sha256/parent_id` (versions immutable by trigger, one active per name by partial unique index); new `prompt_evals`, `sources`, `evidence` (claim labelled verified/assumed/unknown; `verified` requires a source), `ai_citations`; `ai_usage.prompt_ref`.
+- `core/prompt_lab.py` (versions, activate, diff + manual-score compare, file sync with drift report, `resolve` used by `ai.run`), `core/knowledge.py` (business-scoped keyword retrieval, derived trust, overview/gaps), `dashboard/lab_api.py` (`/api/lab/*`, `/api/knowledge/*`). UI: `dashboard/static/js/lab.js` (`#lab`).
+- Command Center now retrieves knowledge/research/evidence for the request from one business only, shows the model each record's label, downgrades "verified" claims whose cited source is assumed/unknown/unsourced, and stores every claim in `ai_citations`.
+
 ## Legacy (not deleted; migration strategy)
 Nothing was dropped or altered. Legacy tables (`agents`, `agent_runs`, `opportunities`, `tasks`, `task_events`, `user_actions`,
 `deliverables`, `submissions`, `payments`, `wallets`, `transactions`, `ledger_entries`, `leads`, `notifications`) and the
@@ -91,5 +96,5 @@ three agents keep running, including the daily cron. Retirement plan, for a late
 separate, reversible migration after the owner confirms. Rollback for 007: `database/rollback/007_founder_os_core_down.sql`.
 
 ## Not built yet (by design)
-Command Center UI/conversation persistence, automation execution, per-business dashboards/UI, business-specific
+Command Center UI/conversation persistence, model-run prompt comparison, automation execution, per-business dashboards/UI, business-specific
 workspaces, migration of legacy data, auth beyond the single owner.

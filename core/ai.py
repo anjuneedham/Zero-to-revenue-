@@ -9,6 +9,10 @@ Guarantees, each covered by tests/unit/test_ai.py:
   claim labelled "verified" without a source id from the supplied context is downgraded to "unknown".
 * Every attempted call reserves its worst-case cost first (core/budget.py, hard monthly cap, fails closed), then
   writes one `llm_usage` row (budget ledger) and one `ai_usage` row (per-business ledger).
+* The system prompt is the active Prompt Lab version of `command-center` (core/prompt_lab.py), else the file; the fixed GUARD
+  text is always appended. Knowledge/research/evidence context is retrieved for the request, from this business only, and a claim
+  may be "verified" only if its cited source is itself verified (evidence labels and trust are shown to the model).
+* Every claim of an answer is stored in `ai_citations` (claim, label, cited source id).
 * The kill switch pauses model calls. Nothing here executes an action; answers are advisory.
 """
 
@@ -19,12 +23,14 @@ import uuid
 from pathlib import Path
 
 from core import ai_config as cfg
-from core import budget, founder
+from core import budget, founder, knowledge, prompt_lab
 from core.audit import audit
 from core.db import now
 from core.orchestrator import killswitch
 
 SYSTEM = (Path(__file__).resolve().parents[1] / "prompts" / "ai" / f"{cfg.PROMPT_VERSION}.md").read_text().strip()
+_FILE_NAME, _FILE_VER = prompt_lab.FILE_RE.match(cfg.PROMPT_VERSION + ".md").groups()
+FILE_REF = f"{_FILE_NAME}@{int(_FILE_VER)}(file)"
 AGENT = "command_center"
 LABELS = ("verified", "assumed", "unknown")
 GUARANTEE = re.compile(r"guarantee[sd]?\s+(?:\w+\s+){0,3}(?:profit|returns?|income|revenue)|risk[- ]free|can'?t lose|cannot lose", re.I)
@@ -84,30 +90,44 @@ _CONTEXT = {
                  lambda r: f"open blocker: {_t(r['description'])}"),
     "decisions": ("SELECT id,title,decision,status FROM decisions WHERE business_id=? ORDER BY created_at DESC LIMIT ?",
                   lambda r: f"decision [{r['status']}]: {_t(r['title'])} -> {_t(r['decision'])}"),
-    "knowledge": ("SELECT id,title,body FROM knowledge WHERE business_id=? ORDER BY created_at DESC LIMIT ?",
-                  lambda r: f"note: {_t(r['title'])}: {_t(r['body'])}"),
-    "research": ("SELECT id,title,summary FROM research WHERE business_id=? ORDER BY created_at DESC LIMIT ?",
-                 lambda r: f"research: {_t(r['title'])}: {_t(r['summary'])}"),
+    # knowledge / research / evidence rows come from core.knowledge.relevant (best match for the request, else most recent)
+    "knowledge": (None, lambda r: f"note [{r['trust']}]: {_t(r['title'])}: {_t(r['body'])}"),
+    "research": (None, lambda r: f"research [{r['trust']}]: {_t(r['title'])}: {_t(r['summary'])}"),
+    "evidence": (None, lambda r: f"evidence [{r['label']}; {('source ' + r['source_id']) if r['source_id'] else 'no source'}]: {_t(r['claim'])}"),
     "strategies": ("SELECT id,name,hypothesis,status,failure_conditions,max_drawdown_limit_pct FROM trading_strategies WHERE business_id=? ORDER BY created_at DESC LIMIT ?",
                    lambda r: f"strategy {_t(r['name'])} [{r['status']}]: {_t(r['hypothesis'])}; failure conditions: {_t(r['failure_conditions'])}; drawdown limit {r['max_drawdown_limit_pct']}%"),
     "runs": ("SELECT id,strategy_id,mode,trades,net_return_pct,max_drawdown_pct,costs_included,slippage_bps FROM trading_runs WHERE business_id=? ORDER BY created_at DESC LIMIT ?",
              lambda r: f"run of {r['strategy_id']} [{r['mode']}]: {r['trades']} trades, net {r['net_return_pct']}%, max drawdown {r['max_drawdown_pct']}%, costs included {r['costs_included']}, slippage {r['slippage_bps']} bps"),
 }
 _TABLE = {"goals": "goals", "tasks": "work_tasks", "kpis": "kpis", "blockers": "blockers", "decisions": "decisions", "knowledge": "knowledge",
-          "research": "research", "strategies": "trading_strategies", "runs": "trading_runs"}
+          "research": "research", "evidence": "evidence", "strategies": "trading_strategies", "runs": "trading_runs"}
 
 
-def select_context(conn, slug: str, task_type: str, max_chars: int) -> dict:
+_RETRIEVED = ("knowledge", "research", "evidence")
+_PARENT_COL = {"knowledge": "knowledge_id", "research": "research_id"}
+_TRUST_LABEL = {"verified": "verified", "unknown": "unknown"}  # anything else (assumed, mixed, unsourced) is not fact: "assumed"
+
+
+def select_context(conn, slug: str, task_type: str, max_chars: int, request: str | None = None) -> dict:
     """Rows for the task type's context kinds, from ONE business. Each item carries a source id the model may cite."""
     biz = founder.get_business(conn, slug)  # NotFound for an unknown slug
     items, used = [], 0
     for kind in cfg.TASKS[task_type]["context"]:
         sql, fmt = _CONTEXT[kind]
-        for r in conn.execute(sql, (biz["id"], cfg.MAX_CONTEXT_ROWS)).fetchall():
+        if kind in _RETRIEVED:
+            rows = knowledge.relevant(conn, biz["id"], kind, request, cfg.MAX_CONTEXT_ROWS)
+            if kind in _PARENT_COL:
+                counts = knowledge._evidence_counts(conn, _PARENT_COL[kind], [r["id"] for r in rows])
+                rows = [{**r, "trust": knowledge.trust_of(counts[r["id"]])} for r in rows]
+        else:
+            rows = conn.execute(sql, (biz["id"], cfg.MAX_CONTEXT_ROWS)).fetchall()
+        for r in rows:
             line = f"[{_TABLE[kind]}:{r['id']}] {fmt(r)}"
             if used + len(line) > max_chars:
                 break
-            items.append({"source": f"{_TABLE[kind]}:{r['id']}", "text": line})
+            # label = how far the model may trust this record as fact (None: the founder's own operating records)
+            label = r["label"] if kind == "evidence" else _TRUST_LABEL.get(r["trust"], "assumed") if kind in _PARENT_COL else None
+            items.append({"source": f"{_TABLE[kind]}:{r['id']}", "text": line, "label": label})
             used += len(line)
     return {"business": {"slug": biz["slug"], "name": biz["name"], "stage": biz["stage"], "description": _t(biz["description"], 400)}, "items": items}
 
@@ -121,8 +141,11 @@ def build_prompt(ctx: dict, request: str) -> str:
 
 # --- structured output -----------------------------------------------------------------------------------------------
 
-def parse_reply(text: str, sources: set[str]) -> dict:
-    """Strict envelope. Raises ValueError on anything unexpected (caller discards the output)."""
+def parse_reply(text: str, sources) -> dict:
+    """Strict envelope. Raises ValueError on anything unexpected (caller discards the output).
+    `sources` is a set of citable ids, or a dict id -> label (None = founder record, else verified/assumed/unknown):
+    a "verified" claim keeps that label only if its source is citable AND not itself labelled assumed/unknown."""
+    src_label = sources if isinstance(sources, dict) else {x: None for x in sources}
     s = text.strip()
     m = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", s, re.S)
     data = json.loads(m.group(1) if m else s)
@@ -141,9 +164,12 @@ def parse_reply(text: str, sources: set[str]) -> dict:
         if src is not None and not isinstance(src, str):
             raise ValueError("bad claim")
         label = c["label"]
-        if label == "verified" and src not in sources:
-            label, src = "unknown", None  # a fact must trace to supplied data, else it is not presented as verified
-        out_claims.append({"text": _t(c["text"]), "label": label, "source": src if src in sources else None})
+        if label == "verified":
+            if src not in src_label:
+                label, src = "unknown", None  # a fact must trace to supplied data, else it is not presented as verified
+            elif src_label[src] in ("assumed", "unknown"):
+                label = src_label[src]  # citing an assumption does not make it a fact
+        out_claims.append({"text": _t(c["text"]), "label": label, "source": src if src in src_label else None})
     if not all(isinstance(x, str) for x in steps) or not all(isinstance(k, str) and isinstance(v, str) for k, v in fields.items()):
         raise ValueError("bad types")
     if not isinstance(data.get("needs_approval", False), bool):
@@ -168,10 +194,19 @@ class AnthropicClient:
 
 # --- the orchestrator ------------------------------------------------------------------------------------------------
 
-def _log(conn, biz_id, route, model, tin, tout, cost, ms, outcome, llm_id):
-    conn.execute("INSERT INTO ai_usage(id,business_id,provider,model,purpose,input_tokens,output_tokens,cost_usd,created_at,routing_level,task_type,latency_ms,outcome,llm_usage_id) "
-                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                 (f"use_{uuid.uuid4().hex[:12]}", biz_id, "anthropic", model, route["task_type"], tin, tout, cost, now(), route["level"], route["task_type"], ms, outcome, llm_id))
+def _log(conn, biz_id, route, model, tin, tout, cost, ms, outcome, llm_id, prompt_ref):
+    uid = f"use_{uuid.uuid4().hex[:12]}"
+    conn.execute("INSERT INTO ai_usage(id,business_id,provider,model,purpose,input_tokens,output_tokens,cost_usd,created_at,routing_level,task_type,latency_ms,outcome,llm_usage_id,prompt_ref) "
+                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                 (uid, biz_id, "anthropic", model, route["task_type"], tin, tout, cost, now(), route["level"], route["task_type"], ms, outcome, llm_id, prompt_ref))
+    return uid
+
+
+def _cite(conn, biz_id, usage_id, claims):
+    """Append every claim of an answer with its label and cited source id (citation and evidence tracking)."""
+    for c in claims:
+        conn.execute("INSERT INTO ai_citations(ai_usage_id,business_id,claim,label,source,created_at) VALUES (?,?,?,?,?,?)",
+                     (usage_id, biz_id, c["text"], c["label"], c["source"], now()))
 
 
 def run(conn, client, slug: str, request: str, actor: str, task_type: str | None = None, min_level: str | None = None) -> dict:
@@ -191,10 +226,11 @@ def run(conn, client, slug: str, request: str, actor: str, task_type: str | None
     if not budget.llm_enabled(level):
         return {**base, "status": "disabled", "message": "AI is off: set ANTHROPIC_API_KEY, LLM_MONTHLY_BUDGET_USD and the LLM_PRICE_* variables."}
     max_prompt, max_out = cfg.limits(level)
-    ctx_chars = max(0, max_prompt * cfg.CHARS_PER_TOKEN - len(SYSTEM) - len(request) - 600)
-    ctx = select_context(conn, slug, route["task_type"], ctx_chars)
+    system, pref = prompt_lab.resolve(conn, _FILE_NAME, SYSTEM, FILE_REF)
+    ctx_chars = max(0, max_prompt * cfg.CHARS_PER_TOKEN - len(system) - len(request) - 600)
+    ctx = select_context(conn, slug, route["task_type"], ctx_chars, request)
     prompt = build_prompt(ctx, request)
-    max_in = (len(SYSTEM) + len(prompt)) // cfg.CHARS_PER_TOKEN + 1
+    max_in = (len(system) + len(prompt)) // cfg.CHARS_PER_TOKEN + 1
     model = route["model"]
     try:
         rid = budget.reserve(conn, AGENT, model, route["task_type"], max_in, max_out, level)
@@ -204,22 +240,24 @@ def run(conn, client, slug: str, request: str, actor: str, task_type: str | None
         return {**base, "status": "disabled", "message": "LLM budget/prices not configured."}
     t0 = time.monotonic()
     try:
-        text, tin, tout = client.complete(model, SYSTEM, prompt, max_out)
+        text, tin, tout = client.complete(model, system, prompt, max_out)
     except Exception:
         held = budget.fail(conn, rid)  # outcome unknown: the worst-case hold stays counted
-        _log(conn, biz["id"], route, model, 0, 0, held, int((time.monotonic() - t0) * 1000), "error", rid)
+        _log(conn, biz["id"], route, model, 0, 0, held, int((time.monotonic() - t0) * 1000), "error", rid, pref)
         audit(conn, actor, "ai.run.error", slug, route["task_type"])
         return {**base, "status": "error", "model_called": True, "message": "The model call failed; its worst-case cost stays counted against the budget."}
     ms = int((time.monotonic() - t0) * 1000)
     cost = budget.settle(conn, rid, int(tin), int(tout), level)
     try:
-        out = parse_reply(text, {i["source"] for i in ctx["items"]})
+        out = parse_reply(text, {i["source"]: i["label"] for i in ctx["items"]})
         outcome = "ok"
     except (ValueError, KeyError, TypeError):
         out, outcome = None, "bad_output"
-    _log(conn, biz["id"], route, model, int(tin), int(tout), cost, ms, outcome, rid)
+    uid = _log(conn, biz["id"], route, model, int(tin), int(tout), cost, ms, outcome, rid, pref)
+    if out is not None:
+        _cite(conn, biz["id"], uid, out["claims"])
     audit(conn, actor, f"ai.run.{outcome}", slug, f"{route['task_type']}/{level}")
-    usage = {"input_tokens": int(tin), "output_tokens": int(tout), "cost_usd": str(cost), "latency_ms": ms, "model": model}
+    usage = {"input_tokens": int(tin), "output_tokens": int(tout), "cost_usd": str(cost), "latency_ms": ms, "model": model, "prompt": pref}
     if out is None:
         return {**base, "status": "bad_output", "model_called": True, "usage": usage, "message": "The reply was not the expected structure and was discarded."}
     out["needs_approval"] = out["needs_approval"] or route["stakes"]
@@ -233,4 +271,5 @@ def status(conn) -> dict:
                    "enabled": budget.llm_enabled(lv)} for lv in cfg.LEVELS}
     return {"levels": levels, "tasks": {k: {"level": v["level"], "about": v["about"], "stakes": v["stakes"]} for k, v in cfg.TASKS.items()},
             "monthly_cap_usd": float(budget.monthly_cap()) or None, "spent_this_month_usd": float(budget.spent_this_month(conn)),
-            "paused": killswitch.is_paused(conn), "prompt_version": cfg.PROMPT_VERSION}
+            "paused": killswitch.is_paused(conn), "prompt_version": cfg.PROMPT_VERSION,
+            "prompt_in_use": prompt_lab.resolve(conn, _FILE_NAME, SYSTEM, FILE_REF)[1]}

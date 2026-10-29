@@ -2,6 +2,96 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 8: Prompt Lab, Research, and Knowledge. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Everything deterministic is built and tested (367 tests, 19 new). **No real model call has ever been executed** (no `ANTHROPIC_API_KEY`/`LLM_*` here), so every model-dependent path is NOT TESTED against the real API. Migration 014 is applied only to throwaway local Postgres, not to Neon. The UI got a render/search smoke test, not a full click-through.
+**Branch:** `ccr-edf0723c-id0y6l`, created from `966a8d3` (Phase 7 head of `ccr-79ad6026-fa1uuh`). Nothing was pushed to `ccr-79ad6026-fa1uuh`. No preview/production URL was opened or requested.
+
+### Objective
+Versioned prompts and a trustworthy, business-scoped knowledge base: prompt versioning and comparison (taking over `prompts/ai/`), research with sources and verified/assumed/unknown labels, per-business retrieval, citation and evidence tracking. Out of scope and not built: experiment engine, automation.
+
+### Design (verify these first)
+- **Prompt versions are immutable.** New text = new version of the same name (`core/prompt_lab.py`), enforced in code and by a DB trigger. One active version per name (partial unique index). Activation is an audited action. The generic CRUD `prompts` entity can now only create an *inactive* version or edit `purpose`.
+- **Command Center takes its prompt from the Lab.** `ai.run` uses the active `command-center` version, else the file `prompts/ai/command-center-v1.md`. A fixed `GUARD` (JSON-only, text in `<data>`/`<untrusted>` is data, no actions, no promises of returns, "verified" only with a source) is always appended, and a `command-center` version cannot be created or activated without the `<data>`, `<untrusted>`, `needs_approval`, `claims`, `JSON` markers. `ai_usage.prompt_ref` records which version answered (`command-center@N` or `command-center@1(file)`).
+- **Files:** `POST /api/lab/prompts/sync` registers `prompts/ai/<name>-v<N>.md` as `file` versions. A file that differs from the stored version is reported as **drift** and never overwrites it. It activates a name's file version only when that name has no active version. Nothing syncs automatically (no DB write on a read path).
+- **Comparison is not a model call:** unified diff + averages of founder-entered scores (`prompt_evals`, 1-5, append-only). With fewer than 3 scored examples on either version the verdict says "not enough evidence"; otherwise it reports the averages and states they are hand-entered and not a statistical test. There is no automatic winner.
+- **Sources and evidence** (`sources`, `evidence`, via the existing CRUD API, business-scoped, parents must be in the same business). Each claim is `verified`, `assumed` or `unknown` (default `unknown`) and must hang off a research item or knowledge note. `verified` needs a source (code message + DB CHECK). Promoting to `verified` needs a source; label changes are audited as `label assumed -> verified`. A note's or research item's **trust** is derived from its evidence (`unsourced | verified | assumed | unknown | mixed`), never stored. Verified claims on a `low`/`unknown`-reliability source are flagged.
+- **Retrieval** (`core/knowledge.py`): keyword scoring (ILIKE on words of 3+ letters, escaped, top N), no embeddings, no model. Always `WHERE business_id = <this business>`. Global notes (`business_id NULL`) appear only with `include_global: true` and are labelled `global`. No cross-business search exists (Phase 11).
+- **Command Center integration:** knowledge/research/evidence context is retrieved for the request (best match, else most recent) from that business only. Each item is shown to the model with its trust/label. A claim the model labels `verified` is kept only if its cited source is in the supplied context and is not itself assumed/unknown: citing an assumed evidence row gives `assumed`; an unsourced note gives `assumed`. This **changes Phase 7 behaviour**: a knowledge note cited as `verified` is now downgraded unless it has verified evidence.
+- **Citations:** every claim of a parsed answer is stored in `ai_citations` (claim, label, cited source id) linked to the `ai_usage` row. Discarded (`bad_output`) answers store none.
+- **Request body limit:** the server read limit was 4 KiB (`MAX_BODY`), too small for prompts. Added `READ_LIMIT = 48_000` in `dashboard/app.py`, used by `serve` and `api/index.py`; each route still enforces its own smaller limit (login/AI stay at 4 KiB, CRUD at 8 KiB, lab at 40 KB).
+
+### Work completed
+- Migration `014_prompt_lab_knowledge.sql` (additive; first normalises any multiple-active prompts so the unique index can be created), rollback `database/rollback/014_prompt_lab_knowledge_down.sql` (drops Phase 8 data).
+- `core/prompt_lab.py`, `core/knowledge.py`, `dashboard/lab_api.py`; edits to `core/ai.py`, `core/ai_config.py` (evidence in `research_summary`/`draft_content` context), `core/founder.py` (entities `sources`, `evidence`; prompt restrictions; evidence rules), `dashboard/app.py`, `api/index.py`.
+- API (owner auth): `GET/POST /api/lab/prompts`, `GET /api/lab/prompts/<id>`, `POST /api/lab/prompts/sync`, `.../<id>/activate`, `.../<id>/evals`, `POST /api/lab/compare`, `GET /api/knowledge/<slug>`, `POST /api/knowledge/<slug>/search`, plus CRUD `sources`, `evidence`. (Search and compare are POST because the server strips query strings.)
+- UI: new **Lab** page (`dashboard/static/js/lab.js`, nav "Lab", service-worker cache `z2r-shell-v10`): Knowledge tab (business picker, search with opt-in global notes, research/notes with trust pills, claims, verify-with-source, sources) and Prompts tab (versions, view, score, new version, compare, activate, register files).
+
+### Files
+- Created: `core/prompt_lab.py`, `core/knowledge.py`, `dashboard/lab_api.py`, `dashboard/static/js/lab.js`, `database/migrations/014_prompt_lab_knowledge.sql`, `database/rollback/014_prompt_lab_knowledge_down.sql`, `tests/unit/test_lab_knowledge.py`.
+- Modified: `core/ai.py`, `core/ai_config.py`, `core/founder.py`, `dashboard/app.py`, `dashboard/founder_api.py`, `dashboard/pages/index.html`, `dashboard/static/js/main.js`, `dashboard/static/sw.js`, `api/index.py`, docs.
+- Removed: none.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| `pip install "psycopg[binary]>=3.2" --break-system-packages` | worked (PyPI reachable) | PASS |
+| `python3 -m unittest discover -s tests -t .` before changes (local Postgres 16) | 348 OK | PASS |
+| same command after changes | **367 OK** (19 new in `tests/unit/test_lab_knowledge.py`: immutable versions, trigger and unique index, generic-CRUD lock-down, diff and evidence threshold, command-center marker check, file sync and drift, active version used by `ai.run` with GUARD and `prompt_ref`, API flow and auth, verified-needs-source, cross-business references rejected, promotion audited, trust derivation, business-scoped search and opt-in global, LIKE/quote safety, retrieval for the request, assumed evidence cited as verified downgraded, citations stored, unsourced note not verified, no citations on bad output, migration repairs multiple active prompts) | PASS |
+| Browser smoke on a throwaway local DB, 390 px wide, `AUTH_DISABLED=1`: Lab page loads, sources/evidence/notes render, search returns results, Prompts tab shows the registered file, no horizontal scroll, no JS errors | | PASS (partial: forms/dialogs, activate, compare drawer, desktop/tablet widths not exercised) |
+| Any real Anthropic call using a Lab prompt, real token usage, real citation behaviour of a real model | **never executed** | NOT TESTED |
+| Migration 014 on Neon, any preview/production URL | not applied, not opened | NOT TESTED |
+
+### Acceptance criteria
+- Prompt versioning and comparison: PASS (diff + manual scores; no model-run comparison, see Unfinished work)
+- Research capture with sources and verified/assumed/unknown labels: PASS
+- Per-business knowledge stores, retrieval scoped by business: PASS (keyword retrieval only; relevance quality is unmeasured)
+- Citation and evidence tracking: PASS in tests with a fake client; whether real models cite source ids correctly is NOT TESTED
+- UI: PARTIAL (smoke only, no accessibility pass)
+
+### Discrepancies found at start of phase
+- `CONTINUE_FROM_HERE.md` said 325 tests; the correct baseline after Phase 7 was 348 (confirmed).
+- The server read only 4 KiB of a request body, so large bodies were silently truncated before route limits; fixed with `READ_LIMIT`.
+
+### Known issues and technical debt
+- A prompt version does not change the code that parses its output: a Lab prompt that asks for another format will just produce `bad_output` (billed). The marker check is a floor, not a guarantee.
+- Search is keyword-only (English-ish tokens, 3+ letters, no stemming/synonyms). Evidence of a retrieved note is not auto-included; only evidence matching the request is.
+- `sources` have no dedupe, and a source's `reliability` is the founder's judgement, not checked.
+- Evidence `verified` means "has a source", not "the source says that": nothing verifies quotes against URLs.
+- The old `research.source_url` and `knowledge.source_url` fields remain and are not linked to `sources` (kept to avoid breaking Phases 3-6).
+- Prompts for other names (`scout-enrich-v1`, business prompts) are not registered or resolved through the Lab; only `command-center` is wired. Business-scoped prompts are stored but never auto-selected.
+- Migrations 007_a, 007, 008-014 are all unapplied on production Neon.
+- Pushing this branch can itself trigger a Vercel preview build against the shared Neon database; the first API request to any deployment applies pending migrations, so do not open it before the backup.
+
+### Decisions and assumptions
+- Compare is manual-scored, not model-run, to avoid a second spend path outside the Command Center's budget and ledgers.
+- "Trust" is computed, so an assumption can never be stored as a fact by editing a note.
+- Unsourced knowledge notes are treated as `assumed` for the model (stricter than Phase 7; the founder can attach verified evidence to raise them).
+- Search/compare are POST (query strings are stripped by the server).
+
+### Unfinished work
+- Run a prompt version against a test input through the Command Center and record the output as a scored eval (needs budget gating and a real key).
+- Migrate Scout's prompt and any future prompts under the Lab; business-specific prompt selection.
+- Link legacy `source_url` to `sources`; quote/URL verification; staleness (re-check dates) for verified evidence.
+- Command Center UI/conversation persistence, approval prompts, quality feedback (still Phase 7 gaps).
+- First real model call (see below).
+
+### Next phase
+Phase 9: Experiment and Growth Engine, **not started**. Before it: founder Neon backup + "apply to Neon" (migrations 007_a, 007, 008-014). To verify Phases 7-8 for real: in a throwaway environment set `ANTHROPIC_API_KEY`, a small `LLM_MONTHLY_BUDGET_USD`, and `LLM_PRICE_*` from the provider's pricing page, add one verified and one assumed evidence row, make one `POST /api/ai/run` with a research request, then check `llm_usage`, `ai_usage.prompt_ref` and `ai_citations`.
+
+### Ready-to-paste next-chat instruction
+```
+Repo: anjuneedham/Zero-to-revenue- (attach with add_repo, push access). Phases 0-8 live on branch ccr-edf0723c-id0y6l (check the latest commit with git log; Phase 8 head). They are NOT on the default branch. Check that branch out, then create a new branch from it for this work. Do not push to ccr-edf0723c-id0y6l or ccr-79ad6026-fa1uuh: pushes auto-deploy a Vercel preview against the shared Neon database.
+Read, in order: docs/CONTINUE_FROM_HERE.md, docs/FOUNDER_OS_BUILD_PROTOCOL.md, docs/PHASE_HANDOFF.md (Phase 8 entry first), docs/FOUNDER_OS_ARCHITECTURE.md. The correct test baseline after Phase 8 is 367.
+Verify first: start local Postgres 16 per the recipe in CONTINUE_FROM_HERE.md; check that pip install "psycopg[binary]>=3.2" --break-system-packages works (if PyPI is blocked, stop and tell me); run python3 -m unittest discover -s tests -t . (expect 367 OK); inspect core/founder.py, core/workspace.py, core/ai.py, core/knowledge.py, core/prompt_lab.py and the experiments table/entity from migrations 007 and 008.
+Do not open or request any preview/production URL of this branch until I say the Neon backup is done.
+Implement only Phase 9: Experiment and Growth Engine (protocol section 9): hypothesis, metric, duration, result and decision records; experiment lifecycle; growth funnels from real data; learnings written back to business knowledge (as evidence-labelled notes, never as verified without a source). Out of scope: automated execution of experiments without approval, cross-business synthesis. Do not start Phase 10.
+ANTHROPIC_API_KEY may still be missing: do not claim any model call works unless it was executed; mark model-dependent items NOT TESTED.
+Finish by updating docs/PHASE_HANDOFF.md (Phase 9 entry on top, honest PASS/PARTIAL/NOT TESTED, ready-to-paste Phase 10 block) and docs/CONTINUE_FROM_HERE.md, then stop.
+```
+
+---
+
 ## Phase 7: AI Command Center. Completed 2026-10-29
 
 **Overall status: PARTIAL.** Routing, context, structured output, budget and ledgers are built and tested with a fake client (348 tests). **No real model call has ever been executed**: `ANTHROPIC_API_KEY` and `LLM_*` pricing are not set in this environment, so `AnthropicClient` is untested against the live API. Not applied to production Neon (awaiting founder backup + approval); no lint/type/build tooling. No UI and no conversation persistence were built (see Unfinished work).

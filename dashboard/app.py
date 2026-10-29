@@ -13,7 +13,7 @@ from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
 from core import actions, ai, founder, founder_dashboard, rates, scheduler, workspace
-from dashboard import api_data, founder_api
+from dashboard import api_data, founder_api, lab_api
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
@@ -46,6 +46,7 @@ def static_file(path: str):
         return None
     return STATIC_MIME[f.suffix], f.read_bytes()
 MAX_BODY = 4096
+READ_LIMIT = 48_000  # most bytes read from a request; each route enforces its own (smaller) limit. Prompt Lab bodies need more than 4 KiB.
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
@@ -171,6 +172,9 @@ def handle(method, path, authz, conn, body: bytes = b""):
         return _json(404, {"error": "not found"})
     if path.startswith("/api/ai/"):
         return _ai_route(conn, owner, method, path, body)
+    lab = lab_api.handle(conn, owner, method, path, body)
+    if lab:
+        return lab
     fo = founder_api.handle(conn, owner, method, path, body)
     if fo:
         return fo
@@ -375,7 +379,7 @@ def serve(host="127.0.0.1", port=8080):
     class H(BaseHTTPRequestHandler):
         def _go(self, method):
             n = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(min(n, MAX_BODY + 1)) if n else b""
+            body = self.rfile.read(min(n, READ_LIMIT + 1)) if n else b""
             path = self.path.split("?")[0]
             conn = None
             try:
