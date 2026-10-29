@@ -13,7 +13,7 @@ from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
 from core import actions, rates, scheduler
-from dashboard import api_data
+from dashboard import api_data, founder_api
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
@@ -127,6 +127,9 @@ def handle(method, path, authz, conn, body: bytes = b""):
         owner = ol.verify_session(conn, token)
     except ol.AuthError:
         return _json(401, {"error": "unauthorized"})
+    fo = founder_api.handle(conn, owner, method, path, body)
+    if fo:
+        return fo
     if method == "GET" and path == "/api/status":
         return _json(200, status_snapshot(conn))
     if method == "POST" and path == "/api/pause":
