@@ -581,5 +581,56 @@
     ]
    }
   ]
- }
+ },
+ "master": [
+  {
+   "id": "os-audit",
+   "title": "Current-state audit + master plan",
+   "detail": "docs/master/CURRENT_STATE_AUDIT.md and MASTER_PLAN.md, from the evidence in HANDOFF.md.",
+   "who": "agent",
+   "p": "P0"
+  },
+  {
+   "id": "os-ventures-docs",
+   "title": "Venture docs: BuildFlow, Agriloop, Trading, E-commerce",
+   "detail": "docs/master/ventures/*.md: report, audit, risks, MVP scope, roadmap, growth plan, metrics, acceptance criteria.",
+   "who": "agent",
+   "p": "P0"
+  },
+  {
+   "id": "os-phase1",
+   "title": "Phase 1 build: ventures, tasks, decisions, experiments, metrics",
+   "detail": "Reversible migration 007, venture-scoped views, weekly-allocation page.",
+   "who": "agent",
+   "p": "P1"
+  },
+  {
+   "id": "os-sidekick",
+   "title": "BuildFlow sidekick (screenshots, fit score, outreach)",
+   "detail": "Needs ANTHROPIC_API_KEY.",
+   "who": "both",
+   "p": "P1"
+  },
+  {
+   "id": "os-ecom-brand",
+   "title": "Decide which e-commerce repo is the brand",
+   "detail": "Kadeform (Shopify) or NF-Fragrance (static).",
+   "who": "owner",
+   "p": "P1"
+  },
+  {
+   "id": "os-gmail-token",
+   "title": "Reissue or publish the Gmail OAuth token (expires ~2 Nov)",
+   "detail": "Sending silently stops otherwise.",
+   "who": "owner",
+   "p": "P0"
+  },
+  {
+   "id": "os-agriloop-data",
+   "title": "Verify Agriloop's live data source",
+   "detail": "memory vs Prisma on the live Vercel env.",
+   "who": "agent",
+   "p": "P1"
+  }
+ ]
 }

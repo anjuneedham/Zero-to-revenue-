@@ -1,7 +1,7 @@
 (function () {
   const { el, add, pill, btn, card, fmt } = Z;
-  let tab = "bf", data = null, ticks = {}, who = "ALL";
-  const TABS = [["week", "This week"], ["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
+  let tab = "os", data = null, ticks = {}, who = "ALL";
+  const TABS = [["os", "OS progress"], ["week", "This week"], ["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
   const WHO = { owner: ["You", "gold"], agent: ["Agent", "royal"], both: ["Both", ""] };
   const CAT = { buildflow: ["BuildFlow", "gold"], jobs: ["Jobs", "ok"], study: ["Study", "royal"], improve: ["Improve", ""] };
 
@@ -52,6 +52,10 @@
   }
 
   const panels = {
+    os(redraw) {
+      const c = Z.progressCard(data, ticks);
+      c.append(el("h2", null, "Master plan steps"), list(data.master, redraw)); return c;
+    },
     week(redraw) {
       const all = data.week.days.flatMap(d => d.items);
       const done = all.filter(i => ticks[i.id]).length;
