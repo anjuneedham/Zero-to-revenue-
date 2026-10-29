@@ -30,6 +30,12 @@ STATIC_ROOT = {"/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.pn
 STATIC_DIRS = ("/css/", "/js/", "/fonts/", "/data/")
 
 
+def auth_disabled() -> bool:
+    """Owner-only convenience for LOCAL runs and Vercel PREVIEWS: needs AUTH_DISABLED=1 and is ignored
+    on Vercel production (VERCEL_ENV=production). Never set it where the URL is public and holds real keys."""
+    return os.environ.get("AUTH_DISABLED") == "1" and os.environ.get("VERCEL_ENV") != "production"
+
+
 def static_file(path: str):
     """(content_type, bytes) for an allowed static file, else None. Path traversal safe."""
     if path not in STATIC_ROOT and not path.startswith(STATIC_DIRS):
@@ -96,7 +102,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
     try:
         if method == "GET" and path == "/api/auth/state":
             return _json(200, {"setup_complete": ol.setup_complete(conn), "setup_enabled": ol.setup_enabled(),
-                               "mode": "LIVE" if api_data.is_live() else "LOCAL"})
+                               "mode": "LIVE" if api_data.is_live() else "LOCAL", **({"auth_disabled": True} if auth_disabled() else {})})
         if method == "POST" and path == "/api/auth/login":
             password, code = _fields(body, "password", "code")
             return _json(200, ol.login(conn, password, code))
@@ -127,7 +133,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
     # --- authenticated -------------------------------------------------------------
     token = authz[7:] if authz and authz.startswith("Bearer ") else ""
     try:
-        owner = ol.verify_session(conn, token)
+        owner = ol.IDENTITY if auth_disabled() else ol.verify_session(conn, token)
     except ol.AuthError:
         return _json(401, {"error": "unauthorized"})
     if method == "GET" and path == "/api/status":

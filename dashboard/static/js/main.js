@@ -82,6 +82,10 @@
     try {
       const st = await Z.api("/api/auth/state", "GET", null, false);
       Z.state.mode = st.mode; const chip = $("modechip"); text(chip, st.mode === "LIVE" ? "LIVE" : "LOCAL"); chip.className = "modechip" + (st.mode === "LIVE" ? " live" : "");
+      if (st.auth_disabled) {
+        text($("modechip"), "NO LOGIN"); $("signout").hidden = true; $("signoutall").hidden = true;
+        try { await start(); return; } catch (e) { showAuth("msgbox"); text($("msg"), "Could not load: " + e.message); return; }
+      }
       if (!st.setup_complete) {
         if (!st.setup_enabled) { showAuth("msgbox"); text($("msg"), "Setup is not enabled. Set OWNER_SETUP_TOKEN (20+ characters), then redeploy or restart."); return; }
         showAuth("setup1"); return;

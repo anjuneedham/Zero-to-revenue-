@@ -206,3 +206,24 @@ class FounderApiTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AuthDisabledTest(unittest.TestCase):
+    def setUp(self):
+        self.conn = make_conn()
+
+    def get(self, env):
+        from unittest import mock
+        with mock.patch.dict("os.environ", env, clear=False):
+            return handle("GET", "/api/founder/dashboard", None, self.conn)[0]
+
+    def test_skip_login_only_when_opted_in_and_not_production(self):
+        import os
+        from unittest import mock
+        with mock.patch.dict("os.environ", {}, clear=False):
+            os.environ.pop("AUTH_DISABLED", None); os.environ.pop("VERCEL_ENV", None)
+            self.assertEqual(handle("GET", "/api/founder/dashboard", None, self.conn)[0], 401)
+        self.assertEqual(self.get({"AUTH_DISABLED": "1", "VERCEL_ENV": "preview"}), 200)
+        self.assertEqual(self.get({"AUTH_DISABLED": "1"}), 200)  # local run
+        self.assertEqual(self.get({"AUTH_DISABLED": "1", "VERCEL_ENV": "production"}), 401)
+        self.assertEqual(self.get({"AUTH_DISABLED": "true", "VERCEL_ENV": "preview"}), 401)
