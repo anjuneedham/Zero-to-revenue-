@@ -12,8 +12,8 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, rates, scheduler
-from dashboard import api_data
+from core import actions, founder, founder_dashboard, rates, scheduler, workspace
+from dashboard import api_data, founder_api
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
@@ -30,6 +30,12 @@ STATIC_ROOT = {"/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.pn
 STATIC_DIRS = ("/css/", "/js/", "/fonts/", "/data/")
 
 
+def auth_disabled() -> bool:
+    """Owner-only convenience for LOCAL runs and Vercel PREVIEWS: needs AUTH_DISABLED=1 and is ignored
+    on Vercel production (VERCEL_ENV=production). Never set it where the URL is public and holds real keys."""
+    return os.environ.get("AUTH_DISABLED") == "1" and os.environ.get("VERCEL_ENV") != "production"
+
+
 def static_file(path: str):
     """(content_type, bytes) for an allowed static file, else None. Path traversal safe."""
     if path not in STATIC_ROOT and not path.startswith(STATIC_DIRS):
@@ -44,6 +50,7 @@ SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inj
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
 ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send|submit-email)$")
+WORKSPACE_RE = re.compile(r"^/api/founder/workspace/([a-z][a-z0-9_-]{1,40})(/import-launch-plan)?$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
@@ -93,7 +100,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
     try:
         if method == "GET" and path == "/api/auth/state":
             return _json(200, {"setup_complete": ol.setup_complete(conn), "setup_enabled": ol.setup_enabled(),
-                               "mode": "LIVE" if api_data.is_live() else "LOCAL"})
+                               "mode": "LIVE" if api_data.is_live() else "LOCAL", **({"auth_disabled": True} if auth_disabled() else {})})
         if method == "POST" and path == "/api/auth/login":
             password, code = _fields(body, "password", "code")
             return _json(200, ol.login(conn, password, code))
@@ -124,9 +131,26 @@ def handle(method, path, authz, conn, body: bytes = b""):
     # --- authenticated -------------------------------------------------------------
     token = authz[7:] if authz and authz.startswith("Bearer ") else ""
     try:
-        owner = ol.verify_session(conn, token)
+        owner = ol.IDENTITY if auth_disabled() else ol.verify_session(conn, token)
     except ol.AuthError:
         return _json(401, {"error": "unauthorized"})
+    if path == "/api/founder/dashboard" and method == "GET":
+        return _json(200, founder_dashboard.dashboard(conn))
+    wm = WORKSPACE_RE.match(path)
+    if wm:
+        try:
+            if method == "GET" and not wm.group(2):
+                return _json(200, workspace.workspace(conn, wm.group(1)))
+            if method == "POST" and wm.group(2):
+                return _json(200, workspace.import_launch_plan(conn, wm.group(1), owner))
+        except founder.NotFound as e:
+            return _json(404, {"error": str(e)})
+        except founder.FounderError as e:
+            return _json(400, {"error": str(e)})
+        return _json(404, {"error": "not found"})
+    fo = founder_api.handle(conn, owner, method, path, body)
+    if fo:
+        return fo
     if method == "GET" and path == "/api/status":
         return _json(200, status_snapshot(conn))
     if method == "POST" and path == "/api/pause":

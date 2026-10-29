@@ -14,6 +14,7 @@
     operator: "M4 6h16M4 12h16M4 18h10",
     treasury: "M3 7h18v12H3zM3 7l3-3h12l3 3M16 13h2",
     plan: "M5 3h14v18l-7-4-7 4z",
+    founder: "M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z",
     play: "M8 5v14l11-7z",
     check: "M5 12l5 5L20 7",
     copy: "M9 9h11v11H9zM5 15V4h11",
