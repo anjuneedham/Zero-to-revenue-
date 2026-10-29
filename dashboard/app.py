@@ -223,6 +223,9 @@ def handle(method, path, authz, conn, body: bytes = b""):
         return _json(404, {"error": "not found"})
     if path.startswith("/api/ai/"):
         return _ai_route(conn, owner, method, path, body)
+    gr = growth_api.handle(conn, owner, method, path, body)
+    if gr:
+        return gr
     lab = lab_api.handle(conn, owner, method, path, body)
     if lab:
         return lab

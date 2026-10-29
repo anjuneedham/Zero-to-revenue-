@@ -88,6 +88,10 @@ Errors: 400 validation (message never contains driver text), 401 no session, 404
 - `core/prompt_lab.py` (versions, activate, diff + manual-score compare, file sync with drift report, `resolve` used by `ai.run`), `core/knowledge.py` (business-scoped keyword retrieval, derived trust, overview/gaps), `dashboard/lab_api.py` (`/api/lab/*`, `/api/knowledge/*`). UI: `dashboard/static/js/lab.js` (`#lab`).
 - Command Center now retrieves knowledge/research/evidence for the request from one business only, shows the model each record's label, downgrades "verified" claims whose cited source is assumed/unknown/unsourced, and stores every claim in `ai_citations`.
 
+## Phase 9 additions (Experiment and Growth Engine)
+- Migration `015_experiments_growth.sql`: experiments gain `inconclusive` status and `kpi_id, duration_days, min_sample, sample_size, result_value, decision, abandon_reason, learning_knowledge_id`; `decisions.experiment_id`; a trigger enforces the lifecycle (proposed -> running -> succeeded|failed|inconclusive, or abandoned), locks the plan once started and keeps a concluded result.
+- `core/experiments.py` (start / conclude / abandon, evaluation against baseline and target, decision record, learning written back as ASSUMED evidence with an internal source), `core/growth.py` (read-only funnels per business from recorded data; untracked = null; small-sample flags), `dashboard/growth_api.py` (`/api/growth/*`). UI: `dashboard/static/js/growth.js` (`#growth`). No model is involved; nothing executes an experiment.
+
 ## Legacy (not deleted; migration strategy)
 Nothing was dropped or altered. Legacy tables (`agents`, `agent_runs`, `opportunities`, `tasks`, `task_events`, `user_actions`,
 `deliverables`, `submissions`, `payments`, `wallets`, `transactions`, `ledger_entries`, `leads`, `notifications`) and the
@@ -96,5 +100,5 @@ three agents keep running, including the daily cron. Retirement plan, for a late
 separate, reversible migration after the owner confirms. Rollback for 007: `database/rollback/007_founder_os_core_down.sql`.
 
 ## Not built yet (by design)
-Command Center UI/conversation persistence, model-run prompt comparison, automation execution, per-business dashboards/UI, business-specific
+Command Center UI/conversation persistence, model-run prompt comparison, experiment execution, automation execution, per-business dashboards/UI, business-specific
 workspaces, migration of legacy data, auth beyond the single owner.
