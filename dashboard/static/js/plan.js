@@ -68,8 +68,9 @@
     },
     acq(redraw) {
       const a = data.acquire;
-      const c = card("First 5 users at $10", "Research note: the next main focus. Faceless, repeatable short videos that give value for a comment and ask for a setup call.");
+      const c = card("First 5 founding contractors", "Research note: the next main focus. Faceless, repeatable short videos that give value for a comment and ask for a setup call.");
       c.append(el("p", "sub", a.goal), el("p", "sub", a.thesis));
+      c.append(el("h2", null, "Decisions"), table(["Topic", "Decision"], a.decisions));
       c.append(el("h2", null, "The 6-beat storyboard (every video)"), table(["Beat", "What goes on screen"], a.beats));
       c.append(el("h2", null, "No-camera formats"), table(["Format", "How it works"], a.formats));
       c.append(el("h2", null, "What we give away"), table(["Offer", "Why"], a.offers));

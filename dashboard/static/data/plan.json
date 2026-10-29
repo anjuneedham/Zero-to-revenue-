@@ -10,10 +10,10 @@
   },
   {
    "id": "bf-billing",
-   "p": "P0",
+   "p": "P2",
    "who": "both",
-   "title": "Decide how contractors pay (Stripe is not available in Jamaica)",
-   "detail": "Billing is a stub: $50/month is displayed but nothing charges or enforces the trial. For the first 10 founding contractors use bank transfer or PayPal invoices and mark them paid in the admin screen. Then choose WiPay or PayPal subscriptions. Once you choose, I can build trial enforcement and a paid-until field.",
+   "title": "Billing: not needed while founding contractors are free",
+   "detail": "Billing is a stub by design (src/lib/billing.ts, 'manual' mode); it is not broken and needs no database change. Revisit when the first founding trial nears its end: bank transfer or PayPal invoices first, then WiPay or PayPal subscriptions. Stripe is not available in Jamaica.",
    "src": "V2 audit; strategy section 6"
   },
   {
@@ -583,7 +583,7 @@
   ]
  },
  "acquire": {
-  "goal": "First 5 paying BuildFlow users at $10 each. Network outreach has been tried and did not convert, so the next engine is the organic wheel: 2 faceless videos a day, each giving something useful away and asking for a short call to set the app up.",
+  "goal": "First 5 founding contractors using BuildFlow, free for 60 days in exchange for feedback, job photos and a testimonial (decided 29 Oct: free, not $10). Payment is a later step, so the success metric is five active contractors, not revenue. The engine is 2 faceless short videos a day that give value for a comment and ask for a short setup call.",
   "thesis": "Every video does one job: trade something genuinely useful for a comment or DM, then move the person to a 15-minute setup call. No face, no phone camera: everything is built on a computer from screen recordings, text, stock or AI footage and a voiceover (or captions only).",
   "beats": [
    [
@@ -653,6 +653,10 @@
    [
     "Free profile setup",
     "The call itself is the offer: \"I'll set up your public profile and first quote with you in 15 minutes.\""
+   ],
+   [
+    "Consumer giveaway (later)",
+    "\"How to check a contractor before you pay\" checklist. Drives consumers to profiles."
    ]
   ],
   "funnel": [
@@ -682,39 +686,31 @@
     "Count only completed set-ups"
    ],
    [
-    "Paid $10",
-    "First payment",
-    "Counts toward the 5"
+    "Active founding contractor",
+    "Profile live and first quote or job photo added",
+    "Counts toward the 5. Payment comes later"
    ]
   ],
   "experiment": "Run 10 days, 20 videos. Rotate the 6 formats evenly so each gets about 3 posts, hold the offer and CTA constant per 5-video block, and log views, comments, DMs and calls per video in one sheet. After day 10 keep the top 2 formats and drop the rest. Everything below is a planning assumption until the log says otherwise: expect most videos to do little, so judge on comments per 1,000 views and calls per 10 DMs, not on any single hit.",
   "risks": [
-   "Founding offer conflict: the launch plan says free for 60 days for 10 founding contractors; this goal says 5 at $10. Decide which one the videos promise before posting.",
+   "Free users still need a working app: Firebase Storage must be on before any setup call or photos fail. Billing does not block this.",
    "BuildFlow is not launch-ready (Storage, billing, legal are open). A call that ends in a broken upload loses the user. Fix Storage and decide billing first, or sell as a guided beta.",
    "Collecting names and numbers in DMs: have a one-line consent note and the legal pages in place.",
    "Platform rules on giveaways, automated DMs and AI footage differ; check each platform's current rules before using auto-reply tools.",
    "No view or conversion figures are known yet. Nothing here is a forecast."
   ],
   "open": [
-   "Which platforms: TikTok, Instagram Reels, Facebook, YouTube Shorts (WhatsApp Status is free reach to Jamaican contacts)?",
-   "Is $10 a one-off, monthly, or a founding price that rises to $50?",
-   "Who is the target: roofers, electricians, plumbers, general builders, or all?",
-   "Voiceover (your voice, no face) or captions only?"
+   "Which trade first (roofers, electricians, plumbers, general builders)? One trade makes the hooks sharper.",
+   "Voiceover (your voice, no face) or captions only?",
+   "Consumer-side giveaway: e.g. a free checklist for hiring a contractor safely. Worth doing once 2-3 contractor profiles are live."
   ],
   "tasks": [
    {
-    "id": "aq-decide-offer",
-    "p": "P0",
-    "who": "owner",
-    "title": "Decide the offer the videos promise",
-    "detail": "Settle $10 vs 60 days free, one trade to start with, and the one free giveaway. Everything else follows from this."
-   },
-   {
     "id": "aq-fix-blockers",
     "p": "P0",
-    "who": "both",
-    "title": "Clear the BuildFlow blockers a call would hit",
-    "detail": "Storage on, billing method chosen (see BuildFlow launch tab), so a set-up call does not end in a failed upload."
+    "who": "owner",
+    "title": "Turn on Firebase Storage",
+    "detail": "The only blocker for free founding users. Billing is not needed yet."
    },
    {
     "id": "aq-giveaway",
@@ -735,7 +731,7 @@
     "p": "P1",
     "who": "owner",
     "title": "Pick the no-camera toolchain",
-    "detail": "Laptop screen recorder for demos plus an editor (Descript or CapCut desktop). Stock footage and voiceover or captions. No phone needed."
+    "detail": "Tab S9 FE: built-in screen recorder for demos plus CapCut or Descript for editing. Stock footage and captions or voiceover. No camera needed."
    },
    {
     "id": "aq-booking",
@@ -757,7 +753,39 @@
     "who": "owner",
     "title": "Post 2 a day for 10 days, then review",
     "detail": "Keep the top 2 formats, cut the rest, write what changed in the Founders Log."
+   },
+   {
+    "id": "aq-trial60",
+    "p": "P1",
+    "who": "both",
+    "title": "Make the founding trial 60 days",
+    "detail": "BuildFlow currently creates a 14-day trial for every business (onboarding.ts). For founding contractors it needs 60, as a code change in the BuildFlow repo."
+   },
+   {
+    "id": "aq-pick-trade",
+    "p": "P1",
+    "who": "owner",
+    "title": "Pick the first trade to target",
+    "detail": "One trade for the first 10 days so the hooks and DM script stay specific."
    }
+  ],
+  "decisions": [
+   [
+    "Offer",
+    "Free for founding contractors (60 days), in return for feedback, job photos and a testimonial."
+   ],
+   [
+    "Platforms",
+    "TikTok, YouTube Shorts, Facebook, Instagram. One edit exported to all four."
+   ],
+   [
+    "Audience",
+    "Two sides: contractors and construction service professionals (the buyers), and consumers who want trustworthy people to hire (the demand that makes the profile worth having). Contractor-first: consumer videos point to contractors' public profiles, and each founding contractor shares their own link."
+   ],
+   [
+    "Editing",
+    "Samsung Tab S9 FE only. Faceless formats need no camera: use the built-in screen recorder for demos, and stock or AI footage, text and captions for the rest, so camera quality does not matter."
+   ]
   ]
  }
 }
