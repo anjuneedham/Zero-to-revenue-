@@ -1,5 +1,6 @@
 -- Venture workspace: ventures, their tasks, decisions and experiments (HANDOFF step 3). Additive only.
--- The agent queue already owns the name `tasks`, so the owner's task list is `venture_tasks`.
+-- The agent queue already owns the name `tasks`, and the production database already had an unrelated `decisions` table
+-- (found when this migration failed on 29 Oct), so every table here carries the `venture_` prefix and none touches those.
 -- Roll back with database/rollbacks/008_ventures.down.sql (kept outside this folder: the runner applies every *.sql here).
 CREATE TABLE ventures (
   id TEXT PRIMARY KEY,
@@ -30,7 +31,7 @@ CREATE TABLE venture_tasks (
 );
 CREATE INDEX venture_tasks_open ON venture_tasks (venture_id, status);
 
-CREATE TABLE decisions (
+CREATE TABLE venture_decisions (
   id TEXT PRIMARY KEY,
   venture_id TEXT REFERENCES ventures(id) ON DELETE SET NULL,   -- NULL = applies to the whole OS
   title TEXT NOT NULL,
@@ -40,9 +41,9 @@ CREATE TABLE decisions (
   created_at TEXT NOT NULL,
   decided_at TEXT
 );
-CREATE INDEX decisions_status ON decisions (status, created_at);
+CREATE INDEX venture_decisions_status ON venture_decisions (status, created_at);
 
-CREATE TABLE experiments (
+CREATE TABLE venture_experiments (
   id TEXT PRIMARY KEY,
   venture_id TEXT NOT NULL REFERENCES ventures(id) ON DELETE CASCADE,
   hypothesis TEXT NOT NULL,
@@ -52,4 +53,4 @@ CREATE TABLE experiments (
   created_at TEXT NOT NULL,
   closed_at TEXT
 );
-CREATE INDEX experiments_status ON experiments (venture_id, status);
+CREATE INDEX venture_experiments_status ON venture_experiments (venture_id, status);

@@ -1,8 +1,10 @@
 import unittest
+import uuid
 from pathlib import Path
 
 import dashboard.app as dash
 from core import db
+from tests import dbutil
 from tests.unit.test_challenge import ChallengeBase
 
 ROLLBACK = Path(__file__).resolve().parents[2] / "database" / "rollbacks" / "008_ventures.down.sql"
@@ -61,6 +63,26 @@ class MigrationReversibleTest(ChallengeBase):
 
     def test_rollback_dir_is_outside_the_migration_runner(self):
         self.assertFalse(any("down" in f.name for f in db.MIGRATIONS.glob("*.sql")))
+
+
+class PreexistingTablesTest(unittest.TestCase):
+    def test_migration_survives_unrelated_tables_with_common_names(self):
+        """Production already had a `decisions` table that no migration in this repo creates; the first 008 used that
+        name, failed with DuplicateTable and took every API route down (503). Names must not collide, and the foreign
+        tables must be left alone."""
+        dbutil.require_db()
+        schema = "t_" + uuid.uuid4().hex[:10]
+        admin = db.connect(dbutil.URL)
+        admin.execute(f'CREATE SCHEMA "{schema}"')
+        admin.close()
+        dbutil._schemas.append(schema)
+        conn = db.connect(dbutil.URL, schema=schema)
+        for name in ("decisions", "experiments", "ventures_old", "tasks_old"):
+            conn.execute(f"CREATE TABLE {name} (id serial PRIMARY KEY, note text)")
+        conn.execute("INSERT INTO decisions(note) VALUES ('keep me')")
+        self.assertIn("008_ventures.sql", db.migrate(conn))
+        self.assertEqual(conn.execute("SELECT note FROM decisions").fetchone()[0], "keep me")
+        self.assertEqual(conn.execute("SELECT count(*) FROM ventures").fetchone()[0], 4)
 
 
 if __name__ == "__main__":

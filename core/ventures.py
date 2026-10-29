@@ -1,4 +1,4 @@
-"""Venture workspace: each venture's tasks, decisions and experiments (migration 008). Owner-only, no side effects
+"""Venture workspace: each venture's tasks, decisions and experiments (migration 008; tables are venture_tasks, venture_decisions, venture_experiments). Owner-only, no side effects
 outside the database: nothing here sends, spends or contacts anyone."""
 
 import uuid
@@ -38,13 +38,13 @@ def overview(conn) -> dict:
     for r in conn.execute("SELECT id,venture_id,title,status,priority,due_date,notes FROM venture_tasks WHERE status<>'done' "
                           "ORDER BY (priority='high') DESC, due_date NULLS LAST, created_at"):
         by[r["venture_id"]]["tasks"].append(dict(r))
-    for r in conn.execute("SELECT id,venture_id,hypothesis,metric,created_at FROM experiments WHERE status='running' ORDER BY created_at"):
+    for r in conn.execute("SELECT id,venture_id,hypothesis,metric,created_at FROM venture_experiments WHERE status='running' ORDER BY created_at"):
         by[r["venture_id"]]["experiments"].append(dict(r))
     shared = []
-    for r in conn.execute("SELECT id,venture_id,title,context,created_at FROM decisions WHERE status='open' ORDER BY created_at"):
+    for r in conn.execute("SELECT id,venture_id,title,context,created_at FROM venture_decisions WHERE status='open' ORDER BY created_at"):
         (by[r["venture_id"]]["decisions"] if r["venture_id"] in by else shared).append(dict(r))
     recent = [dict(r) for r in conn.execute(
-        "SELECT id,venture_id,title,decision,status,decided_at FROM decisions WHERE status<>'open' ORDER BY decided_at DESC NULLS LAST LIMIT 10")]
+        "SELECT id,venture_id,title,decision,status,decided_at FROM venture_decisions WHERE status<>'open' ORDER BY decided_at DESC NULLS LAST LIMIT 10")]
     return {"ventures": list(by.values()), "shared_decisions": shared, "recent_decisions": recent,
             "weekday": date.today().strftime("%a")}
 
@@ -79,7 +79,7 @@ def set_task_status(conn, owner, task_id, status):
 def add_decision(conn, owner, venture_id, title, context=""):
     _venture(conn, venture_id, required=False)
     did = "dec_" + uuid.uuid4().hex[:12]
-    conn.execute("INSERT INTO decisions(id,venture_id,title,context,created_at) VALUES (?,?,?,?,?)",
+    conn.execute("INSERT INTO venture_decisions(id,venture_id,title,context,created_at) VALUES (?,?,?,?,?)",
                  (did, venture_id or None, _text(title, "title", 200, True), _text(context, "context", 1000) or None, now()))
     audit(conn, owner, "venture.decision_add", did, venture_id or "os")
     return {"id": did}
@@ -89,7 +89,7 @@ def decide(conn, owner, decision_id, decision, status="decided"):
     if status not in DECISION_STATUS:
         raise VentureError("status must be decided or reversed")
     text = _text(decision, "decision", 1000, True)
-    if not conn.execute("UPDATE decisions SET decision=?, status=?, decided_at=? WHERE id=?", (text, status, now(), decision_id)).rowcount:
+    if not conn.execute("UPDATE venture_decisions SET decision=?, status=?, decided_at=? WHERE id=?", (text, status, now(), decision_id)).rowcount:
         raise VentureError("decision not found")
     audit(conn, owner, "venture.decision", decision_id, status)
     return {"ok": True}
@@ -98,7 +98,7 @@ def decide(conn, owner, decision_id, decision, status="decided"):
 def add_experiment(conn, owner, venture_id, hypothesis, metric):
     _venture(conn, venture_id)
     eid = "exp_" + uuid.uuid4().hex[:12]
-    conn.execute("INSERT INTO experiments(id,venture_id,hypothesis,metric,created_at) VALUES (?,?,?,?,?)",
+    conn.execute("INSERT INTO venture_experiments(id,venture_id,hypothesis,metric,created_at) VALUES (?,?,?,?,?)",
                  (eid, venture_id, _text(hypothesis, "hypothesis", 300, True), _text(metric, "metric", 200, True), now()))
     audit(conn, owner, "venture.experiment_add", eid, venture_id)
     return {"id": eid}
@@ -107,7 +107,7 @@ def add_experiment(conn, owner, venture_id, hypothesis, metric):
 def close_experiment(conn, owner, experiment_id, status, result=""):
     if status not in EXPERIMENT_CLOSE:
         raise VentureError("status must be won, lost, inconclusive or stopped")
-    if not conn.execute("UPDATE experiments SET status=?, result=?, closed_at=? WHERE id=? AND status='running'",
+    if not conn.execute("UPDATE venture_experiments SET status=?, result=?, closed_at=? WHERE id=? AND status='running'",
                         (status, _text(result, "result", 1000) or None, now(), experiment_id)).rowcount:
         raise VentureError("running experiment not found")
     audit(conn, owner, "venture.experiment_close", experiment_id, status)
