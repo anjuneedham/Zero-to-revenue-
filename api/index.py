@@ -8,6 +8,7 @@ A fresh connection per request: serverless instances are short-lived.
 
 import json
 import os
+import sys
 from urllib.parse import parse_qs, urlsplit
 from http.server import BaseHTTPRequestHandler
 
@@ -25,22 +26,33 @@ def has_persistent_db() -> bool:
     return _db_url().startswith(("postgres://", "postgresql://"))
 
 
+def _log(stage: str, e: Exception | None = None) -> None:
+    """Runtime-log only (never in the response): which stage failed and the exception type, message cut short."""
+    detail = f"{type(e).__name__}: {str(e)[:200]}" if e else "DATABASE_URL is not a postgres:// URL"
+    print(f"api 503 at {stage}: {detail}", file=sys.stderr, flush=True)
+
+
 def _api(method, path, authz, body=b""):
     global _migrated
     unavailable = (503, "application/json", json.dumps({"error": "database unavailable"}).encode())
     if not has_persistent_db():
+        _log("config")
         return unavailable
     try:
         conn = db.connect(_db_url())
-    except Exception:
+    except Exception as e:
+        _log("connect", e)
         return unavailable
+    stage = "migrate"
     try:
         if not _migrated:
             db.migrate(conn)
             _migrated = True
+        stage = "handle"
         return dash.handle(method, path, authz, conn, body)
-    except Exception:
-        return unavailable  # never leak driver errors (may contain hosts/users)
+    except Exception as e:
+        _log(stage, e)
+        return unavailable  # never leak driver errors (may contain hosts/users) in the response
     finally:
         conn.close()
 
