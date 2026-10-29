@@ -57,14 +57,19 @@ def daily_report(conn) -> str:
     moved = conn.execute(
         "SELECT title, 'now ' || status AS what FROM opportunities WHERE discovered_at < ? AND "
         "status IN ('APPROVED','AWAITING_PAYMENT','PAYMENT_VERIFIED') ORDER BY discovered_at DESC LIMIT 5", (t,)).fetchall()
-    lines = ["PIN MOVERS (what actually changed)"]
+    from core import challenge
+    ch = challenge.summary(conn)
+    lines = [f"CHALLENGE: ${ch['cash_usd']:,.0f} of ${ch['target_usd']:,.0f} verified cash"
+             + (f", day {ch['day']}/{ch['total_days']}, {'ahead of' if ch['ahead_by_usd'] >= 0 else 'behind'} pace by ${abs(ch['ahead_by_usd']):,.0f}" if ch["state"] == "running" else f" ({ch['state']})")
+             + f". Open deals: {ch['deals_open']} (${ch['pipeline_usd']:,.0f}). Leads to contact today: {len(ch['due'])}.", "",
+             "PIN MOVERS (what actually changed)"]
     if paid_today:
         lines.append(f"- {paid_today} payment(s) verified today")
     if qualified_new:
         lines.append(f"- {qualified_new} new opportunity(ies) qualified today")
     for m in moved:
         lines.append(f"- {m['title'][:80]}: {m['what']}")
-    if len(lines) == 1:
+    if lines[-1].startswith("PIN MOVERS"):
         lines.append("- Nothing moved today")
     lines.append("")
     lines += [

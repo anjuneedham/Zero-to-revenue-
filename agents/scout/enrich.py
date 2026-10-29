@@ -30,9 +30,12 @@ class ClaudeClient:
         self.model = model or os.environ.get("CLAUDE_MODEL", "claude-sonnet-5-5")
         self.client = anthropic.Anthropic()  # ANTHROPIC_API_KEY from the environment
 
-    def complete(self, system: str, user: str, max_tokens: int):
+    def complete(self, system: str, user: str, max_tokens: int, image=None):
+        content = user if image is None else [
+            {"type": "image", "source": {"type": "base64", "media_type": image[0], "data": image[1]}},
+            {"type": "text", "text": user}]
         r = self.client.messages.create(model=self.model, max_tokens=max_tokens, system=system,
-                                        messages=[{"role": "user", "content": user}])
+                                        messages=[{"role": "user", "content": content}])
         text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
         return text, r.usage.input_tokens, r.usage.output_tokens
 

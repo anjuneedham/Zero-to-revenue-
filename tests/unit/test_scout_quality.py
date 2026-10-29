@@ -144,7 +144,7 @@ class DailyReportTest(unittest.TestCase):
         from tests.dbutil import make_conn
         conn = make_conn()
         report = daily_report(conn)
-        self.assertTrue(report.startswith("PIN MOVERS"))
+        self.assertIn("\nPIN MOVERS", report)
         self.assertIn("Nothing moved today", report)
 
 
