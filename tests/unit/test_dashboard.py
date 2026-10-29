@@ -27,7 +27,7 @@ class DashboardTest(unittest.TestCase):
     def test_page_is_public_but_labelled_mock_and_api_requires_auth(self):
         c, html = self.call("GET", "/")
         self.assertEqual(c, 200)
-        self.assertIn("MOCK", html)
+        self.assertNotIn("MOCK", html)  # the mode chip is set from /api/auth/state (LOCAL or LIVE), never hardcoded
         for path, m in (("/api/status", "GET"), ("/api/pause", "POST"), ("/api/resume", "POST"),
                         ("/api/auth/logout", "POST"), ("/api/auth/logout-all", "POST")):
             self.assertEqual(self.call(m, path)[0], 401, path)

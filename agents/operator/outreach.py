@@ -11,6 +11,7 @@ import re
 import uuid
 
 from agents.operator.drafts import FILL
+from core import challenge
 from core.audit import audit
 from core.db import now
 from core.orchestrator.killswitch import is_paused
@@ -64,18 +65,20 @@ def parse_csv(text: str) -> list[dict]:
     return rows
 
 
-def import_leads(conn, owner: str, csv_text: str) -> dict:
+def import_leads(conn, owner: str, csv_text: str, venture: str = "buildflow") -> dict:
+    if venture not in challenge.VENTURES:
+        raise ImportError_("venture must be buildflow or agriloop")
     rows = parse_csv(csv_text)
     added = skipped = 0
     for r in rows:
         lid = "lead_" + uuid.uuid4().hex[:12]
         cur = conn.execute(
-            "INSERT INTO leads(id,name,business,email,phone,notes,created_at) VALUES (?,?,?,?,?,?,?) "
+            "INSERT INTO leads(id,name,business,email,phone,notes,venture,channel,created_at) VALUES (?,?,?,?,?,?,?,'email',?) "
             "ON CONFLICT (lower(email)) WHERE email IS NOT NULL AND email <> '' DO NOTHING",
-            (lid, r["name"], r["business"], r["email"], r["phone"], r["notes"], now()))
+            (lid, r["name"], r["business"], r["email"], r["phone"], r["notes"], venture, now()))
         added += cur.rowcount
         skipped += 1 - cur.rowcount
-    audit(conn, owner, "leads.import", None, f"added={added} skipped_duplicates={skipped} rows={len(rows)}")
+    audit(conn, owner, "leads.import", None, f"venture={venture} added={added} skipped_duplicates={skipped} rows={len(rows)}")
     return {"added": added, "skipped_duplicates": skipped, "total_rows": len(rows)}
 
 
@@ -128,6 +131,10 @@ def send_outreach(conn, action_id: str, owner: str, edited_body: str | None = No
     lead = conn.execute("SELECT * FROM leads WHERE id=?", (action_id[len("ua_lead_"):],)).fetchone()
     if lead is None:
         raise SendError("lead not found")
+    if lead["stage"] == "lost" or lead["status"] == "SKIPPED":
+        raise SendError("this lead opted out or was marked lost; do not contact them again")
+    if not lead["email"]:
+        raise SendError("this lead has no email address")
     text = (edited_body or a["exact_action"] or "").strip()
     if not text:
         raise SendError("draft is empty")
@@ -140,6 +147,7 @@ def send_outreach(conn, action_id: str, owner: str, edited_body: str | None = No
         raise SendError(str(e)) from e
     conn.execute("UPDATE user_actions SET status='DONE', resolved_at=? WHERE action_id=?", (now(), action_id))
     conn.execute("UPDATE leads SET status='SENT' WHERE id=?", (lead["id"],))
+    challenge.log_touch(conn, owner, lead["id"], "email", "sent", "out", text)
     audit(conn, owner, "action.sent_via_gmail", action_id, result["message_id"])
     return {"sent": True, "message_id": result["message_id"]}
 

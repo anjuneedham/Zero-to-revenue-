@@ -1,6 +1,6 @@
 """Owner-only dashboard + API. Every /api route except the few login/setup routes needs
 a session bearer token in the Authorization header (no cookies, so no CSRF surface).
-Mode: MOCK."""
+Mode: LOCAL or LIVE (Vercel)."""
 
 import hmac
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, rates, scheduler
+from core import actions, challenge, rates, scheduler
 from dashboard import api_data
 from dashboard.mcp import handle_mcp
 from core import db
@@ -74,6 +74,36 @@ def _fields(body: bytes, *names):
             raise ValueError("bad field")
         out.append(v)
     return out
+
+
+def _challenge_route(method, path, body, conn, owner):
+    """60-day challenge: summary, config, prospect pipeline, touches, drafts, deals."""
+    data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+    if not isinstance(data, dict):
+        raise ValueError("bad request")
+    if method == "GET" and path == "/api/challenge":
+        return challenge.summary(conn)
+    if method == "GET" and path == "/api/challenge/leads":
+        return {"leads": challenge.list_leads(conn)}
+    if method != "POST":
+        raise ValueError("bad request")
+    if path == "/api/challenge/config":
+        return challenge.set_config(conn, owner, data)
+    if path == "/api/challenge/leads":
+        return challenge.add_lead(conn, owner, data)
+    if path == "/api/challenge/stage":
+        return challenge.set_stage(conn, owner, str(data.get("lead_id", "")), str(data.get("stage", "")),
+                                   str(data.get("reason", "")), data.get("next_days"))
+    if path == "/api/challenge/touch":
+        return challenge.log_touch(conn, owner, str(data.get("lead_id", "")), str(data.get("channel", "")),
+                                   str(data.get("outcome", "sent")), str(data.get("direction", "out")), str(data.get("body", "")))
+    if path == "/api/challenge/draft":
+        return challenge.draft_for(conn, str(data.get("lead_id", "")), str(data.get("channel", "email")), bool(data.get("follow_up")))
+    if path == "/api/challenge/deal":
+        return challenge.create_deal(conn, owner, str(data.get("lead_id", "")), data.get("amount"))
+    if path == "/api/challenge/onboarding":
+        return challenge.set_onboarding(conn, owner, str(data.get("deal_id", "")), str(data.get("status", "")))
+    raise ValueError("bad request")
 
 
 def handle(method, path, authz, conn, body: bytes = b""):
@@ -179,7 +209,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
             csv_text = data.get("csv", "")
             if not isinstance(csv_text, str):
                 raise ValueError("bad request")
-            return _json(200, outreach.import_leads(conn, owner, csv_text))
+            return _json(200, outreach.import_leads(conn, owner, csv_text, data.get("venture", "buildflow")))
         except outreach.ImportError_ as e:
             return _json(400, {"error": str(e)})
         except (ValueError, json.JSONDecodeError):
@@ -194,7 +224,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
         made = []
         for r in rows:
             lead = dict(r)
-            draft = outreach.draft_outreach(lead)
+            draft = challenge.draft_for(conn, lead["id"], "email")["draft"]
             action_id = "ua_lead_" + lead["id"]
             conn.execute(
                 "INSERT INTO user_actions(action_id, task_id, title, why_required, exact_action, risk, status, "
@@ -215,6 +245,13 @@ def handle(method, path, authz, conn, body: bytes = b""):
                 raise ValueError("bad request")
             return _json(200, outreach.send_outreach_batch(conn, owner, ids))
         except (ValueError, json.JSONDecodeError):
+            return _json(400, {"error": "bad request"})
+    if path.startswith("/api/challenge"):
+        try:
+            return _json(200, _challenge_route(method, path, body, conn, owner))
+        except challenge.ChallengeError as e:
+            return _json(400, {"error": str(e)})
+        except (ValueError, json.JSONDecodeError, AttributeError, TypeError):
             return _json(400, {"error": "bad request"})
     if method == "GET" and path == "/api/plan":
         return _json(200, api_data.plan_get(conn))

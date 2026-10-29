@@ -1,0 +1,178 @@
+(function () {
+  const { el, add, pill, btn, card, fmt, nice } = Z;
+  const VENT = { buildflow: "BuildFlow", agriloop: "AgriLoop" };
+  const STAGES = [["new", "New"], ["contacted", "Contacted"], ["replied", "Replied"], ["onboarding_booked", "Onboarding booked"], ["trial", "Trial"], ["paying", "Paying"], ["lost", "Lost"]];
+  const CHANNELS = ["email", "whatsapp", "instagram", "facebook", "call", "in_person", "other"];
+  const usd0 = v => "$" + Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+  const leadName = l => l.business || l.name || l.email || l.phone || "Unnamed";
+  const field = (label, node) => { const l = el("label", "f", label); l.append(node); return l; };
+  const input = (ph, type) => { const i = el("input"); i.placeholder = ph || ""; if (type) i.type = type; i.setAttribute("aria-label", ph || "field"); return i; };
+  const select = (opts, val) => { const s = el("select"); opts.forEach(o => { const [v, t] = Array.isArray(o) ? o : [o, nice(o)]; const op = el("option", null, t); op.value = v; s.append(op); }); if (val) s.value = val; return s; };
+
+  // ---- draft + log drawer for one lead ----
+  async function openLead(l, refresh) {
+    const box = el("div", "list");
+    const ch = select(CHANNELS, l.email ? "email" : l.phone ? "whatsapp" : "instagram");
+    const ta = el("textarea", "draft"); ta.rows = 12;
+    const load = async followUp => { const d = await Z.api("/api/challenge/draft", "POST", { lead_id: l.id, channel: ch.value, follow_up: followUp }); ta.value = d.draft; };
+    ch.onchange = () => load(l.stage !== "new").catch(e => Z.toast(e.message, "bad"));
+    add(box, add(el("div", "meta"), pill(VENT[l.venture]), pill(nice(l.stage), "gold"), l.segment ? pill(l.segment) : null, l.location ? pill(l.location) : null),
+      el("div", "sub", [l.name, l.email, l.phone].filter(Boolean).join(" · ")), l.notes ? el("p", "sub", l.notes) : null,
+      field("Channel", ch), ta,
+      el("p", "sub", "Fill every [OWNER TO FILL] before sending. Nothing is sent from here: copy it, send it yourself (or send email through the Operator), then log it."));
+    const row = el("div", "row");
+    add(row,
+      btn("Copy", "ghost small", () => Z.copy(ta.value, "Message"), "copy"),
+      btn("I sent it - log it", "gold small", async () => { await Z.api("/api/challenge/touch", "POST", { lead_id: l.id, channel: ch.value, outcome: "sent", body: ta.value }); Z.toast("Logged. Follow-up in 3 days.", "ok"); Z.$("drawer").close(); await refresh(); }),
+      btn("They replied", "small", async () => { await Z.api("/api/challenge/touch", "POST", { lead_id: l.id, channel: ch.value, direction: "in", outcome: "replied" }); Z.toast("Marked replied", "ok"); Z.$("drawer").close(); await refresh(); }),
+      btn("Onboarding booked", "small", async () => { await Z.api("/api/challenge/touch", "POST", { lead_id: l.id, channel: ch.value, outcome: "booked" }); Z.toast("Onboarding booked", "ok"); Z.$("drawer").close(); await refresh(); }));
+    box.append(row);
+    const row2 = el("div", "row");
+    const reason = input("Why lost? (optional)");
+    add(row2, btn("They paid / close the deal", "gold small", async () => { const r = await Z.api("/api/challenge/deal", "POST", { lead_id: l.id }); Z.toast("Deal created: " + usd0(r.amount_usd) + ". Request the PayPal link below.", "ok"); Z.$("drawer").close(); await refresh(); }),
+      reason, btn("Not interested / opt-out", "ghost small", async () => { await Z.api("/api/challenge/stage", "POST", { lead_id: l.id, stage: "lost", reason: reason.value }); Z.toast("Marked lost. Will not be drafted again.", "ok"); Z.$("drawer").close(); await refresh(); }));
+    box.append(row2);
+    Z.openDrawer(leadName(l), box);
+    load(l.stage !== "new").catch(e => Z.toast(e.message, "bad"));
+  }
+
+  function addLeadForm(refresh) {
+    const f = el("div", "form");
+    const v = select([["buildflow", "BuildFlow"], ["agriloop", "AgriLoop"]]);
+    const name = input("Contact name"), biz = input("Business / farm"), email = input("Email (optional)", "email"), phone = input("Phone / WhatsApp"),
+      seg = input("Trade or crop"), loc = input("Parish / town"), ch = select(CHANNELS, "whatsapp"), notes = input("Notes");
+    add(f, field("Venture", v), name, biz, email, phone, seg, loc, field("Found them via", ch), notes,
+      btn("Add lead", "gold small", async () => {
+        await Z.api("/api/challenge/leads", "POST", { venture: v.value, name: name.value, business: biz.value, email: email.value, phone: phone.value, segment: seg.value, location: loc.value, channel: ch.value, notes: notes.value });
+        Z.toast("Lead added", "ok"); await refresh();
+      }));
+    return f;
+  }
+
+  function importForm(refresh) {
+    const f = el("div", "form");
+    const v = select([["buildflow", "BuildFlow"], ["agriloop", "AgriLoop"]]);
+    const ta = el("textarea"); ta.rows = 5; ta.placeholder = "name,business,email,phone,notes\nJane Doe,Doe Tiling,jane@example.com,876-555-0100,saw her Instagram";
+    add(f, field("Paste CSV for", v), ta, btn("Import", "small", async () => {
+      const r = await Z.api("/api/leads/import", "POST", { csv: ta.value, venture: v.value });
+      Z.toast(`Added ${r.added}, skipped ${r.skipped_duplicates} duplicates`, "ok"); await refresh();
+    }));
+    return f;
+  }
+
+  function configForm(c, refresh) {
+    const f = el("div", "form");
+    const target = input("Target USD", "number"); target.value = c.target_usd;
+    const start = input("Start", "date"); start.value = c.start; const end = input("End", "date"); end.value = c.end;
+    add(f, field("Cash target (USD)", target), field("Starts", start), field("Ends", end));
+    const offers = {};
+    ["buildflow", "agriloop"].forEach(k => {
+      const o = c.offers[k], ann = input("Annual price USD", "number"), mon = input("Monthly price USD", "number"), fm = input("Free months", "number");
+      ann.value = o.annual_usd == null ? "" : o.annual_usd; mon.value = o.monthly_usd == null ? "" : o.monthly_usd; fm.value = o.free_months;
+      offers[k] = { ann, mon, fm };
+      add(f, el("h3", null, VENT[k] + " offer"), field("Annual price (paid up front)", ann), field("Normal monthly price", mon), field("Free months added", fm));
+    });
+    add(f, btn("Save", "gold small", async () => {
+      const body = { target_usd: target.value, start: start.value, end: end.value, offers: {} };
+      Object.entries(offers).forEach(([k, o]) => { body.offers[k] = { annual_usd: o.ann.value, monthly_usd: o.mon.value, free_months: parseInt(o.fm.value, 10) }; });
+      await Z.api("/api/challenge/config", "POST", body); Z.toast("Saved", "ok"); Z.$("drawer").close(); await refresh();
+    }));
+    return f;
+  }
+
+  Z.pages.challenge = {
+    title: "Challenge", sub: "60 days, $10k cash: sell annual plans with 1-on-1 onboarding", icon: "target",
+    async render(root) {
+      const [s, ld, pay, t] = await Promise.all([Z.api("/api/challenge"), Z.api("/api/challenge/leads"), Z.api("/api/payments"), Z.api("/api/treasury/overview")]);
+      const refresh = () => Z.rerender();
+      const c = s.config, g = el("div", "grid");
+
+      // hero
+      const hero = el("section", "card hero s8");
+      const when = s.state === "before" ? `Starts in ${s.starts_in_days} day${s.starts_in_days === 1 ? "" : "s"} (${c.start})` : s.state === "after" ? "Challenge ended" : `Day ${s.day} of ${s.total_days} · ${s.days_left} left`;
+      add(hero, el("div", "label", "Verified cash in the challenge window · " + when), el("div", "big", fmt.usd(s.cash_usd) + " / " + usd0(s.target_usd)));
+      const bar = el("div", "bar"); const fill = el("i"); fill.style.width = Math.min(100, 100 * s.cash_usd / s.target_usd) + "%"; bar.append(fill); hero.append(bar);
+      const ahead = s.ahead_by_usd >= 0;
+      hero.append(el("p", "sub", s.state === "running" ? (ahead ? `Ahead of pace by ${usd0(s.ahead_by_usd)}.` : `Behind pace by ${usd0(-s.ahead_by_usd)} (pace target today: ${usd0(s.pace_target_usd)}).`) : "Only payments Treasury has verified count as cash. Pipeline is not cash."));
+      const tiles = el("div", "tiles");
+      [["Still to earn", usd0(s.remaining_usd)], ["Deals needed", s.deals_needed == null ? "set a price" : s.deals_needed], ["Per week needed", s.per_week_needed == null ? "-" : s.per_week_needed], ["Open deals", `${s.deals_open} · ${usd0(s.pipeline_usd)}`]]
+        .forEach(([l, v]) => { const x = el("div", "tile"); add(x, el("div", "label", l), el("div", "stat", v)); tiles.append(x); });
+      hero.append(tiles); g.append(hero);
+
+      // offer + actions
+      const off = card("The offer", "Annual plan, two months free to try, personal 1-on-1 onboarding."); off.classList.add("s4");
+      ["buildflow", "agriloop"].forEach(k => { const o = c.offers[k]; off.append(el("div", "item", `${VENT[k]}: ${o.annual_usd ? usd0(o.annual_usd) + " / year" : "price not set"} + ${o.free_months} months free`)); });
+      add(off, btn("Edit target & prices", "ghost small", async () => Z.openDrawer("Challenge settings", configForm(c, refresh))),
+        btn("Add a lead", "gold small", async () => Z.openDrawer("Add a lead", addLeadForm(async () => { Z.$("drawer").close(); await refresh(); }))),
+        btn("Import CSV", "ghost small", async () => Z.openDrawer("Import leads (CSV)", importForm(async () => { Z.$("drawer").close(); await refresh(); }))));
+      g.append(off);
+
+      // today
+      const today = card("Do these today", "Replies first, then booked onboardings, then follow-ups due, then fresh leads."); today.classList.add("s8");
+      const tl = el("div", "list");
+      if (!s.due.length) tl.append(Z.empty("Nothing due", "Add leads (people you can reach in person, WhatsApp or Instagram) to fill this list."));
+      s.due.forEach(l => {
+        const why = l.stage === "new" ? "first message" : l.stage === "replied" ? "they replied - answer now" : l.stage === "onboarding_booked" ? "onboarding booked" : "follow-up due";
+        const it = el("div", "item click"); add(it, add(el("div", "meta"), pill(VENT[l.venture]), pill(why, l.stage === "replied" ? "gold" : ""), l.channel ? pill(l.channel) : null), el("div", "t", leadName(l)));
+        it.onclick = () => openLead(l, refresh); tl.append(it);
+      });
+      today.append(tl); g.append(today);
+
+      // readiness
+      const rd = card("Before you sell", "Known blockers from each product's own readiness reports. Be honest about these on calls."); rd.classList.add("s4");
+      Object.entries(s.blockers).forEach(([k, arr]) => { rd.append(el("h3", null, VENT[k])); arr.forEach(b => rd.append(el("p", "sub", "• " + b))); });
+      g.append(rd);
+
+      // funnel
+      const fn = card("Pipeline", "Leads by stage"); fn.classList.add("s6");
+      ["buildflow", "agriloop"].forEach(k => {
+        const row = el("div", "row"); row.append(el("b", null, VENT[k]));
+        STAGES.forEach(([st, label]) => row.append(pill(label + " " + s.funnel[k][st], st === "paying" ? "ok" : st === "lost" ? "bad" : "")));
+        fn.append(row);
+      });
+      g.append(fn);
+
+      // learning loop
+      const lp = card("What's working", `${s.touches_week} message${s.touches_week === 1 ? "" : "s"} sent in the last 7 days. Replies and paid by channel.`); lp.classList.add("s6");
+      if (!s.by_channel.length) lp.append(Z.empty("No data yet", "Log each message you send; this shows which channel actually converts."));
+      s.by_channel.forEach(r => lp.append(add(el("div", "row"), el("b", null, nice(r.channel)), pill(r.sent + " sent"), pill(r.replies + " replied", r.replies ? "gold" : ""), pill(r.paying + " paying", r.paying ? "ok" : ""))));
+      g.append(lp);
+
+      // deals
+      const dl = card("Deals & payments", "Request a PayPal link, send it yourself, then Check payment. Cash counts only once verified."); dl.classList.add("s12");
+      const dlist = el("div", "list");
+      if (!s.deals.length) dlist.append(Z.empty("No deals yet", "Open a lead and press 'They paid / close the deal' when they say yes."));
+      s.deals.forEach(d => {
+        const p = pay.payments.find(x => x.id === d.payment_id);
+        const it = el("div", "item");
+        add(it, add(el("div", "meta"), pill(VENT[d.venture]), pill(d.status === "paid" ? "Paid & verified" : "Awaiting payment", d.status === "paid" ? "ok" : "warn"), pill(d.free_months + " months free"), pill("Onboarding: " + nice(d.onboarding_status), d.onboarding_status === "done" ? "ok" : "")),
+          el("div", "t", `${d.business || d.name || "Customer"} · ${usd0(d.amount_usd)}`));
+        if (d.status !== "paid" && p) { if (t.paypal) it.append(Z.paypalForm(p)); if (t.chains.length) it.append(Z.verifyForm(p, t.chains)); }
+        const ob = select([["to_schedule", "Onboarding: to schedule"], ["scheduled", "Onboarding: scheduled"], ["done", "Onboarding: done"]], d.onboarding_status);
+        ob.onchange = async () => { try { await Z.api("/api/challenge/onboarding", "POST", { deal_id: d.id, status: ob.value }); Z.toast("Saved", "ok"); } catch (e) { Z.toast(e.message, "bad"); } };
+        it.append(ob); dlist.append(it);
+      });
+      dl.append(dlist); g.append(dl);
+
+      // all leads
+      const all = card("All leads", "Tap a lead to draft, log a message, or close a deal."); all.classList.add("s12");
+      const flt = select([["", "All ventures"], ["buildflow", "BuildFlow"], ["agriloop", "AgriLoop"]]);
+      const fst = select([["", "All stages"], ...STAGES]);
+      const list = el("div", "list");
+      const paint = () => {
+        list.replaceChildren();
+        const rows = ld.leads.filter(l => (!flt.value || l.venture === flt.value) && (!fst.value || l.stage === fst.value));
+        if (!rows.length) list.append(Z.empty("No leads here", "Add one or import a CSV."));
+        rows.slice(0, 100).forEach(l => {
+          const it = el("div", "item click");
+          add(it, add(el("div", "meta"), pill(VENT[l.venture]), pill(nice(l.stage), l.stage === "paying" ? "ok" : l.stage === "lost" ? "bad" : "gold"), l.channel ? pill(l.channel) : null, l.last_contacted_at ? pill("last " + fmt.ago(l.last_contacted_at)) : null), el("div", "t", leadName(l)),
+            el("div", "sub", [l.segment, l.location].filter(Boolean).join(" · ")));
+          it.onclick = () => openLead(l, refresh); list.append(it);
+        });
+      };
+      flt.onchange = fst.onchange = paint; paint();
+      add(all, add(el("div", "row"), flt, fst), list); g.append(all);
+      root.append(g);
+    },
+  };
+})();

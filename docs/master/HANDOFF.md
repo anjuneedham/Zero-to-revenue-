@@ -27,3 +27,7 @@ Single-tenant, opportunity/lead-centric model; no projects, tasks (beyond agent 
 3. Phase 1 build: `ventures`, `tasks`, `decisions`, `experiments`, `metrics` tables (reversible migration 007), venture-scoped views, weekly-allocation page. Keep Python/Neon/Vercel stack.
 4. Then the BuildFlow sidekick work from the earlier brief (needs ANTHROPIC_API_KEY).
 Open decisions: which e-commerce repo is the brand; Gmail token expires ~2 Nov; Agriloop live data source.
+
+## Phase 10 status (29 Oct)
+Built: migration 007 (prospect pipeline on `leads`, `lead_touches`, `deals`), `core/challenge.py`, `agents/operator/pitches.py`, `/api/challenge/*`, Challenge page (default), send->touch logging, opt-out enforcement, daily report challenge line, removed dead `static/app.js` and the hardcoded MOCK label. Operating guide: docs/runbooks/CHALLENGE.md.
+Still open: Agriloop price; Gmail token (~2 Nov); BuildFlow Storage/billing/legal; Agriloop real data layer; ANTHROPIC_API_KEY for AI drafting; screenshot ingestion from the earlier brief; ventures/tasks/experiments tables from step 3 above.

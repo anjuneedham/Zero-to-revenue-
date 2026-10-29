@@ -5,7 +5,9 @@ work), **Treasury** (read-only accounting) — starting from **$0 capital**.
 
 This is not a trading bot. No profit is assumed and nothing is "live" yet.
 
-## Current status: Phase 1 (foundation) — `MOCK`, no external actions
+## Current status: Phase 10 — 60-day challenge OS (`LIVE` on Vercel, `LOCAL` otherwise)
+- Challenge (1 Nov - 31 Dec 2026, $10k verified cash, annual plan + 2 months free + 1:1 onboarding for BuildFlow and AgriLoop): [docs/runbooks/CHALLENGE.md](docs/runbooks/CHALLENGE.md)
+- Original foundation below (Phase 1, agents never act without owner approval)
 - Spec: [MASTER_SYSTEM.md](MASTER_SYSTEM.md)
 - Architecture & plan: [docs/architecture/PHASE0_ARCHITECTURE.md](docs/architecture/PHASE0_ARCHITECTURE.md)
 - Security: [SECURITY.md](SECURITY.md)
@@ -24,4 +26,4 @@ Dashboard + API run on Vercel with Neon Postgres (see [docs/runbooks/VERCEL_AND_
 ## Using it
 - Live: https://zero-to-revenue-neon.vercel.app (install it as an app from the browser).
 - Local: `python scripts/run_local.py`, see [docs/runbooks/LOCAL_APP.md](docs/runbooks/LOCAL_APP.md).
-- Pages: Overview, Scout, Operator, Treasury, Game plan (BuildFlow launch plan: [docs/strategy/BUILDFLOW_LAUNCH_PLAN.md](docs/strategy/BUILDFLOW_LAUNCH_PLAN.md)).
+- Pages: **Challenge** (default), Overview, Scout, Operator, Treasury, Game plan (BuildFlow launch plan: [docs/strategy/BUILDFLOW_LAUNCH_PLAN.md](docs/strategy/BUILDFLOW_LAUNCH_PLAN.md)).
