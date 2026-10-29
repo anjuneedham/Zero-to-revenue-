@@ -15,7 +15,7 @@ STATUSES = {
     "projects": ("planned", "active", "blocked", "done", "cancelled"),
     "goals": ("open", "achieved", "missed", "cancelled"),
     "work_tasks": ("todo", "doing", "blocked", "done", "cancelled"),
-    "experiments": ("proposed", "running", "succeeded", "failed", "abandoned"),
+    "experiments": ("proposed", "running", "succeeded", "failed", "inconclusive", "abandoned"),
     "blockers": ("open", "resolved"),
     "content_items": ("idea", "scripted", "filmed", "posted", "dropped"),
     "feedback_items": ("new", "triaged", "actioned", "dismissed"),
@@ -56,10 +56,12 @@ ENTITIES = {
     "kpis": dict(prefix="kpi", business="required", required=("name",), order="name ASC",
                  cols={"name": (T, None), "unit": (T, None), "target_value": (N, None), "current_value": (N, None),
                        "direction": (T, ("up", "down")), "baseline_value": (N, None), "is_primary": (B, None), "period": (T, None)}),
-    "experiments": dict(prefix="exp", business="required", required=("hypothesis",), order="created_at DESC", parents={"goal_id": "goals"},
-                        cols={"hypothesis": (T, None), "method": (T, None), "success_metric": (T, None), "result": (T, None),
-                              "learnings": (T, None), "goal_id": (T, None), "status": (T, STATUSES["experiments"]), "baseline_value": (N, None),
-                              "target_value": (N, None), "review_date": (T, None), "next_action": (T, None)}),
+    # Phase 9: status, result, decision and dates are changed only by core/experiments.py (start / conclude / abandon).
+    "experiments": dict(prefix="exp", business="required", required=("hypothesis",), order="created_at DESC", parents={"goal_id": "goals", "kpi_id": "kpis"},
+                        force={"status": "proposed"}, update_deny=("status",),
+                        cols={"hypothesis": (T, None), "method": (T, None), "success_metric": (T, None), "learnings": (T, None),
+                              "goal_id": (T, None), "kpi_id": (T, None), "status": (T, STATUSES["experiments"]), "baseline_value": (N, None),
+                              "target_value": (N, None), "review_date": (T, None), "next_action": (T, None), "duration_days": (I, None), "min_sample": (I, None)}),
     "blockers": dict(prefix="blk", business="required", required=("description",), order="created_at ASC", parents={"work_task_id": "work_tasks"},
                      cols={"description": (T, None), "impact": (T, None), "suggested_action": (T, None), "work_task_id": (T, None),
                            "status": (T, STATUSES["blockers"])}),
@@ -288,6 +290,11 @@ def update(conn, entity, rid, data, actor):
     values = _clean(entity, data, partial=True)
     if not values:
         raise FounderError("nothing to update")
+    if set(values) & set(spec.get("update_deny", ())):
+        raise FounderError("status is changed by the experiment lifecycle (start, conclude, abandon), not by editing")
+    if entity == "experiments":
+        from core import experiments
+        experiments.guard_plan_edit(conn, rid, values)
     if spec.get("update_only") and set(values) - set(spec["update_only"]):
         raise FounderError("only these fields can be edited: " + ", ".join(spec["update_only"]) + " (create a new version instead)")
     row = conn.execute(f"SELECT * FROM {entity} WHERE id=?", (rid,)).fetchone()
