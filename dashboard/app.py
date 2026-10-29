@@ -12,8 +12,8 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, challenge, ingest, rates, scheduler, ventures, weekly
-from dashboard import api_data
+from core import actions, ai, challenge, founder, founder_dashboard, ingest, rates, scheduler, ventures, weekly, workspace
+from dashboard import api_data, founder_api, growth_api, lab_api
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
@@ -28,6 +28,12 @@ STATIC_MIME = {".js": "text/javascript", ".css": "text/css", ".woff2": "font/wof
                ".json": "application/json", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml"}
 STATIC_ROOT = {"/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.png"}
 STATIC_DIRS = ("/css/", "/js/", "/fonts/", "/data/")
+
+
+def auth_disabled() -> bool:
+    """Owner-only convenience for LOCAL runs and Vercel PREVIEWS: needs AUTH_DISABLED=1 and is ignored
+    on Vercel production (VERCEL_ENV=production). Never set it where the URL is public and holds real keys."""
+    return os.environ.get("AUTH_DISABLED") == "1" and os.environ.get("VERCEL_ENV") != "production"
 
 
 def static_file(path: str):
@@ -47,10 +53,17 @@ BODY_LIMITS = {"/api/leads/import": 200_000, "/api/challenge/ingest": 4_000_000}
 
 def body_limit(path: str) -> int:
     return BODY_LIMITS.get(path, MAX_BODY)
+READ_LIMIT = 48_000  # most bytes read from a request; each route enforces its own (smaller) limit. Prompt Lab bodies need more than 4 KiB.
+
+
+def read_limit(path: str) -> int:
+    """Bytes the HTTP handlers read before dispatch (one more than the limit so oversize is detected, not truncated)."""
+    return max(READ_LIMIT, body_limit(path))
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
 ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send|submit-email)$")
+WORKSPACE_RE = re.compile(r"^/api/founder/workspace/([a-z][a-z0-9_-]{1,40})(/import-launch-plan)?$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
@@ -152,6 +165,27 @@ def _challenge_route(method, path, body, conn, owner):
     raise ValueError("bad request")
 
 
+def _ai_route(conn, owner, method, path, body):
+    """AI Command Center: GET /api/ai/status, POST /api/ai/classify (no model), POST /api/ai/run {business, request, task_type?, min_level?}."""
+    try:
+        if method == "GET" and path == "/api/ai/status":
+            return _json(200, ai.status(conn))
+        if method == "POST" and path in ("/api/ai/classify", "/api/ai/run"):
+            if len(body) > MAX_BODY:
+                raise ai.AiError("body too large")
+            d = json.loads(body or b"{}")
+            if not isinstance(d, dict):
+                raise ai.AiError("bad request")
+            if path == "/api/ai/classify":
+                return _json(200, ai.classify(str(d.get("request", "")), d.get("task_type"), d.get("min_level")))
+            return _json(200, ai.run(conn, ai.AnthropicClient(), str(d.get("business", "")), d.get("request"), owner, d.get("task_type"), d.get("min_level")))
+    except founder.NotFound as e:
+        return _json(404, {"error": str(e)})
+    except (ai.AiError, founder.FounderError, json.JSONDecodeError):
+        return _json(400, {"error": "bad request"})
+    return _json(404, {"error": "not found"})
+
+
 def handle(method, path, authz, conn, body: bytes = b""):
     """Returns (status, content_type, body_bytes)."""
     if method == "GET" and path == "/":
@@ -169,7 +203,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
     try:
         if method == "GET" and path == "/api/auth/state":
             return _json(200, {"setup_complete": ol.setup_complete(conn), "setup_enabled": ol.setup_enabled(),
-                               "mode": "LIVE" if api_data.is_live() else "LOCAL"})
+                               "mode": "LIVE" if api_data.is_live() else "LOCAL", **({"auth_disabled": True} if auth_disabled() else {})})
         if method == "POST" and path == "/api/auth/login":
             password, code = _fields(body, "password", "code")
             return _json(200, ol.login(conn, password, code))
@@ -200,9 +234,34 @@ def handle(method, path, authz, conn, body: bytes = b""):
     # --- authenticated -------------------------------------------------------------
     token = authz[7:] if authz and authz.startswith("Bearer ") else ""
     try:
-        owner = ol.verify_session(conn, token)
+        owner = ol.IDENTITY if auth_disabled() else ol.verify_session(conn, token)
     except ol.AuthError:
         return _json(401, {"error": "unauthorized"})
+    if path == "/api/founder/dashboard" and method == "GET":
+        return _json(200, founder_dashboard.dashboard(conn))
+    wm = WORKSPACE_RE.match(path)
+    if wm:
+        try:
+            if method == "GET" and not wm.group(2):
+                return _json(200, workspace.workspace(conn, wm.group(1)))
+            if method == "POST" and wm.group(2):
+                return _json(200, workspace.import_launch_plan(conn, wm.group(1), owner))
+        except founder.NotFound as e:
+            return _json(404, {"error": str(e)})
+        except founder.FounderError as e:
+            return _json(400, {"error": str(e)})
+        return _json(404, {"error": "not found"})
+    if path.startswith("/api/ai/"):
+        return _ai_route(conn, owner, method, path, body)
+    lab = lab_api.handle(conn, owner, method, path, body)
+    if lab:
+        return lab
+    gr = growth_api.handle(conn, owner, method, path, body)
+    if gr:
+        return gr
+    fo = founder_api.handle(conn, owner, method, path, body)
+    if fo:
+        return fo
     if method == "GET" and path == "/api/status":
         return _json(200, status_snapshot(conn))
     if method == "POST" and path == "/api/pause":
@@ -418,7 +477,7 @@ def serve(host="127.0.0.1", port=8080):
     class H(BaseHTTPRequestHandler):
         def _go(self, method):
             n = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(min(n, body_limit(self.path.split("?")[0]) + 1)) if n else b""
+            body = self.rfile.read(min(n, read_limit(self.path.split("?")[0]) + 1)) if n else b""
             path = self.path.split("?")[0]
             conn = None
             try:

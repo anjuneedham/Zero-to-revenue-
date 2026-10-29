@@ -67,9 +67,9 @@ class MigrationReversibleTest(ChallengeBase):
 
 class PreexistingTablesTest(unittest.TestCase):
     def test_migration_survives_unrelated_tables_with_common_names(self):
-        """Production already had a `decisions` table that no migration in this repo creates; the first 008 used that
-        name, failed with DuplicateTable and took every API route down (503). Names must not collide, and the foreign
-        tables must be left alone."""
+        """Production once had a `decisions` table that the first 008 tried to create, failed with DuplicateTable and took every
+        API route down (503). That table is the Founder OS `decisions` table (007_founder_os_core); the Ventures tables are
+        prefixed `venture_*` so the two never collide, and unrelated foreign tables must be left alone."""
         dbutil.require_db()
         schema = "t_" + uuid.uuid4().hex[:10]
         admin = db.connect(dbutil.URL)
@@ -77,12 +77,14 @@ class PreexistingTablesTest(unittest.TestCase):
         admin.close()
         dbutil._schemas.append(schema)
         conn = db.connect(dbutil.URL, schema=schema)
-        for name in ("decisions", "experiments", "ventures_old", "tasks_old"):
+        for name in ("ventures_old", "tasks_old", "notes_old"):
             conn.execute(f"CREATE TABLE {name} (id serial PRIMARY KEY, note text)")
-        conn.execute("INSERT INTO decisions(note) VALUES ('keep me')")
+        conn.execute("INSERT INTO notes_old(note) VALUES ('keep me')")
         self.assertIn("008_ventures.sql", db.migrate(conn))
-        self.assertEqual(conn.execute("SELECT note FROM decisions").fetchone()[0], "keep me")
+        self.assertEqual(conn.execute("SELECT note FROM notes_old").fetchone()[0], "keep me")
         self.assertEqual(conn.execute("SELECT count(*) FROM ventures").fetchone()[0], 4)
+        for t in ("decisions", "venture_decisions", "experiments", "venture_experiments"):
+            self.assertIsNotNone(conn.execute("SELECT to_regclass(?)", (t,)).fetchone()[0], t)
 
 
 if __name__ == "__main__":

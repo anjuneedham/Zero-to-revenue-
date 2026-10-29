@@ -1,8 +1,8 @@
 (function () {
   const { $, el, add, text, icon } = Z;
-  const NAV = [["challenge", "Challenge"], ["ventures", "Ventures"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
+  const NAV = [["founder", "Founder"], ["challenge", "Challenge"], ["buildflow", "BuildFlow", "side"], ["agriloop", "Agriloop", "side"], ["fashion", "Fashion", "side"], ["trading", "Trading", "side"], ["ventures", "Ventures"], ["lab", "Lab"], ["growth", "Growth"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
   const AUTH = ["msgbox", "setup1", "setup2", "setup3", "login"];
-  let timer = null, seq = 0, current = "overview";
+  let timer = null, seq = 0, current = "founder";
 
   const KO = ["Walking out of the tunnel", "Checking the pitch", "Reading the team sheet", "Warming up the agents"];
   let ki = 0; const kt = setInterval(() => { ki = (ki + 1) % KO.length; text($("ko-msg"), KO[ki]); }, 700); const t0 = Date.now();
@@ -24,7 +24,7 @@
   function buildNav() {
     ["nav-side", "nav-tabs"].forEach(id => {
       const box = $(id); box.replaceChildren();
-      NAV.forEach(([k, label]) => { const a = el("a"); a.href = "#" + k; a.dataset.page = k; add(a, icon(Z.pages[k].icon), el("span", null, label)); if (id === "nav-side" && k === "operator") { const bd = el("span", "badge"); bd.hidden = true; a.append(bd); } box.append(a); });
+      NAV.forEach(([k, label, only]) => { if (only === "side" && id !== "nav-side") return; const a = el("a"); a.href = "#" + k; a.dataset.page = k; add(a, icon(Z.pages[k].icon), el("span", null, label)); if (id === "nav-side" && k === "operator") { const bd = el("span", "badge"); bd.hidden = true; a.append(bd); } box.append(a); });
     });
   }
   function markNav() {
@@ -82,6 +82,10 @@
     try {
       const st = await Z.api("/api/auth/state", "GET", null, false);
       Z.state.mode = st.mode; const chip = $("modechip"); text(chip, st.mode === "LIVE" ? "LIVE" : "LOCAL"); chip.className = "modechip" + (st.mode === "LIVE" ? " live" : "");
+      if (st.auth_disabled) {
+        text($("modechip"), "NO LOGIN"); $("signout").hidden = true; $("signoutall").hidden = true;
+        try { await start(); return; } catch (e) { showAuth("msgbox"); text($("msg"), "Could not load: " + e.message); return; }
+      }
       if (!st.setup_complete) {
         if (!st.setup_enabled) { showAuth("msgbox"); text($("msg"), "Setup is not enabled. Set OWNER_SETUP_TOKEN (20+ characters), then redeploy or restart."); return; }
         showAuth("setup1"); return;

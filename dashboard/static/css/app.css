@@ -194,3 +194,6 @@ dialog .body{padding:16px;overflow:auto;max-height:calc(90vh - 56px);display:gri
   .top .actions .hide-sm{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.hero ul.plain,.hero .sub{color:rgba(255,255,255,.88)}
+.hero .btn.ghost{color:#fff;border-color:rgba(255,255,255,.45)}
+.hero .row,.card .row{flex-wrap:wrap}

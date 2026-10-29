@@ -36,12 +36,18 @@ def monthly_cap() -> Decimal:
     return _dec("LLM_MONTHLY_BUDGET_USD")
 
 
-def prices() -> tuple[Decimal, Decimal]:
+def prices(level: str | None = None) -> tuple[Decimal, Decimal]:
+    """USD per million tokens. A routing level (LOW/STANDARD/HIGH) may set LLM_PRICE_{IN,OUT}_PER_MTOK_<LEVEL>
+    (models differ in price); otherwise the global pair applies. Nothing is hard-coded."""
+    if level:
+        lin, lout = _dec(f"LLM_PRICE_IN_PER_MTOK_{level}"), _dec(f"LLM_PRICE_OUT_PER_MTOK_{level}")
+        if lin > 0 and lout > 0:
+            return lin, lout
     return _dec("LLM_PRICE_IN_PER_MTOK"), _dec("LLM_PRICE_OUT_PER_MTOK")
 
 
-def llm_enabled() -> bool:
-    pin, pout = prices()
+def llm_enabled(level: str | None = None) -> bool:
+    pin, pout = prices(level)
     return monthly_cap() > 0 and pin > 0 and pout > 0 and bool(os.environ.get("ANTHROPIC_API_KEY"))
 
 
@@ -59,9 +65,9 @@ def _cost(pin: Decimal, pout: Decimal, tin: int, tout: int) -> Decimal:
     return (pin * tin + pout * tout) / Decimal(1_000_000)
 
 
-def reserve(conn, agent: str, model: str, purpose: str, max_in: int, max_out: int) -> int:
+def reserve(conn, agent: str, model: str, purpose: str, max_in: int, max_out: int, level: str | None = None) -> int:
     """Reserve worst-case cost; returns the reservation id or raises."""
-    pin, pout = prices()
+    pin, pout = prices(level)
     cap = monthly_cap()
     if cap <= 0 or pin <= 0 or pout <= 0:
         raise LlmDisabled("LLM budget/prices not configured")
@@ -76,12 +82,16 @@ def reserve(conn, agent: str, model: str, purpose: str, max_in: int, max_out: in
             (now(), agent, model, purpose, max_in, max_out, worst)).fetchone()["id"]
 
 
-def settle(conn, reservation_id: int, in_tokens: int, out_tokens: int) -> None:
-    pin, pout = prices()
+def settle(conn, reservation_id: int, in_tokens: int, out_tokens: int, level: str | None = None) -> Decimal:
+    """Replace the reservation with actual usage; returns the actual cost."""
+    pin, pout = prices(level)
+    cost = _cost(pin, pout, in_tokens, out_tokens)
     conn.execute("UPDATE llm_usage SET input_tokens=?, output_tokens=?, cost_usd=?, status='DONE' WHERE id=?",
-                 (in_tokens, out_tokens, _cost(pin, pout, in_tokens, out_tokens), reservation_id))
+                 (in_tokens, out_tokens, cost, reservation_id))
+    return cost
 
 
-def fail(conn, reservation_id: int) -> None:
-    """Outcome unknown (call may have been billed): keep the worst-case reservation (fail safe)."""
+def fail(conn, reservation_id: int) -> Decimal:
+    """Outcome unknown (call may have been billed): keep the worst-case reservation (fail safe). Returns the held cost."""
     conn.execute("UPDATE llm_usage SET status='FAILED' WHERE id=?", (reservation_id,))
+    return Decimal(conn.execute("SELECT cost_usd FROM llm_usage WHERE id=?", (reservation_id,)).fetchone()["cost_usd"])
