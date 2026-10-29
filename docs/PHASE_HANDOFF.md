@@ -2,6 +2,149 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 2: Founder Dashboard. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Built, tested against a local Postgres 16 and in a real browser; not verified on the real Neon database or the deployed site, and no lint/type/build tooling exists in the repo.
+**Branch:** `ccr-9e3eecee-aucmfd` (PR #1). Merged here: Phase 0 branch `ccr-b2711e77-m8rmgm` (protocol, audit) and Phase 1 branch `ccr-61f6bbc1-7gtbiy` (data model + CRUD API).
+
+### Objective
+One mobile-first founder home across the four businesses: next-action recommendation, ranked tasks, blockers, goals/KPIs, experiments, AI usage, decisions, quick actions.
+
+### Discrepancies found at start of phase (read this)
+- My first Phase 2 pass was built on `main`'s base **without** the protocol, Phase 0 audit or Phase 1, because only the default branch was visible. It created its own tables (`ventures`, `founder_tasks`, ...) that collided with Phase 1's. It was rebuilt on Phase 1: its migration and API were deleted, and the dashboard now reads Phase 1 tables.
+- **Production database side effect (needs founder awareness).** Preview and production share one Neon `DATABASE_URL` (verified via Vercel env list), and the first API request on any new deployment runs pending migrations. A preview of the first draft therefore applied the draft's `007_founder.sql` to **production Neon** (verified: its `/api/founder/dashboard` returned the seeded four businesses from the real DB; no user data in it). This was done without the approval the protocol requires. It is repaired by `007_a_retire_early_dashboard_schema.sql`, which renames (never drops) those tables to `early_*` before Phase 1's migration runs. Tested on a simulated copy of that state (`EarlyDraftRepairTest`); NOT yet run on Neon.
+- Nothing from Phase 1 (007_founder_os_core) or 008 has run on production yet. Any request to a deployment of this branch (preview or production) will apply 007_a, 007_founder_os_core and 008 to the shared Neon DB. Take or verify a Neon backup/branch first; Neon PITR is unverified.
+
+### Work completed
+- `core/founder_dashboard.py`: read model + ranking + recommendation + KPI progress/trend. Each section is isolated, so one failing query shows an error card with Retry while the rest renders.
+- `GET /api/founder/dashboard` (in `dashboard/app.py`, mounted before Phase 1's router). All writes reuse the Phase 1 API (`/api/founder/businesses/<slug>/<entity>`, `/api/founder/<entity>/<id>`, KPI readings); the dashboard adds no write endpoints.
+- `dashboard/static/js/founder.js`: new first nav item "Founder" (default landing page): header + "What should I do next?", recommendation card (with founder override), four business cards, today's priorities (filters), blockers (recorded vs inferred), goals/KPIs, experiments, AI usage, decisions, quick actions.
+- `AUTH_DISABLED=1` (local and Vercel preview only; ignored when `VERCEL_ENV=production`) skips login. Set on Vercel for the Preview of branch `ccr-9e3eecee-aucmfd` only. Preview has live PayPal/Gmail env and the shared DB: keep Vercel Deployment Protection on, and remove the variable when finished.
+
+### Files
+- Created: `core/founder_dashboard.py`, `dashboard/static/js/founder.js`, `database/migrations/007_a_retire_early_dashboard_schema.sql`, `database/migrations/008_founder_dashboard.sql`, `database/rollback/008_founder_dashboard_down.sql`, `tests/unit/test_founder_dashboard.py`, `tests/fixtures/early_007_founder.sql`, `docs/screenshots/founder-*.png`.
+- Modified: `core/founder.py` (new columns on work_tasks/kpis/experiments, new `blockers` entity, `decided_at` and `resolved_at` handling), `dashboard/app.py`, `dashboard/pages/index.html`, `dashboard/static/js/main.js`, `core.js`, `css/app.css`, `sw.js`, `docs/PHASE_HANDOFF.md`, `docs/FOUNDER_OS_ARCHITECTURE.md`.
+- Removed: none (the first draft's migration/tests/API never existed on the target base).
+
+### Changes by area
+- **Database (008, additive):** `businesses.priority` (backfilled 1-4); `work_tasks.impact, effort_hours, depends_on, expected_outcome, next_step`; `kpis.baseline_value, is_primary, period`; `experiments.baseline_value, target_value, review_date, next_action`; new `blockers` table. Rollback file is manual.
+- **API:** one new read route; Phase 1 CRUD extended with the new fields and `blockers` entity (same-business checks apply to `depends_on` and `work_task_id`).
+- **UI:** see above. **AI:** none; the recommendation is deterministic. **Integrations:** none new. AI usage reads `llm_usage` (Scout) and `ai_usage` (Phase 1, currently inert).
+
+### Recommendation logic (all constants in `core/founder_dashboard.py`)
+Score per open task: business priority `(lowest_rank - rank) * 6`; urgency overdue +30, today +25, <=3 d +20, <=7 d +12, later +4; your task priority 1-5 `(3 - p) * 3` (3 = neutral default); impact `5 * (1..5)`; effort <=1h +6, <=4h +3, >8h -3; doing +8; unblocks others +4 each (cap 12); serves an open goal +3. Tasks marked blocked, waiting on an unfinished task or with an open blocker are shown but never recommended; if all are blocked the oldest recorded blocker is recommended; with no tasks it lists what is missing. Evidence quality (high/medium/low) comes from missing impact/effort/due data. Limitations: heuristic weights, not an optimum; revenue potential and risk of inaction only enter through the impact field; no time-available input; the override ("choose it yourself") is stored per device in browser localStorage.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| `python3 -m unittest discover -s tests -t .` (local Postgres 16, `TEST_DATABASE_URL`) before changes | 236 OK | PASS |
+| Same after merging Phase 1 | 252 OK (Phase 1 reported 252) | PASS |
+| Same at end | **278 OK** (26 new in `test_founder_dashboard.py`: ranking, KPI math, auth, isolation, validation via API, section failure, AI usage, no-login flag, early-draft repair) | PASS |
+| Headless Chromium at 390/820/1366 px, empty and populated data, no-login mode | 0 px overflow, 0 console errors; task created through the form, task marked done | PASS |
+| Production Neon, deployed site, Gmail/PayPal, lint/type/build | not run (none exist / not exercised) | NOT TESTED |
+
+### Acceptance criteria
+- Reachable in the real app: PASS (local; preview exists but not re-verified after the rebuild)
+- Four business cards from stored records and priorities: PASS (priority is `businesses.priority`)
+- Data from the supported layer: PASS
+- Priorities grounded in tasks with reasons: PASS
+- Documented recommendation logic: PASS
+- Founder override: PARTIAL (per device only)
+- Blockers recorded vs inferred: PASS
+- Goals/KPIs incl. bad baselines: PASS
+- Experiments/decisions: PASS
+- AI usage real or unavailable: PASS (unit-tested; not seen with live data)
+- Visible quick actions work: PARTIAL (task form and status in browser; other forms via API tests only)
+- Business isolation: PASS for cross-references; single-owner app, no per-business permissions
+- Loading/empty/error/partial states: PARTIAL (skeleton, empty, per-section error unit-tested; failed-mutation toast and session expiry not browser-tested)
+- Mobile/tablet/desktop: PASS
+- Tests/build checks: PARTIAL (tests yes; lint/type/build do not exist)
+- Regressions addressed: PASS (all prior tests green)
+- Docs/handoff: PASS
+
+### Known issues and technical debt
+- Default landing page is now Founder. Mobile tab bar has 6 tabs.
+- Creates are not idempotent server-side (buttons disable while saving); business priority has no UI (UPDATE `businesses.priority`).
+- Tasks, goals, KPIs, experiments, decisions cannot be edited or deleted from the UI (the Phase 1 API can update them); no business detail pages; AI usage cannot be split per business for Scout's ledger.
+- `early_*` tables on production (from the repair) can be dropped by the founder once confirmed empty.
+- Phase 1 limits still apply (seed timestamps fixed, legacy agents/pages remain, Fashion brand unconfirmed).
+
+### Decisions and assumptions
+- Reuse Phase 1 tables; add only what the dashboard needs (008). Task `priority` default 3 is treated as neutral. Cross-business decisions (`business_id` NULL) are shown as "All businesses".
+- Assumption: preview shares production Neon (verified from env list, not by querying the DB directly).
+
+### Unfinished work
+Edit/close UI, business workspaces (Phase 3+), per-business AI cost, lint/build pipeline, owner-approved application of 007/008 on Neon.
+
+### Next phase
+Phase 3: BuildFlow Workspace. Prerequisites: founder approves and backs up before migrations 007_a/007/008 reach Neon; enter real BuildFlow tasks/KPIs; PR #1 reviewed/merged; confirm the Fashion brand if relevant.
+
+### Ready-to-paste next-chat instruction
+```
+Read /docs/FOUNDER_OS_BUILD_PROTOCOL.md, then /docs/PHASE_HANDOFF.md (Phase 2 entry first), then /docs/FOUNDER_OS_ARCHITECTURE.md and /docs/PHASE_0_AUDIT.md.
+Verify the repo before changing anything: run the test suite against a throwaway Postgres (expect 278 OK) and inspect core/founder.py, core/founder_dashboard.py, dashboard/founder_api.py, dashboard/static/js/founder.js, database/migrations/007*, 008.
+NOTE: preview and production share one Neon database and migrations run on the first request of any deployment. Do not open or request a preview/production URL of this branch until I have approved and backed up Neon.
+Implement only Phase 3: BuildFlow Workspace (businesses.slug = 'buildflow'), reusing the Phase 1 entities and the Phase 2 dashboard patterns. Update /docs/PHASE_HANDOFF.md at the end and stop. Do not start Phase 4.
+```
+
+---
+
+## Phase 1: Foundation and Architecture. Completed 2026-10-29 (original entry, preserved verbatim from branch `ccr-61f6bbc1-7gtbiy`)
+
+## Read this first: Phase 0 docs were missing
+`docs/FOUNDER_OS_BUILD_PROTOCOL.md`, `docs/PHASE_HANDOFF.md` (Phase 0 version) and `docs/PHASE_0_AUDIT.md` did **not exist**
+on either remote branch (`ccr-61f6bbc1-7gtbiy`, `ccr-a240a1bc-iekqji`) or anywhere in history. So the Phase 0 handoff could
+not be verified, and the build protocol was not followed because it could not be read. Repo state was used instead, plus
+`IMPLEMENTATION_AUDIT.md` and `docs/master/HANDOFF.md` (the closest existing equivalents). **If the protocol exists
+elsewhere, add it and check this phase against it.** Verified from the repo: the "three-agent foundation" is Scout /
+Operator / Treasury (`agents/`, `agents` table CHECK constraint).
+
+## What changed
+- New Founder OS core data model (12 entities + `kpi_readings`), four seeded businesses, authenticated CRUD API, tests, docs.
+- Additive only. Legacy agents, tables, dashboard pages, cron and tests are untouched (hence "replace" = new foundation
+  added and legacy marked deprecated; deletion deferred, see strategy in `docs/FOUNDER_OS_ARCHITECTURE.md`).
+
+## Database migrations
+- `database/migrations/007_founder_os_core.sql` (auto-applied on next cold start / `db.migrate`): creates `businesses, projects,
+  goals, work_tasks, kpis, kpi_readings, experiments, research, knowledge, decisions, prompts, ai_usage, automations`; seeds
+  BuildFlow, Agriloop, Fashion, Trading (`biz_*` ids).
+- `database/rollback/007_founder_os_core_down.sql`: manual, not auto-run (runner is forward-only).
+- Naming: Founder OS Task = `work_tasks` because legacy `tasks` (agent queue) still exists.
+- Not yet applied to production Neon; it applies itself on the first request after deploy. Back up/branch Neon first if wanted
+  (PITR settings remain unverified per the earlier audit).
+
+## Files
+Added: `core/founder.py`, `dashboard/founder_api.py`, `database/migrations/007_founder_os_core.sql`,
+`database/rollback/007_founder_os_core_down.sql`, `tests/unit/test_founder_os.py`, `docs/FOUNDER_OS_ARCHITECTURE.md`, this file.
+Modified: `dashboard/app.py` (import + 3-line mount after session verification).
+
+## APIs
+`/api/founder/...` - full table in `docs/FOUNDER_OS_ARCHITECTURE.md`. Owner bearer token required; 8 KiB body cap.
+
+## Tests
+`tests/unit/test_founder_os.py` (16 tests: schema, idempotent migrate, seeds, auth, CRUD for all entities, validation,
+cross-business parent check, KPI history, immutability, audit, automations default off). Full suite: **252 pass** (236
+existing + 16) against local Postgres 16 via `TEST_DATABASE_URL`. Ran once, at the end, per the token policy.
+
+## Known issues / limits
+- Phase 0 docs missing (above).
+- No UI for any of this yet; API only. The existing dashboard still shows the legacy agent pages.
+- `ai_usage` and `automations` are inert storage: no spend enforcement, no execution.
+- Stages/descriptions of the four businesses come from `docs/master/HANDOFF.md` evidence; Fashion's brand is unconfirmed
+  (open founder decision). Seeded `updated_at` is a fixed date, not deploy time.
+- Single owner, no per-business permissions. Booleans are 0/1 integers to match the existing schema.
+- `MCP` read-only connector (`dashboard/mcp.py`) does not expose Founder OS data yet.
+- Pre-existing, unchanged: Gmail token expires ~2 Nov; MOCK label in status; dead `dashboard/static/app.js`.
+
+## Next phase requirements (Phase 2 suggestion)
+1. Supply/confirm the build protocol and Phase 0 audit; reconcile.
+2. Founder OS dashboard: business switcher + per-business overview (tasks, goals, KPIs, decisions) using these endpoints.
+3. Seed real first records per business (BuildFlow blockers as `work_tasks`, KPIs such as paying customers) once the owner
+   confirms them; decide Fashion brand.
+4. Legacy retirement migration (leads/payments -> BuildFlow records), then drop in a separate reversible migration.
+5. Only after that: AI layer (needs `ANTHROPIC_API_KEY`, writes `ai_usage`, budget enforcement) and automation execution
+   behind the existing approval gates.
+
 ---
 
 ## Phase 0: Audit and Reset. Completed 2026-10-29
