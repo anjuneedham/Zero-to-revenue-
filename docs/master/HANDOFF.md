@@ -43,3 +43,22 @@ Built earlier: migration 007 (prospect pipeline on `leads`, `lead_touches`, `dea
 | 7 Docs | This file, CHALLENGE.md, README. |
 
 Open: Gmail token; ANTHROPIC_API_KEY; AgriLoop live DB (no AgriLoop payment until confirmed); BuildFlow Storage/billing/legal; which e-commerce repo is the brand; Scout/Operator gig-era features kept (see docs/master/OS_REVIEW.md); rotate secrets that were pasted into chats.
+
+## Incident, 29 Oct 2026 (~13:15-13:25 UTC): API down after the first 008 deploy
+- **What happened:** I promoted the commit with migration 008 to production. It created a table named `decisions`, but the production
+  database already had an unrelated `decisions` table (no migration in this repo creates it). The migration failed with
+  `DuplicateTable`; because `api/index.py` runs migrations on the first request of each cold start and turns any exception into a
+  bare 503, every API route (including login state) answered 503. The owner could not log in for roughly 10 minutes. The static
+  page still loaded, which is why a "200" check on the page proved nothing.
+- **Recovery:** redeployed the previous build (`3084b9e`) to production (API back to 401 on `/api/challenge`), found the cause
+  from the new log line, renamed the tables `venture_*`, reproduced the exact failure locally and verified the fix, tested the fixed
+  commit as a preview, then promoted it.
+- **Nothing was lost:** the migration is transactional, so the failed attempt left no tables behind; the unrelated `decisions` table
+  and its rows were never touched. **Owner: check what that `decisions` table is** (it was created outside this repo, possibly by an
+  earlier session) before anything else uses that name.
+- **Lessons now in the code/docs:** `api/index.py` logs the failing stage (config / connect / migrate / handle) with the exception
+  type and a truncated message to the runtime logs (never in the response); a regression test seeds unrelated tables with common names.
+  **Preview deployments share the production database and run migrations on it**, so a branch push can change production's schema.
+  Health checks after a deploy must call a database-backed route (`/api/auth/state`, expect 200; `/api/challenge`, expect 401), not
+  the page.
+

@@ -16,7 +16,9 @@ conversations you start each day.
   migration-008 rollback and re-apply.
 - The new pages load in Chromium against a real database with no JS or API errors; ingestion, weekly and ventures routes
   return correct data.
-- Production deployment of the Phase 10 build is live; migrations ran (the API answers 401 rather than 503).
+- Production deployment of the Phase 10 build was live and healthy before this chat's work; migrations ran (401, not 503).
+- Today's own deploy broke production for about 10 minutes (migration name clash, see HANDOFF). It was rolled back, fixed,
+  proven locally against the same failure, tested as a preview on the real database, then promoted.
 
 ## Not verified
 - Logged-in smoke test of production (no owner credentials in my sandbox) and the `/api/challenge` config payload.
@@ -41,7 +43,12 @@ conversations you start each day.
    belong to the earlier crypto/zero-capital product. They add noise and a daily cron cost. I left them because Treasury and
    Operator share their plumbing and deleting working code on an ambiguous instruction is not reversible in effect. See the
    decision below.
-7. **Operational safety.** Secrets were pasted into chats (PayPal live secret, Gmail secret and refresh token, sandbox keys):
+7. **A failed migration takes the whole app down.** It did today (see HANDOFF, incident 29 Oct). Migrations run on the first
+   request of every cold start and any error becomes a 503 for every route, login included. Previews run those same migrations on
+   the production database, so even a branch push can trigger it. Needed: a pre-deploy check that dry-runs pending migrations on a
+   copy of production's schema, a post-deploy check on a database-backed route, and ideally a migration failure that degrades
+   instead of blocking login.
+8. **Operational safety.** Secrets were pasted into chats (PayPal live secret, Gmail secret and refresh token, sandbox keys):
    rotate them. Vercel runtime logs on this plan keep about 1 hour, so a failure overnight leaves no trace. No CI runs the
    tests. No browser end-to-end test exists (I ran a one-off smoke).
 
