@@ -45,6 +45,8 @@ Limitations: heuristic weights, not an optimum; revenue potential, risk of inact
 ## Authentication and Permissions
 Reuses the single-owner login (password + TOTP, bearer session). No multi-user model exists in this app, so "authorized businesses" = all businesses; per-business isolation is enforced for cross-references (goal/task/blocker links must be in the same business).
 
+**Skipping login (owner convenience).** `AUTH_DISABLED=1` makes the API skip the password/TOTP check. `auth_disabled()` in `dashboard/app.py` ignores it whenever `VERCEL_ENV=production`, so the live site always requires login. It is set on Vercel only for the preview of branch `ccr-9e3eecee-aucmfd` (Preview target, branch-scoped); remove it in Vercel > Settings > Environment Variables. Local runs honour it too. Anyone who can open that preview URL can use every agent action (including Gmail send), so keep Vercel Deployment Protection on. Tested in `AuthDisabledTest` (258 tests OK).
+
 ## Integrations
 None added. AI usage reads the existing `llm_usage` table (no business column, so no per-business split; cap shown only if `LLM_MONTHLY_BUDGET_USD` is set).
 
