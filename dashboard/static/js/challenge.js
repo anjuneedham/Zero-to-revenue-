@@ -33,7 +33,7 @@
     const hint = lp.find(p => (p.key.startsWith("farmer") && seg.includes("farm")) || (p.key.startsWith("buyer") && seg.includes("buy"))); if (hint) planSel.value = hint.key;
     planSel.hidden = lp.length < 2;
     const reason = input("Why lost? (optional)");
-    add(row2, planSel, btn("They said yes - create the deal", "gold small", async () => { const r = await Z.api("/api/challenge/deal", "POST", { lead_id: l.id, plan: planSel.value }); Z.toast(r.plan + " deal: " + usd0(r.amount_usd) + ". Request the PayPal link below.", "ok"); Z.$("drawer").close(); await refresh(); }),
+    add(row2, planSel, btn("They said yes - create the deal", "gold small", async () => { const r = await Z.api("/api/challenge/deal", "POST", { lead_id: l.id, plan: planSel.value }); Z.toast(r.plan + " deal: " + usd0(r.amount_usd) + ". Tap Copy PayPal message on the deal card.", "ok"); Z.$("drawer").close(); await refresh(); }),
       reason, btn("Not interested / opt-out", "ghost small", async () => { await Z.api("/api/challenge/stage", "POST", { lead_id: l.id, stage: "lost", reason: reason.value }); Z.toast("Marked lost. Will not be drafted again.", "ok"); Z.$("drawer").close(); await refresh(); }));
     box.append(row2);
     Z.openDrawer(leadName(l), box);
@@ -61,6 +61,54 @@
       const r = await Z.api("/api/leads/import", "POST", { csv: ta.value, venture: v.value });
       Z.toast(`Added ${r.added}, skipped ${r.skipped_duplicates} duplicates`, "ok"); await refresh();
     }));
+    return f;
+  }
+
+  // ---- screenshot / pasted text -> candidates the owner reviews; nothing is created or sent until "Add lead" ----
+  const readAsDataURL = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(new Error("Could not read that file")); r.readAsDataURL(f); });
+  async function downscale(file) {
+    const url = await readAsDataURL(file);
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("That is not an image")); i.src = url; });
+    const k = Math.min(1, 1600 / Math.max(img.width, img.height)), cv = document.createElement("canvas");
+    cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    return cv.toDataURL("image/jpeg", 0.85).split(",")[1];
+  }
+
+  function ingestForm(ing, refresh) {
+    const f = el("div", "form"), out = el("div", "list");
+    const v = select([["buildflow", "BuildFlow"], ["agriloop", "AgriLoop"]]);
+    const ta = el("textarea"); ta.rows = 5; ta.placeholder = "Paste a profile bio, a chat or a contact list here. You can also paste a screenshot (Ctrl/Cmd+V) or choose one below.";
+    const file = el("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp"; file.setAttribute("aria-label", "Screenshot");
+    let image = null;
+    const setImage = async fl => { try { image = await downscale(fl); Z.toast("Screenshot ready", "ok"); } catch (e) { image = null; Z.toast(e.message, "bad"); } };
+    file.onchange = () => file.files[0] && setImage(file.files[0]);
+    ta.addEventListener("paste", e => { const it = [...(e.clipboardData ? e.clipboardData.items : [])].find(x => x.type.startsWith("image/")); if (it) { e.preventDefault(); setImage(it.getAsFile()); } });
+    add(f, el("p", "sub", ing.images ? "Screenshots are read by AI within your monthly budget. The image is not stored. Review every field before adding: it may contain mistakes." : "Screenshot reading is off until ANTHROPIC_API_KEY and the LLM budget settings are set. Pasted text still works (emails, phone numbers and @handles are picked out without AI)."),
+      field("Add to", v), ta, field("Screenshot", file));
+    const show = res => {
+      out.replaceChildren();
+      if (res.notes) out.append(el("p", "sub", res.notes));
+      res.candidates.forEach(c => {
+        const box = el("div", "item"), g = {};
+        if (c.flags.length) box.append(pill("Contains instruction-like text - ignore it", "bad"));
+        [["name", "Name"], ["business", "Business / farm"], ["phone", "Phone / WhatsApp"], ["email", "Email"], ["instagram", "Instagram handle"], ["segment", "Trade or crop"], ["location", "Parish / town"], ["notes", "Notes"]]
+          .forEach(([k, label]) => { g[k] = input(label); g[k].value = c[k] || ""; box.append(g[k]); });
+        box.append(btn("Add lead", "gold small", async () => {
+          const handle = g.instagram.value.trim().replace(/^@/, "");
+          const notes = [g.notes.value.trim(), handle ? "Instagram @" + handle : ""].filter(Boolean).join(" · ");
+          try {
+            await Z.api("/api/challenge/leads", "POST", { venture: v.value, name: g.name.value, business: g.business.value, email: g.email.value, phone: g.phone.value, segment: g.segment.value, location: g.location.value, channel: handle ? "instagram" : g.phone.value ? "whatsapp" : "email", notes });
+            Z.toast("Lead added", "ok"); box.remove(); await refresh();
+          } catch (e) { Z.toast(e.message, "bad"); }
+        }));
+        out.append(box);
+      });
+    };
+    add(f, btn("Read it", "gold small", async () => {
+      try { show(await Z.api("/api/challenge/ingest", "POST", { text: ta.value, image: image || "", mime: image ? "image/jpeg" : "" })); }
+      catch (e) { Z.toast(e.message, "bad"); }
+    }), out);
     return f;
   }
 
@@ -107,6 +155,7 @@
       s.plans.forEach(p => off.append(el("div", "item", `${VENT[p.venture]} ${p.venture === "buildflow" ? "" : p.label + " "}$${p.monthly_usd}/mo → ${usd0(p.annual_usd)}/year (${p.free_months} months free) · ${p.deals_needed} deals = the target`)));
       add(off, btn("Edit target & prices", "ghost small", async () => Z.openDrawer("Challenge settings", configForm(c, refresh))),
         btn("Add a lead", "gold small", async () => Z.openDrawer("Add a lead", addLeadForm(async () => { Z.$("drawer").close(); await refresh(); }))),
+        btn("From screenshot / paste", "ghost small", async () => Z.openDrawer("Add leads from a screenshot or pasted text", ingestForm(s.ingest, refresh))),
         btn("Import CSV", "ghost small", async () => Z.openDrawer("Import leads (CSV)", importForm(async () => { Z.$("drawer").close(); await refresh(); }))));
       g.append(off);
 
@@ -142,7 +191,7 @@
       g.append(lp);
 
       // deals
-      const dl = card("Deals & payments", "Request a PayPal link, send it yourself, then Check payment. Cash counts only once verified."); dl.classList.add("s12");
+      const dl = card("Deals & payments", "Tap Copy PayPal message, paste it to the customer yourself, then Check if paid. Cash counts only once verified."); dl.classList.add("s12");
       const dlist = el("div", "list");
       if (!s.deals.length) dlist.append(Z.empty("No deals yet", "Open a lead and press 'They paid / close the deal' when they say yes."));
       s.deals.forEach(d => {
@@ -150,6 +199,17 @@
         const it = el("div", "item");
         add(it, add(el("div", "meta"), pill(VENT[d.venture]), pill(d.status === "paid" ? "Paid & verified" : "Awaiting payment", d.status === "paid" ? "ok" : "warn"), pill(d.free_months + " months free"), pill("Onboarding: " + nice(d.onboarding_status), d.onboarding_status === "done" ? "ok" : "")),
           el("div", "t", `${d.business || d.name || "Customer"} · ${usd0(d.amount_usd)}`));
+        if (d.status !== "paid" && t.paypal) {
+          const warn = d.venture === "agriloop" ? "AgriLoop's database is not confirmed live yet. Only continue if it is. Create the PayPal message?" : "";
+          it.append(btn("Copy PayPal message", "gold small", async () => {
+            if (warn && !window.confirm(warn)) return;
+            try {
+              const r = await Z.api("/api/challenge/paypal-message", "POST", { deal_id: d.id });
+              await Z.copy(r.message, "PayPal message");
+              if (r.warning) Z.toast(r.warning, "bad");
+            } catch (e) { Z.toast(e.message, "bad"); }
+          }, "copy"));
+        }
         if (d.status !== "paid" && p) { if (t.paypal) it.append(Z.paypalForm(p)); if (t.chains.length) it.append(Z.verifyForm(p, t.chains)); }
         const ob = select([["to_schedule", "Onboarding: to schedule"], ["scheduled", "Onboarding: scheduled"], ["done", "Onboarding: done"]], d.onboarding_status);
         ob.onchange = async () => { try { await Z.api("/api/challenge/onboarding", "POST", { deal_id: d.id, status: ob.value }); Z.toast("Saved", "ok"); } catch (e) { Z.toast(e.message, "bad"); } };

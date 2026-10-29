@@ -162,6 +162,44 @@ class DealTest(ChallengeBase):
         self.assertEqual(self.conn.execute("SELECT stage FROM leads WHERE id=?", (lid,)).fetchone()[0], "paying")
         self.assertEqual(s["funnel"]["buildflow"]["paying"], 1)
 
+    def test_paypal_message_is_one_tap_and_idempotent(self):
+        lid = self.lead(name="Tia Brown")
+        d = self.call("POST", "/api/challenge/deal", {"lead_id": lid})[1]
+        link = "https://paypal.example/approve/ORD1"
+        with mock.patch("integrations.paypal.create_payment_request",
+                        return_value={"order_id": "ORD1", "approval_link": link, "status": "CREATED"}) as create, \
+                mock.patch("integrations.paypal.get_order", return_value={"status": "CREATED", "links": [{"rel": "approve", "href": link}]}):
+            c, r = self.call("POST", "/api/challenge/paypal-message", {"deal_id": d["deal_id"]})
+            self.assertEqual(c, 200)
+            self.assertIn(link, r["message"])
+            self.assertIn("$500.00", r["message"])
+            self.assertTrue(r["message"].startswith("Hi Tia,"))
+            self.assertEqual(r["warning"], "")
+            c, r2 = self.call("POST", "/api/challenge/paypal-message", {"deal_id": d["deal_id"]})  # second tap reuses the order
+            self.assertEqual((c, r2["approval_link"]), (200, link))
+            self.assertEqual(create.call_count, 1)
+        self.assertEqual(self.conn.execute("SELECT tx_hash FROM payments WHERE id=?", (d["payment_id"],)).fetchone()[0], "ORD1")
+        # still pipeline: a link is not cash
+        self.assertEqual(self.call("GET", "/api/challenge")[1]["cash_usd"], 0)
+
+    def test_paypal_message_refuses_paid_unknown_and_flags_agriloop(self):
+        self.assertEqual(self.call("POST", "/api/challenge/paypal-message", {"deal_id": "nope"})[0], 400)
+        lid = self.lead()
+        d = self.call("POST", "/api/challenge/deal", {"lead_id": lid})[1]
+        self.verify(d["payment_id"], 500)
+        self.assertEqual(self.call("POST", "/api/challenge/paypal-message", {"deal_id": d["deal_id"]})[0], 400)
+        ag = self.lead(venture="agriloop", segment="farmer", name="Ann", phone="876-555-0111")
+        d2 = self.call("POST", "/api/challenge/deal", {"lead_id": ag})[1]
+        link = "https://paypal.example/approve/ORD2"
+        with mock.patch("integrations.paypal.create_payment_request", return_value={"order_id": "ORD2", "approval_link": link, "status": "CREATED"}):
+            r = self.call("POST", "/api/challenge/paypal-message", {"deal_id": d2["deal_id"]})[1]
+        self.assertIn("not confirmed live", r["warning"])
+        self.assertIn("Farmer Premium", r["message"])
+
+    def test_paypal_message_requires_login(self):
+        c, _, _ = dash.handle("POST", "/api/challenge/paypal-message", "", self.conn, b"{}")
+        self.assertEqual(c, 401)
+
     def test_agriloop_plans_and_prices(self):
         none = self.lead(venture="agriloop", segment="")
         r = self.call("POST", "/api/challenge/deal", {"lead_id": none})

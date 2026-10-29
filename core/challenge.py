@@ -10,6 +10,7 @@ from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 
 from agents.operator import pitches
+from core import ingest
 from core.audit import audit
 from core.db import money, now
 
@@ -248,6 +249,45 @@ def create_deal(conn, owner: str, lead_id: str, amount=None, plan: str | None = 
     return {"deal_id": did, "payment_id": pay["payment_id"], "amount_usd": amt, "plan": pl["label"]}
 
 
+def paypal_message(conn, owner: str, deal_id: str) -> dict:
+    """One tap from a deal card: makes sure the deal's PayPal order exists (creating it on first use), fetches the
+    approval link and returns a ready-to-send message containing it. Nothing is sent or charged here: the owner
+    copies the message and sends it; cash counts only after Treasury verifies the capture."""
+    from agents.treasury import run as treasury  # local import: treasury imports core modules at load
+
+    deal = conn.execute("SELECT d.*, l.name, l.business, p.status AS pay_status, p.tx_hash, p.chain_id FROM deals d "
+                        "JOIN leads l ON l.id=d.lead_id JOIN payments p ON p.id=d.payment_id WHERE d.id=?", (deal_id,)).fetchone()
+    if deal is None:
+        raise ChallengeError("deal not found")
+    if deal["status"] != "open" or deal["pay_status"] == "PAYMENT_VERIFIED":
+        raise ChallengeError("this deal is already paid")
+    if deal["chain_id"] is not None:
+        raise ChallengeError("this payment is set up for an on-chain transfer, not PayPal")
+    try:
+        if not (deal["tx_hash"] or "").strip():
+            who = deal["business"] or deal["name"] or "customer"
+            link = treasury.request_paypal_payment(
+                conn, deal["payment_id"], "USD", f"{pitches.PRODUCT[deal['venture']]['name']} annual plan - {who}")["approval_link"]
+            if not link:
+                raise ChallengeError("PayPal did not return a payment link")
+        else:
+            link = treasury.get_paypal_approval_link(conn, deal["payment_id"])["approval_link"]
+    except treasury.VerifyError as e:
+        raise ChallengeError(str(e)) from e
+    cfg = get_config(conn)
+    pl = next((p for p in plans(cfg, deal["venture"]) if p["key"] == deal["plan"]), None)
+    product = pitches.PRODUCT[deal["venture"]]["name"] + (f" {pl['label']}" if pl and deal["venture"] == "agriloop" else "")
+    first = ((deal["name"] or "").split() or [""])[0]
+    amount = float(deal["amount_usd"])
+    message = (f"Hi{' ' + first if first else ''}, thanks for choosing {product}. Here is your secure PayPal link for the annual plan "
+               f"(${amount:,.2f} USD, 12 months of service with {deal['free_months']} months free): {link}\n"
+               "You can pay by card, bank or PayPal balance. Once it goes through I will confirm here and we will book your "
+               "one-on-one onboarding.")
+    audit(conn, owner, "challenge.paypal_message", deal_id, deal["payment_id"])
+    return {"message": message, "approval_link": link, "amount_usd": amount,
+            "warning": ("AgriLoop's database is not confirmed live yet: do not take payment until it is." if deal["venture"] == "agriloop" else "")}
+
+
 def set_onboarding(conn, owner: str, deal_id: str, status: str) -> dict:
     if status not in ("to_schedule", "scheduled", "done"):
         raise ChallengeError("bad onboarding status")
@@ -319,7 +359,7 @@ def summary(conn, today: date | None = None) -> dict:
         "avg_deal_usd": avg_deal,
         "deals_needed": math.ceil(remaining / avg_deal) if avg_deal else None,
         "per_week_needed": math.ceil(remaining / avg_deal / max(days_left / 7, 1)) if avg_deal and days_left else None,
-        "funnel": funnel, "due": due, "touches_week": touches_week, "by_channel": by_channel, "deals": deals,
+        "ingest": ingest.status(), "funnel": funnel, "due": due, "touches_week": touches_week, "by_channel": by_channel, "deals": deals,
     }
 
 

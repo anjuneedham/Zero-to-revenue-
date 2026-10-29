@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, challenge, rates, scheduler
+from core import actions, challenge, ingest, rates, scheduler
 from dashboard import api_data
 from dashboard.mcp import handle_mcp
 from core import db
@@ -40,6 +40,13 @@ def static_file(path: str):
         return None
     return STATIC_MIME[f.suffix], f.read_bytes()
 MAX_BODY = 4096
+# Routes that legitimately take more than MAX_BODY. The HTTP handlers read up to body_limit(path)+1 bytes, so an
+# oversized body is detected instead of silently truncated.
+BODY_LIMITS = {"/api/leads/import": 200_000, "/api/challenge/ingest": 4_000_000}
+
+
+def body_limit(path: str) -> int:
+    return BODY_LIMITS.get(path, MAX_BODY)
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
@@ -57,6 +64,15 @@ HEADERS = {
                                 "img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; "
                                 "base-uri 'none'; form-action 'self'"),
 }
+
+
+def _ingest_client():
+    """A Claude client only when the key, budget and prices are all configured; otherwise None (images are refused)."""
+    from core import budget
+    if not budget.llm_enabled():
+        return None
+    from agents.scout.enrich import ClaudeClient
+    return ClaudeClient()
 
 
 def _json(code, obj):
@@ -78,7 +94,7 @@ def _fields(body: bytes, *names):
 
 def _challenge_route(method, path, body, conn, owner):
     """60-day challenge: summary, config, prospect pipeline, touches, drafts, deals."""
-    data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
+    data = json.loads(body or b"{}") if len(body) <= body_limit(path) else {}
     if not isinstance(data, dict):
         raise ValueError("bad request")
     if method == "GET" and path == "/api/challenge":
@@ -101,6 +117,11 @@ def _challenge_route(method, path, body, conn, owner):
         return challenge.draft_for(conn, str(data.get("lead_id", "")), str(data.get("channel", "email")), bool(data.get("follow_up")))
     if path == "/api/challenge/deal":
         return challenge.create_deal(conn, owner, str(data.get("lead_id", "")), data.get("amount"), str(data.get("plan", "")))
+    if path == "/api/challenge/ingest":
+        return ingest.extract(conn, SCOUT_CLIENT or _ingest_client(), str(data.get("text", "")),
+                              str(data.get("image", "")), str(data.get("mime", "")))
+    if path == "/api/challenge/paypal-message":
+        return challenge.paypal_message(conn, owner, str(data.get("deal_id", "")))
     if path == "/api/challenge/onboarding":
         return challenge.set_onboarding(conn, owner, str(data.get("deal_id", "")), str(data.get("status", "")))
     raise ValueError("bad request")
@@ -249,7 +270,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
     if path.startswith("/api/challenge"):
         try:
             return _json(200, _challenge_route(method, path, body, conn, owner))
-        except challenge.ChallengeError as e:
+        except (challenge.ChallengeError, ingest.IngestError) as e:
             return _json(400, {"error": str(e)})
         except (ValueError, json.JSONDecodeError, AttributeError, TypeError):
             return _json(400, {"error": "bad request"})
@@ -365,7 +386,7 @@ def serve(host="127.0.0.1", port=8080):
     class H(BaseHTTPRequestHandler):
         def _go(self, method):
             n = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(min(n, MAX_BODY + 1)) if n else b""
+            body = self.rfile.read(min(n, body_limit(self.path.split("?")[0]) + 1)) if n else b""
             path = self.path.split("?")[0]
             conn = None
             try:
