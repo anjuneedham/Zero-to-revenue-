@@ -2,6 +2,67 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 6: Trading Workspace. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Built and tested locally (325 tests + browser check at 3 sizes). Not applied to production Neon (awaiting founder approval + backup); no lint/type/build tooling. Phase 5 was reviewed first (no defects found).
+**Branch:** `ccr-9e3eecee-aucmfd` (stacked, PR #1).
+
+### Objective
+Research-and-paper-trading workspace for the trading project: hypotheses, strategies, data notes, test results, risk limits, explicit failure conditions, with a hard human-approval boundary.
+
+### Safety design (verify these first)
+- **No live trading exists.** `trading_runs.mode` allows only backtest / out_of_sample / walk_forward / paper and `trading_strategies.status` has no live/deployed value; both are enforced by API enums AND database CHECK constraints (a test inserts `live` directly and the database refuses it). Nothing in the system places orders or reads a broker/exchange.
+- Modes are never combined or averaged. Runs are **append-only** (edits are rejected); corrections are new results.
+- The workspace never scores a strategy or predicts profit. For each strategy it lists the research steps still missing and any breached recorded failure condition, and its verdict text says that even a complete checklist is not a prediction and that live trading is outside the system. A permanent "Research only" banner appears on the page.
+
+### Work completed
+- Migration `012_trading_research.sql`: `trading_strategies` (hypothesis, instrument, stage, data notes, risk notes, failure conditions, max-drawdown limit %, min trades) and `trading_runs` (mode, period, trades, net return %, max drawdown %, costs included, cost bps, slippage bps, data source, params, notes).
+- `core/trading_eval.py`: `run_warnings` (too few trades, costs not confirmed, no slippage assumption, no drawdown, "positive in-sample backtest is not evidence") and `evaluate` (breached drawdown limit, 9-item research checklist incl. data-quality notes, failure conditions, costed backtest, out-of-sample, walk-forward, paper run of >= 30 days). Thresholds (30 trades, 30 paper days) are documented rules of thumb, not statistical guarantees.
+- `workspace(conn, "trading")` adds `research_lab`; UI `dashboard/static/js/trading.js` (`#trading`: Overview, Strategies, Notes).
+
+### Files
+- Created: `database/migrations/012_trading_research.sql`, `database/rollback/012_trading_research_down.sql`, `core/trading_eval.py`, `dashboard/static/js/trading.js`, `tests/unit/test_trading.py`.
+- Modified: `core/founder.py` (2 entities), `core/workspace.py`, `main.js`, `index.html`, `sw.js`, docs.
+- Removed: none.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| `python3 -m unittest discover -s tests -t .` (local Postgres 16) | **325 OK** (10 new in `test_trading.py`: evaluation rules, no-profit-claim verdict, breach detection, live mode/status rejected by API and DB, append-only runs, isolation, validation) | PASS |
+| Headless Chromium, 3 tabs x phone/tablet/desktop | 0 px overflow, 0 console errors; breach shown, result recorded; no `live` option exists in the form | PASS |
+| The existing MQL5 EA (`mq5` repo), real market data, any broker | not touched or verified | NOT TESTED |
+
+### Acceptance criteria
+- Hypotheses, strategies, data notes, backtests, validation, risk, paper trading, failure conditions: PASS (records only)
+- Backtest / paper / live separated; live needs human approval: PASS by construction (live does not exist; a future phase must add an explicit approval flow)
+- No profitability claims: PASS (copy and tests)
+- Code and data pipeline management, parameter-sensitivity and robustness analysis, liquidity assumptions: NOT BUILT (only free-text `params`/`data_source` fields; no stored curves or statistics)
+- Import of real results from MT5/exports: NOT BUILT (manual entry; numbers are only as good as what the founder types)
+
+### Known issues and technical debt
+- Results are self-reported; nothing verifies them against data. Drawdown breach uses only recorded runs.
+- No tracking of strategy code versions or parameter sets beyond text.
+- Migrations 007_a, 007, 008, 009, 010, 011, 012 are all unapplied on production Neon.
+
+### Decisions and assumptions
+- Conservative on purpose: omit rather than disable live mode; append-only results; checklist instead of a score.
+
+### Unfinished work
+Robustness/parameter-sensitivity records, result import, strategy code/version links, a formal live-authorization design (only if the founder later asks for it, in its own phase, with risk limits and a verified kill switch).
+
+### Next phase
+Phase 7: AI Command Center. Prerequisites: `ANTHROPIC_API_KEY` and pricing env vars are not set in this environment, so model calls cannot be tested here (the existing Scout budget code in `core/budget.py` already fails closed without them). Founder approval + Neon backup before any deployment is requested.
+
+### Ready-to-paste next-chat instruction
+```
+Read /docs/FOUNDER_OS_BUILD_PROTOCOL.md (sections 5 and 7), then /docs/PHASE_HANDOFF.md (Phase 6 entry first), then /docs/FOUNDER_OS_ARCHITECTURE.md.
+Verify first: tests against a throwaway Postgres (expect 325 OK); inspect core/budget.py, core/workspace.py, core/founder.py, agents/scout/enrich.py (the only existing model caller), migrations 004 and 007-012.
+Preview and production share one Neon database and migrate on first request: do not open any preview/production URL until I approve and back up Neon.
+Implement only Phase 7: AI Command Center (task classification, NO AI/LOW/STANDARD/HIGH routing config in one place, context selection scoped by business, structured outputs, usage logging to the existing ledgers, hard budget). Do not claim any model integration works unless it was actually called. Update /docs/PHASE_HANDOFF.md and stop.
+```
+
+---
+
 ## Phase 5: Fashion Workspace. Completed 2026-10-29
 
 **Overall status: PARTIAL.** Built and tested locally (315 tests + browser check at 3 sizes). Not applied to production Neon (awaiting founder approval + backup); no lint/type/build tooling. Phase 4 was reviewed first (no defects found).

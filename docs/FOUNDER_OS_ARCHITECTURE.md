@@ -75,6 +75,10 @@ Errors: 400 validation (message never contains driver text), 401 no session, 404
 - Migration `011_shop.sql`: `shop_products`, `shop_sales`, `shop_campaigns` (entities `shop-products`, `shop-sales`, `shop-campaigns`); sets the `fashion` business description to the brand name.
 - `workspace(conn, "fashion")` adds a `shop` section (margins, stock flags, per-currency revenue, repeat customers, ROAS where computable). UI `dashboard/static/js/fashion.js`.
 
+## Phase 6 additions (Trading workspace: research only)
+- Migration `012_trading_research.sql`: `trading_strategies`, `trading_runs` (entities `trading-strategies`, `trading-runs`). Run modes: backtest, out_of_sample, walk_forward, paper. **There is no live mode or status anywhere** (API enums and DB CHECKs); runs are append-only.
+- `core/trading_eval.py` (pure): run warnings and a research checklist per strategy; never a profit score. `workspace(conn, "trading")` adds `research_lab`. UI `dashboard/static/js/trading.js`.
+
 ## Legacy (not deleted; migration strategy)
 Nothing was dropped or altered. Legacy tables (`agents`, `agent_runs`, `opportunities`, `tasks`, `task_events`, `user_actions`,
 `deliverables`, `submissions`, `payments`, `wallets`, `transactions`, `ledger_entries`, `leads`, `notifications`) and the

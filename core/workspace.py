@@ -8,7 +8,7 @@ import json
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from core import founder, founder_dashboard as fd
+from core import founder, founder_dashboard as fd, trading_eval
 from core.audit import audit
 from core.db import now
 
@@ -254,6 +254,22 @@ def workspace(conn, slug: str, today: date | None = None) -> dict:
                     "sales": sales[:40], "sales_summary": sales_summary(sales, today), "campaigns": campaigns}
 
         sec("shop", shop)
+
+    if slug == "trading":
+        def research():
+            strategies = rows("SELECT * FROM trading_strategies WHERE business_id=? ORDER BY created_at DESC LIMIT 100", (bid,))
+            runs = rows("SELECT * FROM trading_runs WHERE business_id=? ORDER BY created_at DESC LIMIT 500", (bid,))
+            for st in strategies:
+                mine = [r for r in runs if r["strategy_id"] == st["id"]]
+                for r in mine:
+                    r["warnings"] = trading_eval.run_warnings(r, st)
+                    r["mode_label"] = trading_eval.LABEL[r["mode"]]
+                st["runs"] = mine[:25]
+                st["evaluation"] = trading_eval.evaluate(st, mine)
+            return {"strategies": strategies, "live_trading": "not part of this system: no live mode exists and nothing here places orders",
+                    "disclaimer": "Research records only. A backtest does not predict future results and nothing here implies profitability."}
+
+        sec("research_lab", research)
 
     if slug == "buildflow":
         def pipeline():
