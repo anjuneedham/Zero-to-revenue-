@@ -79,6 +79,10 @@ Errors: 400 validation (message never contains driver text), 401 no session, 404
 - Migration `012_trading_research.sql`: `trading_strategies`, `trading_runs` (entities `trading-strategies`, `trading-runs`). Run modes: backtest, out_of_sample, walk_forward, paper. **There is no live mode or status anywhere** (API enums and DB CHECKs); runs are append-only.
 - `core/trading_eval.py` (pure): run warnings and a research checklist per strategy; never a profit score. `workspace(conn, "trading")` adds `research_lab`. UI `dashboard/static/js/trading.js`.
 
+## Phase 7 additions (AI Command Center)
+- `core/ai_config.py` is the single place mapping NO AI / LOW / STANDARD / HIGH to models, limits and task types. `core/ai.py` is the only path for Founder OS model calls: classify (code) -> business-scoped context -> `budget.reserve` (hard cap) -> call -> strict JSON validation -> `budget.settle` -> rows in `llm_usage` (cap) and `ai_usage` (per business, migration `013_ai_command_center.sql`).
+- API: `GET /api/ai/status`, `POST /api/ai/classify`, `POST /api/ai/run`. Advisory only; nothing is executed. Kill switch pauses calls. No real model call has been executed yet.
+
 ## Legacy (not deleted; migration strategy)
 Nothing was dropped or altered. Legacy tables (`agents`, `agent_runs`, `opportunities`, `tasks`, `task_events`, `user_actions`,
 `deliverables`, `submissions`, `payments`, `wallets`, `transactions`, `ledger_entries`, `leads`, `notifications`) and the
@@ -87,5 +91,5 @@ three agents keep running, including the daily cron. Retirement plan, for a late
 separate, reversible migration after the owner confirms. Rollback for 007: `database/rollback/007_founder_os_core_down.sql`.
 
 ## Not built yet (by design)
-AI calls, usage enforcement/budgets for `ai_usage`, automation execution, per-business dashboards/UI, business-specific
+Command Center UI/conversation persistence, automation execution, per-business dashboards/UI, business-specific
 workspaces, migration of legacy data, auth beyond the single owner.

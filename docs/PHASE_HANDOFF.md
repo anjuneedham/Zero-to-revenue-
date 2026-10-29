@@ -2,6 +2,80 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 7: AI Command Center. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Routing, context, structured output, budget and ledgers are built and tested with a fake client (348 tests). **No real model call has ever been executed**: `ANTHROPIC_API_KEY` and `LLM_*` pricing are not set in this environment, so `AnthropicClient` is untested against the live API. Not applied to production Neon (awaiting founder backup + approval); no lint/type/build tooling. No UI and no conversation persistence were built (see Unfinished work).
+**Branch:** `ccr-79ad6026-fa1uuh`, stacked on Phase 6 (`ccr-9e3eecee-aucmfd`). Phases 0-6 were found on that branch after the first attempt looked in the wrong place.
+
+### Objective
+One orchestration layer for every Founder OS model call: classify the task, route it to NO AI / LOW / STANDARD / HIGH from one config file, give the model only that business's records, require a strict JSON reply, log usage to the existing ledgers, and stop at a hard budget.
+
+### Design (verify these first)
+- **One config location:** `core/ai_config.py` holds the level -> model map (`claude-haiku-5-5` / `claude-sonnet-5-5` / `claude-opus-5-5`, each overridable with `LLM_MODEL_LOW|STANDARD|HIGH`), token limits per level, the task-type table (level, context kinds, stakes) and the keyword rules. Business code never names a model.
+- **Classification is code, not a model.** `ai.classify` uses the caller's `task_type` if given, else keyword rules, else `general_question`. Stakes words (live trading, real money, invest, publish, delete...) raise the level one step and force `needs_approval`; keywords can only add caution. `min_level` lets the caller escalate manually (no automatic escalation yet).
+- **NO AI never reaches a model** and writes no ledger row. Currently only the `calculation` task type routes there.
+- **Business isolation:** `ai.select_context` runs `WHERE business_id = <this business>` for goals, tasks, KPIs, blockers, decisions, knowledge, research, trading strategies and runs. Global (`business_id IS NULL`) rows are NOT included. Each row carries a source id such as `goals:goal_x`. Records go to the model inside `<data>`, the request inside `<untrusted>`; the prompt (`prompts/ai/command-center-v1.md`) says to ignore instructions there.
+- **Structured output:** strict envelope `{answer, claims[{text,label,source}], next_steps, needs_approval, fields}`. Anything else is discarded (`bad_output`, still billed and logged). A claim labelled `verified` without a source id from the supplied context is downgraded to `unknown`. Guarantee/risk-free language adds a warning. The result is advisory: nothing is executed.
+- **Hard budget:** reuses and extends `core/budget.py`. Each call reserves its worst-case cost under the advisory lock before the call, so the monthly cap (`LLM_MONTHLY_BUDGET_USD`, shared with Scout) cannot be overshot. Added: optional per-level prices `LLM_PRICE_IN|OUT_PER_MTOK_<LOW|STANDARD|HIGH>` (fall back to the global pair, so Scout is unchanged). Disabled (no row, no call) unless key, cap and prices are set. A client exception keeps the worst-case hold (`FAILED`). The kill switch pauses all calls.
+- **Ledgers:** every attempted call writes one `llm_usage` row (agent `command_center`; this is the row the cap counts) and one `ai_usage` row (business-scoped) with routing level, task type, latency, outcome (`ok|bad_output|error`) and the `llm_usage` id. Error rows record the held worst-case cost. The Founder Dashboard's "Scout (llm_usage)" source now excludes `command_center` rows so one call is not shown twice.
+
+### Work completed
+- Migration `013_ai_command_center.sql` (additive columns on `ai_usage`), rollback `database/rollback/013_ai_command_center_down.sql`.
+- `core/ai_config.py`, `core/ai.py` (`classify`, `select_context`, `build_prompt`, `parse_reply`, `AnthropicClient`, `run`, `status`), `prompts/ai/command-center-v1.md`.
+- API (owner auth required): `GET /api/ai/status`, `POST /api/ai/classify` (no model), `POST /api/ai/run {business, request, task_type?, min_level?}` returning `status` = `ok | no_ai | disabled | paused | budget_exceeded | bad_output | error`. Errors are generic.
+- `core/budget.py` extended (backward compatible); `core/founder_dashboard.py` ledger note/filter.
+
+### Files
+- Created: `core/ai.py`, `core/ai_config.py`, `prompts/ai/command-center-v1.md`, `database/migrations/013_ai_command_center.sql`, `database/rollback/013_ai_command_center_down.sql`, `tests/unit/test_ai.py`.
+- Modified: `core/budget.py`, `core/founder_dashboard.py`, `dashboard/app.py`, docs.
+- Removed: none.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| Local Postgres 16 per the recipe, before changes | 325 OK | PASS |
+| `python3 -m unittest discover -s tests -t .` after changes | **348 OK** (23 new in `test_ai.py`: routing and escalation, single-config models, strict parsing and verified-claim downgrade, NO AI makes no call, disabled makes no call/row, both ledgers on success, business and global-row isolation, trading validation scope, bad output, client error keeps hold, hard cap incl. Scout spend, per-level prices, kill switch, injection, API auth/errors) | PASS |
+| Real Anthropic API call, real model ids, real token/usage fields, real pricing | **never executed** (no key, no prices; tests use a fake client) | NOT TESTED |
+| Any preview/production URL, production Neon, migration 013 on Neon | not opened, not applied | NOT TESTED |
+
+### Acceptance criteria
+- Task classification: PASS (deterministic rules; accuracy beyond the tested examples is unmeasured)
+- One config for NO AI/LOW/STANDARD/HIGH: PASS (`core/ai_config.py`)
+- Business-scoped context: PASS for the listed record types
+- Structured outputs: PASS (strict envelope, source-traced `verified`)
+- Usage logging to existing ledgers + hard budget: PASS in tests with a fake client; token counts, cost and cap are only as right as the real SDK usage fields and your `LLM_PRICE_*` values
+- Command/chat UI, tool access scoped by business, approval prompts, conversation/task persistence (protocol Phase 7 list): NOT BUILT
+- Quality tracking (protocol wants it "when the architecture supports it"): NOT BUILT (no thumbs/outcome feedback; only ok/bad_output/error)
+
+### Known issues and technical debt
+- `AnthropicClient` is unverified; model ids come from the project's model list and the existing Scout config, not from a live check. `ClaudeClient` in Scout still reads `CLAUDE_MODEL` separately (left alone: out of scope).
+- Token estimate is characters/3 (deliberately high). The reservation uses the full estimated prompt, so each call reserves slightly more than it uses until settled.
+- A call that overshoots `max_tokens` is cut by the API; the reply then fails parsing and is discarded as `bad_output`.
+- Keyword classification is crude (English only, substring match). Stakes words can over-flag.
+- No cross-business opt-in path exists yet (by design: Phase 11).
+- Migrations 007_a, 007, 008-013 are all unapplied on production Neon.
+
+### Decisions and assumptions
+- Escalation is manual (`min_level`) rather than automatic retry, to avoid hidden spend.
+- Failed calls are logged at worst-case cost (fail safe), which can overstate spend.
+- Ledger split: `llm_usage` enforces the cap, `ai_usage` answers "per business"; the dashboard avoids double display.
+
+### Unfinished work
+Command Center UI and conversation/task persistence; approval prompts wired to the existing approval gates; per-business tool scoping; output-quality feedback; first real call (see below). Phase 8 (Prompt Lab) must take over `prompts/ai/` versioning.
+
+### Next phase
+Phase 8: Prompt Lab, Research, and Knowledge, **not started**. Before it: founder Neon backup + "apply to Neon"; to verify Phase 7 for real, set `ANTHROPIC_API_KEY`, `LLM_MONTHLY_BUDGET_USD` (small, e.g. 1) and `LLM_PRICE_*` from the provider's pricing page in a throwaway environment, then make one `POST /api/ai/run` and check the two ledger rows.
+
+### Ready-to-paste next-chat instruction
+```
+Read /docs/CONTINUE_FROM_HERE.md, then /docs/FOUNDER_OS_BUILD_PROTOCOL.md, then /docs/PHASE_HANDOFF.md (Phase 7 entry first) and /docs/FOUNDER_OS_ARCHITECTURE.md.
+Verify first: tests against a throwaway Postgres (expect 348 OK); inspect core/ai.py, core/ai_config.py, core/budget.py.
+Do not open any preview/production URL until I say the Neon backup is done.
+Implement only Phase 8: Prompt Lab, Research, and Knowledge. Do not claim a model call works unless it was executed. Update /docs/PHASE_HANDOFF.md and stop.
+```
+
+---
+
 ## Phase 6: Trading Workspace. Completed 2026-10-29
 
 **Overall status: PARTIAL.** Built and tested locally (325 tests + browser check at 3 sizes). Not applied to production Neon (awaiting founder approval + backup); no lint/type/build tooling. Phase 5 was reviewed first (no defects found).

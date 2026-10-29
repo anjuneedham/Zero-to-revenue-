@@ -259,15 +259,15 @@ def dashboard(conn, today: date | None = None) -> dict:
 
 def ai_usage(conn, today: date) -> dict:
     """Real logged rows only, from the two ledgers that exist: `llm_usage` (written by Scout; no business column) and
-    `ai_usage` (Phase 1; business-scoped, nothing writes it yet). Requests, tokens and USD stay separate measures."""
+    `ai_usage` (business-scoped; written by the Phase 7 Command Center and by hand). Requests, tokens and USD stay separate measures."""
     start = datetime(today.year, today.month, 1, tzinfo=timezone.utc).isoformat()
     day = datetime(today.year, today.month, today.day, tzinfo=timezone.utc).isoformat()
     q1 = ("SELECT count(*) AS requests, COALESCE(SUM(input_tokens),0) AS input_tokens, COALESCE(SUM(output_tokens),0) AS output_tokens, "
-          "COALESCE(SUM(cost_usd),0) AS cost_usd, count(*) FILTER (WHERE status='FAILED') AS failed FROM llm_usage WHERE at >= ?")
+          "COALESCE(SUM(cost_usd),0) AS cost_usd, count(*) FILTER (WHERE status='FAILED') AS failed FROM llm_usage WHERE agent <> 'command_center' AND at >= ?")
     q2 = ("SELECT count(*) AS requests, COALESCE(SUM(input_tokens),0) AS input_tokens, COALESCE(SUM(output_tokens),0) AS output_tokens, "
           "COALESCE(SUM(cost_usd),0) AS cost_usd, 0 AS failed FROM ai_usage WHERE created_at >= ?")
     sources = []
-    for name, q, note in (("Scout (llm_usage)", q1, "RESERVED rows are worst-case holds; FAILED rows keep theirs."), ("Founder OS (ai_usage)", q2, "")):
+    for name, q, note in (("Scout (llm_usage)", q1, "RESERVED rows are worst-case holds; FAILED rows keep theirs. Command Center calls are in the Founder OS ledger below (they also count toward the same cap)."), ("Founder OS (ai_usage)", q2, "")):
         m, d = _rows(conn, q, (start,))[0], _rows(conn, q, (day,))[0]
         if m["requests"]:
             sources.append({"name": name, "month": m, "today": d, "note": note})

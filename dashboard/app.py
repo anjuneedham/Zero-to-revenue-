@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, founder, founder_dashboard, rates, scheduler, workspace
+from core import actions, ai, founder, founder_dashboard, rates, scheduler, workspace
 from dashboard import api_data, founder_api
 from dashboard.mcp import handle_mcp
 from core import db
@@ -83,6 +83,27 @@ def _fields(body: bytes, *names):
     return out
 
 
+def _ai_route(conn, owner, method, path, body):
+    """AI Command Center: GET /api/ai/status, POST /api/ai/classify (no model), POST /api/ai/run {business, request, task_type?, min_level?}."""
+    try:
+        if method == "GET" and path == "/api/ai/status":
+            return _json(200, ai.status(conn))
+        if method == "POST" and path in ("/api/ai/classify", "/api/ai/run"):
+            if len(body) > MAX_BODY:
+                raise ai.AiError("body too large")
+            d = json.loads(body or b"{}")
+            if not isinstance(d, dict):
+                raise ai.AiError("bad request")
+            if path == "/api/ai/classify":
+                return _json(200, ai.classify(str(d.get("request", "")), d.get("task_type"), d.get("min_level")))
+            return _json(200, ai.run(conn, ai.AnthropicClient(), str(d.get("business", "")), d.get("request"), owner, d.get("task_type"), d.get("min_level")))
+    except founder.NotFound as e:
+        return _json(404, {"error": str(e)})
+    except (ai.AiError, founder.FounderError, json.JSONDecodeError):
+        return _json(400, {"error": "bad request"})
+    return _json(404, {"error": "not found"})
+
+
 def handle(method, path, authz, conn, body: bytes = b""):
     """Returns (status, content_type, body_bytes)."""
     if method == "GET" and path == "/":
@@ -148,6 +169,8 @@ def handle(method, path, authz, conn, body: bytes = b""):
         except founder.FounderError as e:
             return _json(400, {"error": str(e)})
         return _json(404, {"error": "not found"})
+    if path.startswith("/api/ai/"):
+        return _ai_route(conn, owner, method, path, body)
     fo = founder_api.handle(conn, owner, method, path, body)
     if fo:
         return fo

@@ -1,4 +1,4 @@
-# Continue from here (written 2026-10-29, after Phase 6)
+# Continue from here (written 2026-10-29, after Phase 6; Phase 7 is now done, see the top entry of PHASE_HANDOFF.md: 348 tests, next is Phase 8)
 
 Everything needed to resume in a new Claude Code chat. Source of truth is the repo; read `docs/PHASE_HANDOFF.md` (newest entry on top) for details.
 
