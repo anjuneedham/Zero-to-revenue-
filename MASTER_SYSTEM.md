@@ -1,4 +1,4 @@
-# Zero-to-Revenue Agent System — Master Specification v1.0 (normative summary)
+# Founder OS (originally Zero-to-Revenue Agent System) — Master Specification v1.0 (normative summary)
 
 Section numbers match the owner's original specification.
 

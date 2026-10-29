@@ -66,7 +66,7 @@
       const c = card("BuildFlow: path to launch", "Read from the BuildFlow repo on 25 Oct. Verdict in its own report: not ready, with one owner-side blocker (Storage).");
       c.append(el("p", "sub", "BuildFlow is live in beta at buildflow-app-beta.vercel.app: customer and project management for contractors, a public profile where customers find them, $50/month with a 14-day trial. The code is in good shape; launch is blocked by setup only you can do, and by billing, which is not built yet."), list(data.buildflow, redraw)); return c;
     },
-    sys(redraw) { const c = card("Zero-to-Revenue: your checklist", "Setup that only you can do."); c.append(list(data.system, redraw)); return c; },
+    sys(redraw) { const c = card("Founder OS: your checklist", "Setup that only you can do."); c.append(list(data.system, redraw)); return c; },
     sources(redraw) {
       const c = card("Where to get more jobs", "Scout already reads these automatically: Superteam Earn, GitHub's bounty label, Freelancer.com, Remotive and Himalayas (contract/freelance only). Everything below needs a login, so Scout can't read it - this is what unlocks more and bigger work.");
       c.append(list(data.sources_setup, redraw));

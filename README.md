@@ -1,25 +1,20 @@
-# Zero-to-Revenue Agent System
+# Founder OS
 
-Three cooperating agents — **Scout** (find opportunities), **Operator** (do the
-work), **Treasury** (read-only accounting) — starting from **$0 capital**.
+Founder OS (formerly "Zero-to-Revenue Agent System"; the GitHub repo keeps its old name) is an owner-only
+control room with three cooperating agents: **Scout** (find opportunities and leads), **Operator** (draft and,
+after owner approval, send outreach and applications) and **Treasury** (verify payments, read-only on chain,
+PayPal order verification). Single-tenant, Python + Neon Postgres + Vercel, no build step.
 
-This is not a trading bot. No profit is assumed and nothing is "live" yet.
-
-## Current status: Phase 1 (foundation) — `MOCK`, no external actions
-- Spec: [MASTER_SYSTEM.md](MASTER_SYSTEM.md)
-- Architecture & plan: [docs/architecture/PHASE0_ARCHITECTURE.md](docs/architecture/PHASE0_ARCHITECTURE.md)
-- Security: [SECURITY.md](SECURITY.md)
+## Status
+- Live: Scout, Operator (Gmail send, approval-gated), Treasury (EVM + PayPal verification), leads import/draft/send, Game plan, read-only MCP connector.
+- Not live: no AI model is wired in (`SCOUT_CLIENT = None`, needs `ANTHROPIC_API_KEY`); WhatsApp is record-only.
+- Direction and gaps: [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md), [docs/master/HANDOFF.md](docs/master/HANDOFF.md), [docs/master/FOUNDER_OS_AUDIT.md](docs/master/FOUNDER_OS_AUDIT.md).
+- Original agent spec (still normative for safety rules): [MASTER_SYSTEM.md](MASTER_SYSTEM.md). Security: [SECURITY.md](SECURITY.md).
 
 ## Run tests
 ```
-TEST_DATABASE_URL=postgresql://... python3 -m unittest discover -s tests -t .  # throwaway Postgres
+TEST_DATABASE_URL=postgresql://... python3 -m unittest discover -s tests -t .  # throwaway Postgres, never production
 ```
-
-Phase 1 pieces: SQLite schema (`database/migrations`), task queue with leases and
-idempotency (`core/queue`), kill switch (`core/orchestrator`), append-only audit log,
-owner-only password + authenticator-app login stored in Postgres (`core/auth`), notification service with a
-mock WhatsApp backend. Setup steps: [docs/runbooks/PHASE1_SETUP.md](docs/runbooks/PHASE1_SETUP.md).
-Dashboard + API run on Vercel with Neon Postgres (see [docs/runbooks/VERCEL_AND_APK.md](docs/runbooks/VERCEL_AND_APK.md)). Local: set `DATABASE_URL`, `python3 -m dashboard.app`. Scout (read-only, [docs](docs/architecture/SCOUT.md)) is built. Not built yet: Operator, Treasury monitoring, scheduler, notifications.
 
 ## Using it
 - Live: https://zero-to-revenue-neon.vercel.app (install it as an app from the browser).

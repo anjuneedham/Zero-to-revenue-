@@ -37,7 +37,7 @@ class McpTest(unittest.TestCase):
 
     def test_handshake_and_tool_list_are_read_only(self):
         c, r = self.rpc("initialize", {"protocolVersion": "2025-06-18"})
-        self.assertEqual(r["result"]["serverInfo"]["name"], "zero-to-revenue")
+        self.assertEqual(r["result"]["serverInfo"]["name"], "founder-os")
         c, _, out = handle("POST", f"/mcp/{TOKEN}", None, self.conn, b'{"jsonrpc":"2.0","method":"notifications/initialized"}')
         self.assertEqual(c, 202)
         tools = self.rpc("tools/list")[1]["result"]["tools"]

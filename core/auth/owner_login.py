@@ -28,7 +28,7 @@ MAX_FAILURES = 8           # per kind, per window
 WINDOW_MINUTES = 15
 MIN_PASSWORD_LEN = 12
 MIN_SETUP_TOKEN_LEN = 20
-ISSUER = "Zero-to-Revenue"
+ISSUER = "Founder OS"
 
 
 class AuthError(PermissionError):

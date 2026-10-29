@@ -50,7 +50,7 @@ def tick(conn, scout_sources=None, rpc=None) -> dict:
     today = at.date().isoformat()
     last = conn.execute("SELECT value FROM settings WHERE key='last_daily_summary'").fetchone()
     if last is None or last["value"] != today:
-        alert(conn, "MEDIUM", f"daily:{today}", "Zero-to-Revenue daily report", daily_report(conn))
+        alert(conn, "MEDIUM", f"daily:{today}", "Founder OS daily report", daily_report(conn))
         conn.execute("INSERT INTO settings(key, value, updated_at) VALUES ('last_daily_summary', ?, ?) "
                      "ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=EXCLUDED.updated_at", (today, now()))
         out["daily_report"] = True

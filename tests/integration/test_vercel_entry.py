@@ -58,7 +58,7 @@ class VercelEntryTest(unittest.TestCase):
         # What Vercel actually sends after the vercel.json rewrite
         code, ctype, body = self.raw("/api/index?p=/")
         self.assertEqual((code, ctype.split(";")[0]), (200, "text/html"))
-        self.assertIn("Zero-to-Revenue", body)
+        self.assertIn("Founder OS", body)
         self.assertEqual(self.raw("/api/index?p=/js/main.js")[0], 200)
         self.assertEqual(self.raw("/api/index?p=/css/app.css")[0], 200)
         self.assertEqual(self.raw("/api/index?p=/fonts/inter.woff2")[0], 200)

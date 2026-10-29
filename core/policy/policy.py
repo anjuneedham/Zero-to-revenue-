@@ -1,4 +1,4 @@
-"""Core safety policy for the Zero-to-Revenue Agent System.
+"""Core safety policy for Founder OS.
 
 This module is the single source of truth for what agents may do. It is
 deliberately code, not configuration: financial and signing capabilities are

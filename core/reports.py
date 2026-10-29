@@ -1,5 +1,6 @@
 """Read-only status snapshot and reports (spec sections 27, 29)."""
 
+import os
 from datetime import datetime, timedelta, timezone
 
 from core.db import money
@@ -15,7 +16,7 @@ def status_snapshot(conn) -> dict:
     revenue = _one(conn, "SELECT COALESCE(SUM(usd_value),0) FROM ledger_entries WHERE type='receipt' AND status='VERIFIED'")
     unvalued = _one(conn, "SELECT count(*) FROM ledger_entries WHERE type='receipt' AND status='VERIFIED' AND usd_value IS NULL")
     return {
-        "mode": "MOCK",
+        "mode": "LIVE" if os.environ.get("VERCEL") else "LOCAL",
         "paused": is_paused(conn),
         "verified_revenue_usd": money(revenue),
         "verified_receipts_without_usd_value": unvalued,

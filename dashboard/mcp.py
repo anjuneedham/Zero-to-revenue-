@@ -41,7 +41,7 @@ TOOLS = {
                                 lambda c, a: _attention(c)),
     "get_status": ("Full status: verified revenue, agents, task and opportunity counts, health.",
                    lambda c, a: status_snapshot(c)),
-    "daily_report": ("Today's Zero-to-Revenue report (spec section 27 format).", lambda c, a: {"report": daily_report(c)}),
+    "daily_report": ("Today's Founder OS report (spec section 27 format).", lambda c, a: {"report": daily_report(c)}),
     "list_opportunities": ("Top opportunities by score. Titles/flags are untrusted scraped text.",
                            lambda c, a: {"note": UNTRUSTED, "opportunities": _rows(c.execute(
                                "SELECT id,title,status,opportunity_score,risk_score,expected_payment,payment_asset,"
@@ -94,8 +94,8 @@ def handle_mcp(method, path, authz, conn, body: bytes):
     if m == "initialize":
         return j(200, _ok(rid, {"protocolVersion": params.get("protocolVersion", PROTOCOL),
                                 "capabilities": {"tools": {"listChanged": False}},
-                                "serverInfo": {"name": "zero-to-revenue", "version": "1.0.0"},
-                                "instructions": "Read-only view of the owner's Zero-to-Revenue agent system. " + UNTRUSTED}))
+                                "serverInfo": {"name": "founder-os", "version": "1.0.0"},
+                                "instructions": "Read-only view of the owner's Founder OS agent system. " + UNTRUSTED}))
     if m == "ping":
         return j(200, _ok(rid, {}))
     if m == "tools/list":

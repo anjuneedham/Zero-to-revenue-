@@ -36,7 +36,7 @@
   };
   async function render() {
     const my = ++seq; const name = (NAV.find(([k]) => k === location.hash.slice(1)) || NAV[0])[0]; current = name; markNav();
-    const page = Z.pages[name]; text($("page-title"), page.title); text($("page-sub"), page.sub); document.title = page.title + " · Zero-to-Revenue";
+    const page = Z.pages[name]; text($("page-title"), page.title); text($("page-sub"), page.sub); document.title = page.title + " · Founder OS";
     const view = $("view"); const y = scrollY; const box = el("div"); const first = !view.firstChild || view.dataset.page !== name;
     if (first) view.replaceChildren(Z.skeleton(4));
     try { await page.render(box); } catch (e) {

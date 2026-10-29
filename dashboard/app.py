@@ -1,6 +1,6 @@
 """Owner-only dashboard + API. Every /api route except the few login/setup routes needs
 a session bearer token in the Authorization header (no cookies, so no CSRF surface).
-Mode: MOCK."""
+"""
 
 import hmac
 import json

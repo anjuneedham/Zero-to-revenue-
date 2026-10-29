@@ -432,7 +432,7 @@ class SchedulerTest(Base):
         r2 = scheduler.tick(self.conn, [Source([good()])], FakeChain())
         self.assertNotIn("scout", r2)  # not due yet
         self.assertNotIn("daily_report", r2)
-        self.assertEqual(self.one("select count(*) c from notifications where title like 'Zero-to-Revenue daily%'")["c"], 1)
+        self.assertEqual(self.one("select count(*) c from notifications where title like 'Founder OS daily%'")["c"], 1)
         killswitch.pause_all(self.conn, "owner")
         self.assertFalse(scheduler.tick(self.conn, [], FakeChain())["ran"])
 
