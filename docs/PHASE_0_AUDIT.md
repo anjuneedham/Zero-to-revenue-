@@ -1,17 +1,35 @@
 # Founder OS — Phase 0 Audit
 
-Audited 28 Oct 2026, branch `ccr-b2711e77-m8rmgm`, HEAD `1b1c990`. No application code was modified.
+Audited 28-29 Oct 2026, branch `ccr-b2711e77-m8rmgm`, HEAD `1b1c990`. No application code was modified.
 
 **Evidence labels.** VERIFIED = read in this repo this session. REPORTED = taken from existing docs
 (`IMPLEMENTATION_AUDIT.md`, `docs/master/HANDOFF.md`), not re-checked. NOT RUN = could not be executed here.
 
-## 0. Blocking finding: the protocol file does not exist
+## 0. Protocol and test baseline
 
-`/docs/FOUNDER_OS_BUILD_PROTOCOL.md` is not in this repository or on this machine (VERIFIED: searched `/docs`,
-`docs/`, and the whole filesystem for `*FOUNDER_OS*`; no branch carries it either). This audit therefore follows
-the task brief only. **Phase 1 must not start until the owner supplies the protocol file**, so its rules aren't guessed at.
+**Protocol.** `docs/FOUNDER_OS_BUILD_PROTOCOL.md` was not on this branch when the audit was first written. It lives on
+`origin/ccr-cf790779-6k71zs` (commit `dda7d41`) and is now merged into this branch. Its rules (one OS, not four agents;
+business-context isolation; reuse before rewrite; additive reversible migrations; no destructive DB or production changes without approval) are
+consistent with every recommendation below.
 
-Related gap: `IMPLEMENTATION_AUDIT.md` says an earlier brief "was cut off at section 4" and was never resent.
+**Test baseline (VERIFIED, run this session).**
+Command: `TEST_DATABASE_URL=postgresql://postgres@/t0?host=/var/tmp&port=5433 python3 -m unittest discover -s tests -t .`
+against a throwaway local Postgres 16 (deleted afterwards, nothing touched Neon).
+Result: **Ran 236 tests in 46.0s, OK.** Only noise is `ResourceWarning: Connection ... deleted while still open` from unclosed psycopg connections in tests (cosmetic debt).
+Not covered by this run: live Gmail/PayPal/RPC/Anthropic calls, the deployed Vercel site, the real Neon DB.
+
+**Corrections to protocol Section 0 (its claims, checked).**
+| Protocol claim | Verdict |
+|---|---|
+| Python 3.13, stdlib handler, no framework | VERIFIED |
+| Vercel rewrite to `/api/index`, one daily cron `/api/cron` | VERIFIED (`vercel.json`) |
+| Postgres via `core/db.py`, migrations 001-006 | VERIFIED |
+| Vanilla JS, strict CSP, PWA | VERIFIED |
+| Three agents in `agents/` | VERIFIED; inventory in section 2 |
+| No AI running (`SCOUT_CLIENT = None`) | VERIFIED in code (`dashboard/app.py:44`). Whether prod has an API key set is NOT VERIFIED |
+| 236 tests | VERIFIED, all pass |
+| Sibling repos (BuildFlow, Agriloop, mq5, Kadeform, NF-Fragrance) | NOT VERIFIED; out of scope for this repo |
+| `status.mode` hard-coded "MOCK" (older audit) | OUTDATED: now `LIVE`/`LOCAL`; only the sidebar default text and a docstring say MOCK |
 
 ## 1. CURRENT ARCHITECTURE
 
@@ -110,7 +128,7 @@ Keep these almost as-is: `core/auth/owner_login.py` (scrypt + TOTP + recovery + 
 5. Migrations have no runner, version table or rollback.
 6. Stale/contradictory docs (§1); dead `app.js`; football theming; README says SQLite and "Phase 1".
 7. Cron is daily only; Scout's 6-hour gate can't fire more often than the cron; no unattended finer loop exists.
-8. Tests (236 per REPORTED count) need a throwaway Postgres: `TEST_DATABASE_URL` is unset and no server is running here, so **NOT RUN**. No CI to run them.
+8. Tests pass (236/236, VERIFIED) but only against a Postgres the developer supplies via `TEST_DATABASE_URL`; there is no CI, so nothing runs them automatically.
 9. Operator drafts are static templates with `[OWNER TO FILL]` holes.
 10. 4 KB body cap blocks uploads/long payloads; Vercel body ceiling ≈4.5 MB.
 11. Secrets were pasted into chat in earlier sessions (REPORTED): PayPal live secret, Gmail client secret + refresh token, sandbox keys. Rotation outstanding.
@@ -150,9 +168,9 @@ Auth, audit log, kill switch, budget cap, queue, notifications, events, policy *
 
 | # | Risk | Severity |
 |---|---|---|
-| 1 | Protocol file missing; rules unknown | High, blocks Phase 1 |
+| 1 | (resolved) Protocol file found and merged | - |
 | 2 | Refactoring `agents` CHECK / FKs on a live Neon DB with no migration runner, no rollback, backups unverified | High |
-| 3 | Tests can't run here or in CI; 236 tests unverified this session; refactors would be blind | High |
+| 3 | No CI: the green baseline only holds while someone runs it by hand with a local Postgres | Medium |
 | 4 | Gmail refresh token lapses ~2 Nov → outreach silently stops | High, near-term |
 | 5 | Leaked secrets from earlier chats still valid | High |
 | 6 | Spend: AI enabled with a single global cap; no per-module budget | Medium |
@@ -186,12 +204,15 @@ Principles:
 
 Suggested module order: BuildFlow, Agriloop, Fashion, Trading. This matches the brief.
 
-## 12. DECISIONS NEEDED FROM THE OWNER
+## 12. OPEN FOUNDER DECISIONS (none block Phase 1)
 
-- D1. Provide `/docs/FOUNDER_OS_BUILD_PROTOCOL.md` (missing).
-- D2. Which repo is the fashion brand?
-- D3. Keep EVM/Treasury code for trading, or remove?
-- D4. Set `ANTHROPIC_API_KEY` and `LLM_PRICE_*`; confirm the $80/month cap.
-- D5. Provide a throwaway Postgres (`TEST_DATABASE_URL`) or approve CI to run the suite.
-- D6. Are module repos (BuildFlow, Agriloop) to be integrated by API, or merged here?
-- D7. Rotate leaked credentials and fix the Gmail token before ~2 Nov.
+Phase 1 can proceed on safe defaults; each default is listed so no one has to re-answer.
+
+| # | Question | Default Phase 1 will use |
+|---|---|---|
+| D2 | Which repo is the fashion brand? | Create the `fashion` business context empty; build nothing against a repo until confirmed (protocol Phase 5) |
+| D3 | Keep EVM Treasury code? | Keep it untouched and dormant; revisit in Phase 6/11 |
+| D4 | `ANTHROPIC_API_KEY`, pricing vars, $80 cap | Build routing/usage logging with AI disabled; the existing budget guard stays |
+| D5 | CI / test database | Use a local throwaway Postgres as done here |
+| D6 | Integrate sibling product repos by API or merge? | Treat them as external; Phase 3/4 decide |
+| D7 | Rotate leaked credentials; Gmail 7-day token (~2 Nov) | Out of scope for Phase 1; flagged as owner action, not touched |
