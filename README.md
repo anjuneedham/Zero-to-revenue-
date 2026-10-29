@@ -1,7 +1,7 @@
 # Founder OS
 
 Founder OS (formerly the "Zero-to-Revenue Agent System"; the GitHub repo keeps its old name) runs four businesses (BuildFlow, Agriloop, fashion, trading) from one owner-only control room, plus the 60-day challenge pipeline.
-Pages: Founder, Challenge, BuildFlow, Agriloop, Fashion, Trading, Ventures, Lab, Growth, Overview, Scout, Operator, Treasury, Game plan.
+Pages: Founder, Challenge, BuildFlow, Agriloop, Fashion, Trading, Lab, Growth, Overview, Scout, Operator, Treasury, Game plan.
 
 Three cooperating agents — **Scout** (find opportunities), **Operator** (do the
 work), **Treasury** (read-only accounting) — starting from **$0 capital**.

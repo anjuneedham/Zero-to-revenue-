@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, ai, challenge, founder, founder_dashboard, ingest, rates, scheduler, ventures, weekly, workspace
+from core import actions, ai, challenge, founder, founder_dashboard, ingest, rates, scheduler, weekly, workspace
 from dashboard import api_data, founder_api, growth_api, lab_api
 from dashboard.mcp import handle_mcp
 from core import db
@@ -103,29 +103,6 @@ def _fields(body: bytes, *names):
             raise ValueError("bad field")
         out.append(v)
     return out
-
-
-def _ventures_route(method, path, body, conn, owner):
-    """Venture workspace: tasks, decisions, experiments."""
-    if method == "GET" and path == "/api/ventures":
-        return ventures.overview(conn)
-    data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
-    if method != "POST" or not isinstance(data, dict):
-        raise ValueError("bad request")
-    s = lambda k: str(data.get(k, "") or "")
-    if path == "/api/ventures/task":
-        return ventures.add_task(conn, owner, s("venture_id"), s("title"), s("priority") or "normal", s("due_date"), s("notes"))
-    if path == "/api/ventures/task/status":
-        return ventures.set_task_status(conn, owner, s("id"), s("status"))
-    if path == "/api/ventures/decision":
-        return ventures.add_decision(conn, owner, s("venture_id"), s("title"), s("context"))
-    if path == "/api/ventures/decision/decide":
-        return ventures.decide(conn, owner, s("id"), s("decision"), s("status") or "decided")
-    if path == "/api/ventures/experiment":
-        return ventures.add_experiment(conn, owner, s("venture_id"), s("hypothesis"), s("metric"))
-    if path == "/api/ventures/experiment/close":
-        return ventures.close_experiment(conn, owner, s("id"), s("status"), s("result"))
-    raise ValueError("bad request")
 
 
 def _challenge_route(method, path, body, conn, owner):
@@ -350,13 +327,6 @@ def handle(method, path, authz, conn, body: bytes = b""):
                 raise ValueError("bad request")
             return _json(200, outreach.send_outreach_batch(conn, owner, ids))
         except (ValueError, json.JSONDecodeError):
-            return _json(400, {"error": "bad request"})
-    if path.startswith("/api/ventures"):
-        try:
-            return _json(200, _ventures_route(method, path, body, conn, owner))
-        except ventures.VentureError as e:
-            return _json(400, {"error": str(e)})
-        except (ValueError, json.JSONDecodeError, AttributeError, TypeError):
             return _json(400, {"error": "bad request"})
     if path.startswith("/api/challenge"):
         try:

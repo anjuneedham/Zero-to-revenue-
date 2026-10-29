@@ -10,7 +10,7 @@ consolidated tree.
 | **A. Founder OS Phases 1-9** | `ccr-3cc67fe7` | `core/founder*`, `workspace`, `ai`, `growth`, `prompt_lab`, `knowledge`; pages Founder, BuildFlow, Agriloop, Fashion, Trading, Lab, Growth | 007_a_retire_early_dashboard_schema, 007_founder_os_core, 008_founder_dashboard, 009-015 |
 | **B. Phase 10 challenge OS (what production runs)** | `ccr-42941a77` | `core/challenge`, `ingest`, `weekly`, `ventures`, `agents/operator/pitches`; pages Challenge, Ventures | 007_challenge, 008_ventures |
 
-Both were merged here (B first, then A), plus the progress bar, master-plan docs, venture docs, BuildFlow content engine and the
+Both were merged here (B first, then A); the Phase 10 **Ventures** page was then removed as redundant (see finding 3), plus the progress bar, master-plan docs, venture docs, BuildFlow content engine and the
 World Builders site. 433 tests pass on real Postgres. All 14 pages load in Chromium at desktop and phone width with no JS or API errors.
 
 ## Branch-by-branch
@@ -27,7 +27,7 @@ World Builders site. 433 tests pass on real Postgres. All 14 pages load in Chrom
 | `ccr-134f546c` | first Ventures migration (`007_ventures`) and API | superseded by B's `008_ventures`, not merged |
 | `ccr-b2711e77`, `ccr-cf790779` | FOUNDER_OS_BUILD_PROTOCOL, PHASE_0_AUDIT | already in A |
 | `claude/buildflow-content-dashboard` | partner playbook page, week-1 content data | imported to `docs/buildflow-content/` |
-| `ccr-eb9fdb8a`, `ccr-8661f91e`, `claude/world-builders-landing` | World Builders PHP site + static landing | imported to `sites/world-builders/` (separate from the OS) |
+| `ccr-eb9fdb8a`, `ccr-8661f91e`, `claude/world-builders-landing` | World Builders PHP site + static landing | imported to `sites/world-builders/`. World Builders Construction is the agency's last client job and a side project; it is not an OS venture and nothing in the app depends on it |
 | `claude/token-usage-optimization` | CLAUDE.md / STATE.md "one task per session" rules, MASTER_PLAN checklist | **not merged** (that session method was abandoned; its MASTER_PLAN would overwrite the imported one) |
 
 ## Findings
@@ -39,10 +39,12 @@ World Builders site. 433 tests pass on real Postgres. All 14 pages load in Chrom
    (`015_experiments_growth` vs `015_experiment_growth`). They cannot both apply. This tree keeps A's. If a preview of
    `phase-9-experiments` ever ran on Neon, `015_experiment_growth` will fail with DuplicateColumn: check `schema_migrations`
    before deploying (see "Before you deploy").
-3. **Overlap, not yet consolidated:** `ventures` / `venture_tasks` / `venture_decisions` / `venture_experiments` (B) and
-   `businesses` / `work_tasks` / `decisions` / `experiments` (A) model the same thing, and there are two pages (Ventures, Founder
-   workspaces). Both work; neither was dropped because production may hold rows in B's tables. Recommended: make A the source of
-   truth, copy B's rows across in a new migration, then retire the Ventures page.
+3. **Ventures removed (owner decision, 29 Oct).** The Ventures page, `/api/ventures/*`, `core/ventures.py`, its tests and migration
+   `008_ventures.sql` are deleted; the Founder workspaces (`businesses`, `work_tasks`, `decisions`, `experiments`) are the single
+   source of truth. Production already applied 008, so its four tables (`ventures`, `venture_tasks`, `venture_decisions`,
+   `venture_experiments`) still exist there, now unused. Check they are empty, then drop them by hand:
+   `DROP TABLE venture_experiments, venture_decisions, venture_tasks, ventures;` and
+   `DELETE FROM schema_migrations WHERE name='008_ventures.sql';`. Fresh databases never create them.
 4. **Bugs fixed in this pass:** `Z.none()` was never defined, so Lab, Growth and parts of Agriloop showed "Could not load this page"
    (now `Z.empty`); the phone tab bar wrapped to two rows with 10 tabs (now one scrollable row); status mode was hardcoded `MOCK`
    (now LIVE/LOCAL; B had the same fix); product name was still Zero-to-Revenue in UI, PWA, MCP, auth issuer and reports.
@@ -59,4 +61,4 @@ World Builders site. 433 tests pass on real Postgres. All 14 pages load in Chrom
 Gmail token; `ANTHROPIC_API_KEY` + LLM budget/price vars; AgriLoop live data source; BuildFlow Storage/billing/legal; fashion brand
 name/plan/repo (A's Fashion page exists, data is empty); rotate secrets pasted into chats; Scout gig features (keep or remove);
 no CI; Twilio is record-only. The brief's remaining checklist (single design language, one nav, one source of truth per domain)
-is partly done: items 3 above and the 14-item nav are the main leftovers.
+is mostly done; the 13-item nav is the main leftover.
