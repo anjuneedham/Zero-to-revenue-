@@ -1,7 +1,7 @@
 (function () {
   const { el, add, pill, btn, card, fmt } = Z;
   let tab = "bf", data = null, ticks = {}, who = "ALL";
-  const TABS = [["week", "This week"], ["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
+  const TABS = [["week", "This week"], ["bf", "BuildFlow launch"], ["acq", "First 5 users"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
   const WHO = { owner: ["You", "gold"], agent: ["Agent", "royal"], both: ["Both", ""] };
   const CAT = { buildflow: ["BuildFlow", "gold"], jobs: ["Jobs", "ok"], study: ["Study", "royal"], improve: ["Improve", ""] };
 
@@ -65,6 +65,20 @@
     bf(redraw) {
       const c = card("BuildFlow: path to launch", "Read from the BuildFlow repo on 25 Oct. Verdict in its own report: not ready, with one owner-side blocker (Storage).");
       c.append(el("p", "sub", "BuildFlow is live in beta at buildflow-app-beta.vercel.app: customer and project management for contractors, a public profile where customers find them, $50/month with a 14-day trial. The code is in good shape; launch is blocked by setup only you can do, and by billing, which is not built yet."), list(data.buildflow, redraw)); return c;
+    },
+    acq(redraw) {
+      const a = data.acquire;
+      const c = card("First 5 users at $10", "Research note: the next main focus. Faceless, repeatable short videos that give value for a comment and ask for a setup call.");
+      c.append(el("p", "sub", a.goal), el("p", "sub", a.thesis));
+      c.append(el("h2", null, "The 6-beat storyboard (every video)"), table(["Beat", "What goes on screen"], a.beats));
+      c.append(el("h2", null, "No-camera formats"), table(["Format", "How it works"], a.formats));
+      c.append(el("h2", null, "What we give away"), table(["Offer", "Why"], a.offers));
+      c.append(el("h2", null, "Funnel to track"), table(["Stage", "Action", "Note"], a.funnel));
+      c.append(el("h2", null, "The 10-day test"), el("p", "sub", a.experiment));
+      c.append(el("h2", null, "Risks and conflicts"), ...a.risks.map(r => el("p", "sub", "• " + r)));
+      c.append(el("h2", null, "Open questions"), ...a.open.map(r => el("p", "sub", "• " + r)));
+      c.append(el("h2", null, "Actions"), list(a.tasks, redraw));
+      return c;
     },
     sys(redraw) { const c = card("Zero-to-Revenue: your checklist", "Setup that only you can do."); c.append(list(data.system, redraw)); return c; },
     sources(redraw) {
