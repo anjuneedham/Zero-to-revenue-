@@ -13,7 +13,7 @@ from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
 from core import actions, ai, founder, founder_dashboard, rates, scheduler, workspace
-from dashboard import api_data, founder_api, lab_api
+from dashboard import api_data, founder_api, growth_api, lab_api
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
@@ -175,6 +175,9 @@ def handle(method, path, authz, conn, body: bytes = b""):
     lab = lab_api.handle(conn, owner, method, path, body)
     if lab:
         return lab
+    gr = growth_api.handle(conn, owner, method, path, body)
+    if gr:
+        return gr
     fo = founder_api.handle(conn, owner, method, path, body)
     if fo:
         return fo

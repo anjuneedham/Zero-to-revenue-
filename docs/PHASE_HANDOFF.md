@@ -2,6 +2,82 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 9: Experiment and Growth Engine. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Everything deterministic is built and tested (384 tests, 17 new). No model is involved in this phase, so there is nothing model-dependent to mark NOT TESTED; the standing gap remains that **no real model call has ever been executed**. Migration 015 is applied only to throwaway local Postgres, not to Neon. The UI got a smoke test, not a full click-through.
+**Branch:** `ccr-3cc67fe7-xchnwe`, fast-forwarded to the Phase 8 head `9b907a7` (`ccr-edf0723c-id0y6l`) and extended. See "Push" below.
+
+### Objective
+Structured experiments and growth tracking per business: hypothesis, metric, duration, result and decision records; a lifecycle; funnels from real data; learnings written back to knowledge. Out of scope and not built: running experiments automatically, cross-business synthesis (Phase 11), automation (Phase 10).
+
+### Design (verify these first)
+- **Lifecycle in code, not in CRUD.** `proposed -> running -> succeeded | failed`, or `abandoned` from proposed/running (`core/growth.py`). The generic CRUD now **locks** `status`, `result`, `learnings` on experiments (new `locked` spec key, create forces `proposed`). A concluded experiment cannot be re-concluded or restarted.
+- **Start** needs a success metric (text or linked KPI) and `duration_days`. If a KPI is linked and no baseline was entered, the baseline is the KPI's *recorded* current value, or stays null (never 0). Overdue = running past `started_at + duration_days`; it is **flagged only**, never auto-concluded.
+- **Conclude** (founder-triggered, one transaction): needs outcome (succeeded/failed), result text, learnings text, decision (adopt/iterate/stop). Writes a `decisions` row (status decided) and a business-scoped `knowledge` note, plus one `evidence` row on that note: label **`assumed`** unless the founder supplies a `source_id` from the same business, then `verified`. An experiment's own result never makes a claim verified; the note says it is the founder's observation. `result_value` is the entered value, else the linked KPI's current value (`result_source` = `entered`/`kpi`), else null.
+- **Funnels** (`GET /api/growth/<slug>`) are computed from existing rows: content (idea->scripted->filmed->posted, then summed views/signups only from posts where entered, with coverage counts), marketplace parties per role, transactions, shop campaign and sales totals. A business with no rows has no funnels. Conversion shown only when a previous step has a count. Dropped/churned/cancelled are reported separately.
+- **KPI trends** from `kpi_readings` (last 12); change needs 2+ readings.
+- Everything is business-scoped; experiment `metric_kpi_id`/`goal_id` must belong to the same business.
+
+### Work completed
+- Migration `015_experiment_growth.sql` (additive: `metric_kpi_id`, `duration_days` 1-365, `result_value`, `result_source`, `decision`, `decision_rationale`, `decision_id`, `knowledge_id`, index), rollback `database/rollback/015_experiment_growth_down.sql`.
+- `core/growth.py`, `dashboard/growth_api.py`, edits to `core/founder.py` (experiment spec, `locked`), `dashboard/app.py`.
+- API (owner auth): `GET /api/growth/<slug>`, `POST /api/growth/experiments/<id>/start|conclude|abandon`; create/edit experiments through the CRUD API as before (without status).
+- UI: new **Growth** page (`dashboard/static/js/growth.js`, nav "Growth", service-worker cache `z2r-shell-v11`): experiment list with start/conclude/abandon/setup, overdue warning, funnels, KPI trends. The Founder "Add an experiment" form lost its Status field (it is always proposed) and gained Duration.
+
+### Files
+- Created: `core/growth.py`, `dashboard/growth_api.py`, `dashboard/static/js/growth.js`, `database/migrations/015_experiment_growth.sql`, `database/rollback/015_experiment_growth_down.sql`, `tests/unit/test_growth.py`.
+- Modified: `core/founder.py`, `dashboard/app.py`, `dashboard/pages/index.html`, `dashboard/static/js/main.js`, `dashboard/static/js/founder.js`, `dashboard/static/sw.js`, docs.
+- Removed: none.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| `python3 -m unittest discover -s tests -t .` before changes (local Postgres 16) | 367 OK | PASS |
+| same command after changes | **384 OK** (17 new in `tests/unit/test_growth.py`: status locked in CRUD, start preconditions, KPI baseline snapshot and null when unrecorded, cross-business KPI rejected, conclude validation leaves no partial writes, decision + assumed learning written once, source must be same business and makes it verified, KPI/entered/null result value, abandon, overdue flagged not concluded, 404/401, empty funnels, content funnel counts and coverage, per-role/business-scoped marketplace funnels, shop totals, KPI change needs 2 readings, migration columns and CHECK) | PASS |
+| Browser smoke on a throwaway local DB, 390 px, `AUTH_DISABLED=1`: Growth page renders experiment and content funnel, Conclude dialog opens (6 fields), no horizontal scroll, no JS errors | | PASS (partial: dialogs not submitted through the UI, desktop/tablet not exercised) |
+| Migration 015 on Neon, any preview/production URL | not applied, not opened | NOT TESTED |
+
+### Acceptance criteria
+- Hypothesis, metric, duration, result, decision records: PASS
+- Lifecycle enforced: PASS
+- Funnels from real data (no fabricated numbers): PASS (limited to what Phases 3-5 record; no web/analytics integration, so BuildFlow has no traffic source beyond hand-entered content metrics)
+- Learnings written back to knowledge with honest labels: PASS
+- UI: PARTIAL (smoke only, no accessibility pass)
+
+### Known issues and technical debt
+- Experiments created before this phase have no duration; they can be edited then started, but a previously "running" row (set through the old CRUD) has no `started_at`, so it shows no review date.
+- No statistical significance is computed; success/failure is the founder's call. Funnel step ratios across unlike units (content stage vs. views) are labelled, not computed.
+- Learning evidence cannot be edited from the Growth page; use Lab to verify it with a source.
+- `decisions`/`knowledge` rows created on conclude are not linked back in their own tables (only `experiments.decision_id/knowledge_id`).
+- Migrations 007_a, 007, 008-015 are all unapplied on production Neon.
+
+### Decisions and assumptions
+- Conclusion is a deliberate founder action; there is no scheduler (Phase 10) and no model suggestion of winners.
+- Learnings default to `assumed`: one experiment is a single observation.
+- Funnels are derived at read time, not stored, so they can never drift from the underlying rows.
+
+### Unfinished work
+- Experiment templates, sample-size guidance, per-experiment KPI reading series, linking evidence to analytics exports.
+- Command Center awareness of running experiments (not wired).
+
+### Push
+Work is committed on `ccr-3cc67fe7-xchnwe`. The handoff warned that a push can trigger a Vercel preview; the build alone does not touch Neon (the first API request does). Do not open the preview URL until the Neon backup is done.
+
+### Next phase
+Phase 10: Automation Engine, **not started**. Same pre-requisite: founder Neon backup + "apply to Neon" (migrations 007_a, 007, 008-015).
+
+### Ready-to-paste next-chat instruction
+```
+Repo: anjuneedham/Zero-to-revenue- (attach with add_repo, push access). Phases 0-9 live on branch ccr-3cc67fe7-xchnwe (check the latest commit with git log; Phase 9 head). They are NOT on the default branch. Check that branch out, then work on it or a new branch from it. Pushes may auto-deploy a Vercel preview against the shared Neon database: never open a preview/production URL until I say the Neon backup is done.
+Read, in order: docs/CONTINUE_FROM_HERE.md, docs/FOUNDER_OS_BUILD_PROTOCOL.md, docs/PHASE_HANDOFF.md (Phase 9 entry first), docs/FOUNDER_OS_ARCHITECTURE.md. The correct test baseline after Phase 9 is 384.
+Verify first: start local Postgres 16 per the recipe in CONTINUE_FROM_HERE.md; check pip install "psycopg[binary]>=3.2" --break-system-packages works (if PyPI is blocked, stop and tell me); run python3 -m unittest discover -s tests -t . (expect 384 OK; takes ~2 minutes, run it in the background); inspect core/orchestrator, core/growth.py, core/founder.py (automations entity, locked/force keys), core/ai.py and the existing queue/scheduler/kill switch.
+Implement only Phase 10: Automation Engine (protocol section 9): scheduled and triggered workflows on the existing queue/scheduler; approval gates, dry-run mode, kill-switch integration, audit logging, retries/idempotency, failure notifications. Out of scope: unapproved external communication; any live-trading automation. Do not start Phase 11.
+ANTHROPIC_API_KEY may still be missing: do not claim any model call works unless it was executed; mark model-dependent items NOT TESTED.
+Finish by updating docs/PHASE_HANDOFF.md (Phase 10 entry on top, honest PASS/PARTIAL/NOT TESTED, ready-to-paste Phase 11 block) and docs/CONTINUE_FROM_HERE.md, then stop.
+```
+
+---
+
 ## Phase 8: Prompt Lab, Research, and Knowledge. Completed 2026-10-29
 
 **Overall status: PARTIAL.** Everything deterministic is built and tested (367 tests, 19 new). **No real model call has ever been executed** (no `ANTHROPIC_API_KEY`/`LLM_*` here), so every model-dependent path is NOT TESTED against the real API. Migration 014 is applied only to throwaway local Postgres, not to Neon. The UI got a render/search smoke test, not a full click-through.

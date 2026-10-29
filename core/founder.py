@@ -56,8 +56,10 @@ ENTITIES = {
     "kpis": dict(prefix="kpi", business="required", required=("name",), order="name ASC",
                  cols={"name": (T, None), "unit": (T, None), "target_value": (N, None), "current_value": (N, None),
                        "direction": (T, ("up", "down")), "baseline_value": (N, None), "is_primary": (B, None), "period": (T, None)}),
-    "experiments": dict(prefix="exp", business="required", required=("hypothesis",), order="created_at DESC", parents={"goal_id": "goals"},
-                        cols={"hypothesis": (T, None), "method": (T, None), "success_metric": (T, None), "result": (T, None),
+    "experiments": dict(prefix="exp", business="required", required=("hypothesis",), order="created_at DESC", parents={"goal_id": "goals", "metric_kpi_id": "kpis"},
+                        # Phase 9: status/result/learnings move only through core/growth.py (start, conclude, abandon).
+                        locked=("status", "result", "learnings"), force={"status": "proposed"},
+                        cols={"metric_kpi_id": (T, None), "duration_days": (I, None), "hypothesis": (T, None), "method": (T, None), "success_metric": (T, None), "result": (T, None),
                               "learnings": (T, None), "goal_id": (T, None), "status": (T, STATUSES["experiments"]), "baseline_value": (N, None),
                               "target_value": (N, None), "review_date": (T, None), "next_action": (T, None)}),
     "blockers": dict(prefix="blk", business="required", required=("description",), order="created_at ASC", parents={"work_task_id": "work_tasks"},
@@ -244,9 +246,16 @@ def _check_evidence(values):
         raise FounderError("verified evidence needs a source; otherwise label it assumed or unknown")
 
 
+def _check_locked(spec, values):
+    bad = [c for c in spec.get("locked", ()) if c in values]
+    if bad:
+        raise FounderError(", ".join(bad) + ": cannot be set directly (use the experiment start / conclude / abandon actions)")
+
+
 def create(conn, entity, data, actor):
     spec = ENTITIES[entity]
     values = _clean(entity, data, partial=False)
+    _check_locked(spec, values)
     values.update(spec.get("force", {}))
     if entity == "evidence":
         _check_evidence(values)
@@ -288,6 +297,7 @@ def update(conn, entity, rid, data, actor):
     values = _clean(entity, data, partial=True)
     if not values:
         raise FounderError("nothing to update")
+    _check_locked(spec, values)
     if spec.get("update_only") and set(values) - set(spec["update_only"]):
         raise FounderError("only these fields can be edited: " + ", ".join(spec["update_only"]) + " (create a new version instead)")
     row = conn.execute(f"SELECT * FROM {entity} WHERE id=?", (rid,)).fetchone()

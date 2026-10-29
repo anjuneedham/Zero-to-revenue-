@@ -33,8 +33,8 @@
     reading: { title: "Record a KPI value", fields: () => [
       ["kpi_id", "KPI", "select", (D.kpis || []).map(k => [k.id, k.business_name + ": " + k.name + (k.unit ? " (" + k.unit + ")" : "")]), true], ["value", "Current value", "num", null, true]] },
     experiment: { title: "Add an experiment", entity: "experiments", fields: () => [
-      ["business", "Business", "select", bizOpts(), true], ["hypothesis", "Hypothesis", "text", null, true], ["status", "Status", "select", [["proposed", "Proposed"], ["running", "Running"]]],
-      ["success_metric", "Primary success metric", "text"], ["baseline_value", "Baseline (optional)", "num"], ["target_value", "Target (optional)", "num"],
+      ["business", "Business", "select", bizOpts(), true], ["hypothesis", "Hypothesis", "text", null, true],
+      ["success_metric", "Primary success metric", "text"], ["duration_days", "Duration in days (needed to start)", "int"], ["baseline_value", "Baseline (optional)", "num"], ["target_value", "Target (optional)", "num"],
       ["review_date", "Review date", "date"], ["next_action", "Next action", "text"]] },
     decision: { title: "Record a decision", entity: "decisions", fields: () => [
       ["business", "Business", "select", bizOpts(), true], ["title", "Decision", "text", null, true], ["rationale", "Rationale / evidence", "text"],
