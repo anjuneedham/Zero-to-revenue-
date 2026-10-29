@@ -1,9 +1,12 @@
-# Zero-to-Revenue Agent System
+# Founder OS
+
+Founder OS (formerly the "Zero-to-Revenue Agent System"; the GitHub repo keeps its old name) runs four businesses (BuildFlow, Agriloop, fashion, trading) from one owner-only control room, plus the 60-day challenge pipeline.
+Pages: Founder, Challenge, BuildFlow, Agriloop, Fashion, Trading, Ventures, Lab, Growth, Overview, Scout, Operator, Treasury, Game plan.
 
 Three cooperating agents — **Scout** (find opportunities), **Operator** (do the
 work), **Treasury** (read-only accounting) — starting from **$0 capital**.
 
-This is not a trading bot. No profit is assumed and nothing is "live" yet.
+This is not a trading bot. No profit is assumed; only Treasury-verified payments count as revenue.
 
 ## Current status: Phase 10 — 60-day challenge OS (`LIVE` on Vercel, `LOCAL` otherwise)
 - Challenge (1 Nov - 31 Dec 2026, $10k verified cash, annual plan + 2 months free + 1:1 onboarding for BuildFlow and AgriLoop): [docs/runbooks/CHALLENGE.md](docs/runbooks/CHALLENGE.md)
