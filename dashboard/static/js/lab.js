@@ -66,16 +66,16 @@
     root.append(top);
     if (found) {
       const c = card("Search results", found.error || (found.scope + " · words: " + (found.query_terms || []).join(", ")));
-      if (!found.error && !found.results.length) c.append(Z.none("Nothing matched"));
+      if (!found.error && !found.results.length) c.append(Z.empty("Nothing matched"));
       (found.results || []).forEach(r => { const it = el("div", "item"); add(it, Z.add(el("div", "meta"), pill(r.kind), pill(r.scope), r.trust ? pill("trust: " + r.trust, LABEL_KIND[r.trust]) : null, r.label ? pill(r.label, LABEL_KIND[r.label]) : null, pill(r.source)), el("p", null, r.title), el("p", "sub", r.excerpt)); c.append(it); });
       if (found.note) c.append(el("p", "sub", found.note));
       root.append(c);
     }
-    if (!K.research.length && !K.knowledge.length) root.append(Z.none("No research or notes yet", "Add research or a note, then attach claims labelled verified, assumed or unknown."));
+    if (!K.research.length && !K.knowledge.length) root.append(Z.empty("No research or notes yet", "Add research or a note, then attach claims labelled verified, assumed or unknown."));
     K.research.forEach(r => entry(root, r, "research_id", "research"));
     K.knowledge.forEach(r => entry(root, r, "knowledge_id", "knowledge"));
     const sc = card("Sources", "Where claims come from. Reliability is your judgement.");
-    if (!K.sources.length) sc.append(Z.none("No sources yet"));
+    if (!K.sources.length) sc.append(Z.empty("No sources yet"));
     K.sources.forEach(s => { const it = el("div", "item"); add(it, Z.add(el("div", "meta"), pill(nice(s.kind)), pill("reliability: " + s.reliability, s.reliability === "high" ? "ok" : s.reliability === "medium" ? "" : "warn")), el("p", null, s.title + (s.publisher ? " · " + s.publisher : "")), s.url ? el("p", "sub", s.url) : null); sc.append(it); });
     root.append(sc);
   }
@@ -112,7 +112,7 @@
     top.append(Z.add(el("div", "row"), btn("New prompt", "gold small", () => newVersion()),
       btn("Register prompts/ai files", "ghost small", async () => { try { const r = await post("/api/lab/prompts/sync"); Z.toast(r.registered.length + " registered, " + r.drift.length + " drift", r.drift.length ? "bad" : "ok"); await Z.rerender(); } catch (x) { Z.toast(x.message, "bad"); } })));
     root.append(top);
-    if (!groups.length) root.append(Z.none("No prompts registered", "Register the Command Center prompt file to bring it under version control."));
+    if (!groups.length) root.append(Z.empty("No prompts registered", "Register the Command Center prompt file to bring it under version control."));
     groups.forEach(g => {
       const c = card(g.name, g.versions[0].purpose || "");
       g.versions.forEach((v, i) => {

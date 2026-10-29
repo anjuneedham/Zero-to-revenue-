@@ -59,7 +59,7 @@
       if (G.overdue.length) top.append(el("p", "err", G.overdue.length + " running experiment(s) are past their duration: conclude or abandon them."));
       top.append(Z.add(el("div", "meta"), ...Object.entries(G.by_status).map(([k, n]) => pill(nice(k) + ": " + n, STATUS_KIND[k]))));
       wrap.append(top);
-      if (!G.experiments.length) wrap.append(Z.none("No experiments yet", "Add one with a clear hypothesis and a number you can check."));
+      if (!G.experiments.length) wrap.append(Z.empty("No experiments yet", "Add one with a clear hypothesis and a number you can check."));
       G.experiments.forEach(e => wrap.append(experiment(e)));
       const fc = card("Funnels", "Computed from rows you have recorded. Unentered numbers are not counted as zero.");
       wrap.append(fc);

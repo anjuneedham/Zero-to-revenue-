@@ -1,0 +1,344 @@
+{
+  "meta": {
+    "project": "BUILDFlow",
+    "version": "1.0",
+    "built": "2026-10-28",
+    "source": "BUILDFlow Content Engine master prompt v1.0",
+    "platforms": ["YouTube Shorts", "Facebook Reels", "Instagram Reels", "TikTok"],
+    "cadence": "2 videos per day: 1 Builder + 1 Consumer, 14 per week",
+    "productStateAsOf": "2026-10-25 (docs/strategy/BUILDFLOW_LAUNCH_PLAN.md)",
+    "productTruth": {
+      "existsInBeta": [
+        "Customer and project management for contractors",
+        "A public contractor profile where customers can find them"
+      ],
+      "inProgressOrPlanned": [
+        "Push notifications for new leads",
+        "In-app or private client messaging (undecided)",
+        "Paid billing and trial enforcement (billing is a stub today)"
+      ],
+      "voiceRule": "Anything not in the first list is said as 'We're building...', 'We're testing...' or 'We're working on...'. Never 'BuildFlow lets you...' for it. Never claim users, revenue, testimonials or statistics we do not have."
+    }
+  },
+  "audiences": {
+    "B": {"name": "Builder", "line": "Contractors who run jobs, workers and customers, mostly through WhatsApp, and want more work."},
+    "C": {"name": "Consumer", "line": "Homeowners and project owners who need work done and can't tell who to trust."}
+  },
+  "hookCategories": [
+    {"key": "Direct target", "examples": ["If you're a contractor managing multiple projects, watch this.", "If you're planning a renovation, don't hire a contractor before watching this.", "If you own a construction company, you need to see this."]},
+    {"key": "Problem", "examples": ["If you're managing your construction projects through WhatsApp, we need to talk.", "If your projects keep getting delayed, this might be why.", "If you have no idea what's happening on your construction project, watch this."]},
+    {"key": "Warning", "examples": ["Don't hire a contractor before asking this.", "Contractors: stop doing this with your projects.", "One mistake can turn a 3-month project into a 6-month project."]},
+    {"key": "Curiosity", "examples": ["There's one thing successful contractors do differently.", "Most people choose contractors the wrong way.", "There's a reason your contractor keeps missing deadlines."]},
+    {"key": "Contrarian", "examples": ["You don't need more customers. You need a better system.", "The cheapest contractor isn't always the cheapest option.", "Your contractor saying 'don't worry' isn't a project management system."]},
+    {"key": "Specific scenario", "examples": ["You have three jobs running at once...", "Your plumber says he's waiting on the electrician...", "The homeowner asks for an update and you're searching through 200 WhatsApp messages..."]}
+  ],
+  "ctas": [
+    {"type": "Follow", "line": "Follow BUILDFlow as we build this."},
+    {"type": "Save", "line": "Save this before your next project."},
+    {"type": "Comment", "line": "Would you use this?"},
+    {"type": "Share", "line": "Send this to a contractor."},
+    {"type": "Discussion", "line": "What's the biggest problem you've had with a contractor?"},
+    {"type": "Build in public", "line": "We're building this. What should we add next?"},
+    {"type": "Product", "line": "Want to see the full workflow? Follow BUILDFlow."}
+  ],
+  "metrics": ["Retention", "Average watch %", "Shares", "Saves", "Comments", "Profile visits", "Follows"],
+  "trackingColumns": ["Platform", "Video ID", "Audience", "Hook", "Topic", "Pillar", "Length", "Views", "Likes", "Comments", "Shares", "Saves", "Profile visits", "Follows", "Avg watch duration", "Avg % watched", "Completion rate", "3-sec retention"],
+  "topicScoring": ["Audience relevance", "Pain intensity", "Curiosity potential", "Visual potential", "BUILDFlow relevance", "Shareability"],
+  "weeklyReport": ["Total videos", "Total views", "Total shares", "Total saves", "Total comments", "Total profile visits", "Total new followers", "Top 5 videos", "Top 3 hooks", "Top 3 topics", "Top builder topic", "Top consumer topic", "Best video length", "Best content format", "Worst performing format", "Key learning", "Next week's tests"],
+  "videos": [
+    {
+      "id": "B-D1", "day": 1, "aud": "B", "theme": "Project management", "pillar": "Project Management", "objective": "Problem identification", "len": 45, "ctaType": "Follow",
+      "hook": "If you're struggling to manage multiple construction projects, watch this.",
+      "curiosity": "Your project info is in five places. There's a better way to structure it.",
+      "payoff": "Customer, tasks, deadlines, updates and progress should all connect.",
+      "connection": "That's the problem we're building BUILDFlow to solve.",
+      "cta": "Follow BUILDFlow as we build it.",
+      "beats": [
+        {"t": "0-3", "visual": "Phone buzzing on a job site: WhatsApp, a call and a calendar alert land at once.", "vo": "If you're struggling to manage multiple construction projects, watch this.", "text": "Managing multiple projects?"},
+        {"t": "3-8", "visual": "Screen recording: scroll WhatsApp chats, a notes app, a paper calendar.", "vo": "Your project information might be scattered across five different places.", "text": "5 places. 1 job."},
+        {"t": "8-15", "visual": "Freeze on a half-typed reply. One beat of black.", "vo": "And that's where things start falling through the cracks. There's a better way to structure the project.", "text": "Where it falls through"},
+        {"t": "15-30", "visual": "Screen recording of the BUILDFlow beta: customer, project, tasks.", "vo": "Customer, tasks, deadlines, updates and progress should all connect.", "text": "One job. One place."},
+        {"t": "30-40", "visual": "Talking head, job site behind you.", "vo": "That's exactly the problem we're building BUILDFlow to solve.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Point to the follow button.", "vo": "Follow BUILDFlow as we build it.", "text": "Follow along"}
+      ],
+      "caption": "Five projects, three workers, one phone full of WhatsApp. We're building BUILDFlow for exactly this.",
+      "tags": "#contractor #construction #projectmanagement #jamaica #buildflow",
+      "variable": "Hook",
+      "hypothesis": "A named scenario ('Five projects. Three workers. Twenty WhatsApp messages...') holds the first 3 seconds better than the generic 'if you're struggling' hook.",
+      "check": "Only show screens that match the current beta."
+    },
+    {
+      "id": "C-D1", "day": 1, "aud": "C", "theme": "Project management", "pillar": "Avoiding Bad Contractors", "objective": "Warn and teach", "len": 35, "ctaType": "Save",
+      "hook": "If you're paying someone to build or renovate your property, don't make this mistake.",
+      "curiosity": "The mistake happens before any work starts.",
+      "payoff": "Get the scope and a date for each phase in writing before work begins.",
+      "connection": "We're building BUILDFlow so the plan and the progress sit in one place you can both see.",
+      "cta": "Save this before your next project.",
+      "beats": [
+        {"t": "0-3", "visual": "POV: standing in a half-built house, bare block walls.", "vo": "If you're paying someone to build or renovate, don't make this mistake.", "text": "Renovating? Read this first."},
+        {"t": "3-8", "visual": "Homeowner scrolling WhatsApp, hunting for what was agreed.", "vo": "A lot of arguments start with 'I thought you said...'", "text": "'I thought you said...'"},
+        {"t": "8-15", "visual": "Notes app with an empty line labelled Scope.", "vo": "The mistake isn't the contractor. It's starting with nothing written down. Here's what to write.", "text": "The mistake is before day 1"},
+        {"t": "15-30", "visual": "Three quick text cards, each ticking on: What work, What's included, Date per phase.", "vo": "What exactly is being done. What is and isn't included. And a date for every phase, not just a finish date.", "text": "Scope. Included. Dates."},
+        {"t": "30-40", "visual": "Phone showing the idea of a shared project view. Label it 'in development'.", "vo": "We're building BUILDFlow so the plan and the progress sit in one place you can both see.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Tap the save icon.", "vo": "Save this before your next project.", "text": "Save it"}
+      ],
+      "caption": "Write it down before the first block is laid. Scope, what's included, and a date for each phase.",
+      "tags": "#renovation #homeowner #construction #contractor #jamaica #buildflow",
+      "variable": "Opening visual",
+      "hypothesis": "A POV shot of an unfinished house stops more homeowners than a talking head.",
+      "check": "Shared project view is not confirmed. Say 'we're building'."
+    },
+    {
+      "id": "B-D2", "day": 2, "aud": "B", "theme": "Trust", "pillar": "Trust & Professionalism", "objective": "Build trust", "len": 40, "ctaType": "Share",
+      "hook": "Want customers to trust your construction company before they meet you?",
+      "curiosity": "Customers decide before the first call. What are they looking at?",
+      "payoff": "Show your work while it is happening: progress photos, before and after, a clear profile.",
+      "connection": "BUILDFlow is in beta with a public contractor profile where customers can find you.",
+      "cta": "Send this to a contractor.",
+      "beats": [
+        {"t": "0-3", "visual": "Homeowner on a phone, scrolling past three contractor pages with no photos.", "vo": "Want customers to trust your company before they meet you?", "text": "Trusted before the first call?"},
+        {"t": "3-8", "visual": "Split screen: a blank page vs a page full of finished jobs.", "vo": "Customers decide fast. They look at what you can show them.", "text": "They're checking you out"},
+        {"t": "8-15", "visual": "Hand holds up one finger.", "vo": "And the thing that builds the most trust isn't the finished photo. I'll show you.", "text": "Not the finished photo"},
+        {"t": "15-30", "visual": "Before / during / after of a tiling or roofing job, quick cuts.", "vo": "It's the middle. Photos while the work is happening show you're organised and nothing is hidden.", "text": "Show the middle"},
+        {"t": "30-40", "visual": "Screen recording of the BUILDFlow beta public profile.", "vo": "BUILDFlow is in beta with a public profile built for exactly this, so customers can find you and see your work.", "text": "Your public profile"},
+        {"t": "CTA", "visual": "Point at camera.", "vo": "Send this to a contractor who needs it.", "text": "Send to a builder"}
+      ],
+      "caption": "Finished photos are expected. Progress photos build trust. Show the middle of the job.",
+      "tags": "#contractor #construction #beforeandafter #jamaica #buildflow",
+      "variable": "Curiosity mechanism",
+      "hypothesis": "Delaying the answer ('not the finished photo') raises average watch % over stating the tip up front.",
+      "check": "Confirm the public profile screens match the live beta."
+    },
+    {
+      "id": "C-D2", "day": 2, "aud": "C", "theme": "Trust", "pillar": "Finding Trustworthy Contractors", "objective": "Teach and build trust", "len": 35, "ctaType": "Comment",
+      "hook": "If you want to know whether a contractor is actually trustworthy, don't just look at their finished photos.",
+      "curiosity": "What should you ask to see instead?",
+      "payoff": "Ask for in-progress photos, a past customer to talk to, and watch how clearly they reply.",
+      "connection": "That's why we're building BUILDFlow around real project history, not just a nice final photo.",
+      "cta": "What's the biggest problem you've had with a contractor?",
+      "beats": [
+        {"t": "0-3", "visual": "A perfect finished kitchen photo. Zoom in slowly.", "vo": "Want to know if a contractor is trustworthy? Don't just look at the finished photos.", "text": "Finished photos prove little"},
+        {"t": "3-8", "visual": "Finger swipes through a contractor's page of only polished photos.", "vo": "Anyone can post their best angle.", "text": "Best angle only"},
+        {"t": "8-15", "visual": "Text card: 3 things to ask for.", "vo": "Here are three things to ask for instead.", "text": "Ask for these 3"},
+        {"t": "15-30", "visual": "Cards tick in: in-progress photos, a past customer to call, how fast and clearly they reply.", "vo": "Photos from the middle of a job. A past customer you can actually speak to. And watch how clearly they answer you.", "text": "Middle photos. Past customer. Clear replies."},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow around real project history so you can see more than the last photo.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Question on screen.", "vo": "What's the biggest problem you've had with a contractor? Tell us below.", "text": "Tell us below"}
+      ],
+      "caption": "A finished photo shows the result. It doesn't show how they got there. Ask for the middle.",
+      "tags": "#homeowner #contractor #renovation #trust #jamaica #buildflow",
+      "variable": "CTA",
+      "hypothesis": "A story-prompt CTA pulls more comments than a follow CTA, and those comments become content ideas.",
+      "check": "'Project history' is a plan. Keep it as 'we're building'."
+    },
+    {
+      "id": "B-D3", "day": 3, "aud": "B", "theme": "Discovery", "pillar": "Getting More Work", "objective": "Start a conversation", "len": 40, "ctaType": "Comment",
+      "hook": "Good contractors don't always struggle because they're bad at construction.",
+      "curiosity": "So why do skilled people still go quiet for weeks?",
+      "payoff": "Nobody can see their work, so nobody can pick them.",
+      "connection": "BUILDFlow is in beta with a public profile so customers can find and look at your work.",
+      "cta": "Would you use this?",
+      "beats": [
+        {"t": "0-3", "visual": "Contractor on a ladder, finishing a clean wall.", "vo": "Good contractors don't always struggle because they're bad at construction.", "text": "Great work. Quiet phone."},
+        {"t": "3-8", "visual": "Same contractor checking a phone with no new messages.", "vo": "They struggle because of something else.", "text": "So what's the problem?"},
+        {"t": "8-15", "visual": "Phone camera roll full of job photos nobody sees.", "vo": "Their best work is sitting in their camera roll, and nobody can see it.", "text": "Camera roll ≠ shopfront"},
+        {"t": "15-30", "visual": "Quick cuts of finished jobs: masonry, painting, roofing.", "vo": "Customers choose who they can see. If they can't see your work, they pick whoever they can.", "text": "People pick who they can see"},
+        {"t": "30-40", "visual": "Screen recording of the BUILDFlow beta public profile.", "vo": "BUILDFlow is in beta with a public profile so customers can find you and look at your work.", "text": "A place for your work"},
+        {"t": "CTA", "visual": "Talking head, question on screen.", "vo": "Would you use this? Tell us why or why not.", "text": "Would you use this?"}
+      ],
+      "caption": "Skill isn't always the problem. Visibility is. Would a profile for your work help you?",
+      "tags": "#contractor #construction #getmorework #jamaica #buildflow",
+      "variable": "Topic",
+      "hypothesis": "Visibility (getting found) pulls stronger comments from builders than organisation topics.",
+      "check": "Confirm profile fields on screen exist today."
+    },
+    {
+      "id": "C-D3", "day": 3, "aud": "C", "theme": "Discovery", "pillar": "Contractor Discovery", "objective": "Create interest", "len": 35, "ctaType": "Save",
+      "hook": "Need a contractor but have no idea who to trust?",
+      "curiosity": "There are three things you can check before you call anyone.",
+      "payoff": "Past work you can see, a clear reply, and a written scope.",
+      "connection": "We're building a place where homeowners can look at contractors and their work in one spot.",
+      "cta": "Save this before your next project.",
+      "beats": [
+        {"t": "0-3", "visual": "Homeowner scrolling through a group chat full of 'does anyone know a good mason?'", "vo": "Need a contractor but have no idea who to trust?", "text": "Who do you trust?"},
+        {"t": "3-8", "visual": "Phone contacts: 'Mason 1', 'Mason new', 'Plumber Mike'.", "vo": "Most of us ask around and hope.", "text": "Ask around and hope"},
+        {"t": "8-15", "visual": "Text card with three blank boxes.", "vo": "Before you call anyone, check these three things.", "text": "3 checks first"},
+        {"t": "15-30", "visual": "Boxes fill: past work you can see, a clear reply, a written scope.", "vo": "Past work you can actually see. A clear reply when you message. And a written scope before any money moves.", "text": "See it. Clear reply. In writing."},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so you can look at contractors and their work in one place.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this for your next project.", "text": "Save it"}
+      ],
+      "caption": "See it, test the reply, get it in writing. Three checks before you pick a contractor.",
+      "tags": "#homeowner #findacontractor #renovation #jamaica #buildflow",
+      "variable": "Presentation style",
+      "hypothesis": "Fast text-card format beats talking head for saves on checklist topics.",
+      "check": "Consumer discovery is a plan. Keep it as 'we're building'."
+    },
+    {
+      "id": "B-D4", "day": 4, "aud": "B", "theme": "Communication", "pillar": "Customer Management", "objective": "Stop the scroll, start a conversation", "len": 35, "ctaType": "Discussion",
+      "hook": "If your construction business runs entirely through WhatsApp, this is for you.",
+      "curiosity": "There's a moment where WhatsApp costs you the job. Do you know when?",
+      "payoff": "The moment is when a customer asks for an update and you have to dig for the answer.",
+      "connection": "We're building BUILDFlow so each customer's project history is in one place, next to the job.",
+      "cta": "What's the biggest problem you've had with a contractor?",
+      "beats": [
+        {"t": "0-3", "visual": "Phone screen: 200 unread WhatsApp messages.", "vo": "If your construction business runs entirely through WhatsApp, this is for you.", "text": "Your business is in WhatsApp?"},
+        {"t": "3-8", "visual": "Customer calls while you're mid-job. Phone ringing on a scaffold.", "vo": "A customer asks for an update while you're on the job.", "text": "'Any update?'"},
+        {"t": "8-15", "visual": "Thumb scrolling endlessly up through old chats.", "vo": "And you're scrolling through 200 messages to find what was agreed.", "text": "200 messages later..."},
+        {"t": "15-30", "visual": "Cut to a clean list of one customer's project history (screen recording or mock).", "vo": "That's when WhatsApp costs you trust. Not because of the app. Because there's no single place for the job.", "text": "No single place"},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so each customer's project history sits in one place, next to the job.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Question on screen.", "vo": "What's the worst WhatsApp mix-up you've had on a job?", "text": "Tell us below"}
+      ],
+      "caption": "WhatsApp is great for talking. It's not a project record. What's your worst mix-up?",
+      "tags": "#contractor #whatsapp #construction #customerservice #jamaica #buildflow",
+      "variable": "Opening visual",
+      "hypothesis": "A real phone-screen of unread chats stops more contractors than a talking head.",
+      "check": "Mark any unreleased screens as mock-ups on screen."
+    },
+    {
+      "id": "C-D4", "day": 4, "aud": "C", "theme": "Communication", "pillar": "Project Management", "objective": "Start a conversation", "len": 30, "ctaType": "Share",
+      "hook": "Your contractor saying 'don't worry, I got it' isn't a project update.",
+      "curiosity": "So what does a real update sound like?",
+      "payoff": "A real update says what's done, what's next, what's blocked, and a date.",
+      "connection": "We're working on BUILDFlow so updates are easy for a contractor to give and easy for you to see.",
+      "cta": "Send this to someone renovating.",
+      "beats": [
+        {"t": "0-3", "visual": "Phone showing the text: 'Don't worry, I got it 👍'.", "vo": "'Don't worry, I got it' isn't a project update.", "text": "That's not an update"},
+        {"t": "3-8", "visual": "Homeowner staring at a wall that looks the same as last week.", "vo": "You still don't know what's done or what's next.", "text": "Same wall. Same week."},
+        {"t": "8-15", "visual": "Text card with four empty lines.", "vo": "A real update has four parts. Most people only get one.", "text": "4 parts"},
+        {"t": "15-30", "visual": "Lines fill: Done. Next. Blocked. Date.", "vo": "What's done. What's next. What's blocking it. And when the next step happens.", "text": "Done. Next. Blocked. Date."},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're working on BUILDFlow so updates are easy for a contractor to give and easy for you to see.", "text": "We're working on this"},
+        {"t": "CTA", "visual": "Point at camera.", "vo": "Send this to someone who's renovating.", "text": "Send it on"}
+      ],
+      "caption": "Done, next, blocked, date. If you're not getting those four, you don't have an update.",
+      "tags": "#homeowner #renovation #contractor #construction #jamaica #buildflow",
+      "variable": "Hook",
+      "hypothesis": "A contrarian hook gets more shares than a how-to hook on the same update topic.",
+      "check": "Updates for clients are not confirmed in the product. Use 'we're working on'."
+    },
+    {
+      "id": "B-D5", "day": 5, "aud": "B", "theme": "Money and delays", "pillar": "Business Operations", "objective": "Teach and create curiosity", "len": 40, "ctaType": "Save",
+      "hook": "Want to know where construction businesses lose money without realizing it?",
+      "curiosity": "It isn't the big costs. It's four small leaks.",
+      "payoff": "Rework, workers waiting, late materials and forgotten follow-ups.",
+      "connection": "We're building BUILDFlow so tasks, deadlines and follow-ups connect to the job.",
+      "cta": "Save this before your next project.",
+      "beats": [
+        {"t": "0-3", "visual": "Workers standing around a site, waiting.", "vo": "Want to know where construction businesses lose money without realizing it?", "text": "Where's the money going?"},
+        {"t": "3-8", "visual": "Close-up of a hand tapping a watch.", "vo": "It's rarely the big costs. It's four small leaks.", "text": "4 small leaks"},
+        {"t": "8-15", "visual": "Quick cut to materials delivery that hasn't arrived.", "vo": "Number one: workers waiting because materials or the next trade aren't ready.", "text": "1. Waiting"},
+        {"t": "15-30", "visual": "Quick cuts for each: redoing a tile job, a missed callback, a late invoice.", "vo": "Two: rework. Three: late materials. Four: a follow-up that never happened.", "text": "2. Rework  3. Late materials  4. Forgotten follow-ups"},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so tasks, deadlines and follow-ups connect to the job instead of living in your head.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this and check your last job against all four.", "text": "Check your last job"}
+      ],
+      "caption": "Four small leaks. Check your last job against all four.",
+      "tags": "#contractor #construction #business #profit #jamaica #buildflow",
+      "variable": "Video length",
+      "hypothesis": "A 25-second cut of the same list beats the 40-second cut on completion rate.",
+      "check": "No statistics. Do not put a dollar figure on screen."
+    },
+    {
+      "id": "C-D5", "day": 5, "aud": "C", "theme": "Money and delays", "pillar": "Avoiding Bad Contractors", "objective": "Warn and stop the scroll", "len": 30, "ctaType": "Share",
+      "hook": "Your construction project being 'a little delayed' can become VERY expensive.",
+      "curiosity": "What should you ask the moment someone says 'a little delay'?",
+      "payoff": "Ask what caused it, what the new date is, and what it changes in the cost.",
+      "connection": "We're building BUILDFlow so delays and new dates are recorded in the project.",
+      "cta": "Send this to someone building.",
+      "beats": [
+        {"t": "0-3", "visual": "Calendar with the finish date crossed out.", "vo": "'A little delayed' can become very expensive.", "text": "'A little delayed'"},
+        {"t": "3-8", "visual": "Homeowner on the phone: 'Just another week.'", "vo": "It's rarely just one week.", "text": "One week becomes three"},
+        {"t": "8-15", "visual": "Three question cards stacked up.", "vo": "The moment you hear 'a little delay', ask three things.", "text": "Ask 3 things"},
+        {"t": "15-30", "visual": "Cards flip: What caused it? What's the new date? Does it change the cost?", "vo": "What caused it. What's the new date. And does it change the cost. Get the answers in writing.", "text": "Cause. New date. Cost."},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so delays and new dates get recorded in the project.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Point at camera.", "vo": "Send this to someone building right now.", "text": "Send it on"}
+      ],
+      "caption": "'A little delay' needs three answers: cause, new date, cost. In writing.",
+      "tags": "#homeowner #renovation #construction #delays #jamaica #buildflow",
+      "variable": "Hook",
+      "hypothesis": "Specific-scenario hooks ('Your contractor says just another week...') beat the warning hook for 3-second retention.",
+      "check": "Delay tracking is a plan. Keep as 'we're building'."
+    },
+    {
+      "id": "B-D6", "day": 6, "aud": "B", "theme": "Checklist", "pillar": "Contractor Education", "objective": "Teach and get saves", "len": 30, "ctaType": "Save",
+      "hook": "Here's the 30-second project management checklist every contractor should have.",
+      "curiosity": "Five checks. Most contractors skip number five.",
+      "payoff": "Customer, scope, who's doing what, deadline, and when the customer last heard from you.",
+      "connection": "We're building BUILDFlow around exactly these five.",
+      "cta": "Save this before your next project.",
+      "beats": [
+        {"t": "0-3", "visual": "Clipboard slammed onto a truck bonnet.", "vo": "Here's the 30-second project management checklist every contractor should have.", "text": "30-second checklist"},
+        {"t": "3-8", "visual": "Hand writes five blank lines.", "vo": "Five checks, and most contractors skip number five.", "text": "5 checks"},
+        {"t": "8-15", "visual": "Lines fill: Customer. Scope. Who's doing what.", "vo": "One, who the customer is. Two, what the scope is. Three, who's doing what.", "text": "1 Customer  2 Scope  3 Who"},
+        {"t": "15-30", "visual": "Lines fill: Deadline. Last update sent.", "vo": "Four, the deadline. And five, when the customer last heard from you.", "text": "4 Deadline  5 Last update"},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow around exactly these five.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this and run your next job through it.", "text": "Save the checklist"}
+      ],
+      "caption": "Five checks for every job. Number five is the one that wins repeat customers.",
+      "tags": "#contractor #checklist #construction #projectmanagement #jamaica #buildflow",
+      "variable": "Product placement",
+      "hypothesis": "Putting the BUILDFlow line at the end of a pure checklist keeps saves high versus mentioning it up front.",
+      "check": "Do not claim the app has all five today unless verified."
+    },
+    {
+      "id": "C-D6", "day": 6, "aud": "C", "theme": "Checklist", "pillar": "Customer Empowerment", "objective": "Teach and get saves", "len": 40, "ctaType": "Save",
+      "hook": "Before you hire a contractor, ask these 5 questions.",
+      "curiosity": "The fourth question is the one most people forget.",
+      "payoff": "Similar jobs you can see, a past customer, written timeline, update rhythm, and what happens if the price changes.",
+      "connection": "We're building BUILDFlow so these answers are easier to see before you hire.",
+      "cta": "Save this before your next project.",
+      "beats": [
+        {"t": "0-3", "visual": "Homeowner and contractor shaking hands. Freeze frame.", "vo": "Before you hire a contractor, ask these five questions.", "text": "Ask these 5"},
+        {"t": "3-8", "visual": "Numbers 1-5 appear down the side.", "vo": "And the fourth one is the question most people forget.", "text": "#4 is the one people skip"},
+        {"t": "8-15", "visual": "Cards tick in for 1 and 2.", "vo": "One, can I see similar jobs? Two, can I speak to a past customer?", "text": "1 Similar jobs  2 Past customer"},
+        {"t": "15-30", "visual": "Cards 3, 4 and 5 tick in; 4 glows.", "vo": "Three, what's the timeline in writing by phase? Four, how and how often will you update me? Five, what happens if the price changes?", "text": "3 Timeline  4 Updates  5 Price change"},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so these answers are easier to see before you hire.", "text": "We're building this"},
+        {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this before your next project.", "text": "Save the 5"}
+      ],
+      "caption": "Five questions. Question four is the one almost nobody asks. Save this.",
+      "tags": "#homeowner #hiringacontractor #renovation #construction #jamaica #buildflow",
+      "variable": "Curiosity mechanism",
+      "hypothesis": "Naming the 'fourth question' up front lifts average watch % over a plain list.",
+      "check": "Consumer discovery is a plan. Keep it as 'we're building'."
+    },
+    {
+      "id": "B-D7", "day": 7, "aud": "B", "theme": "Build in public", "pillar": "BUILDFlow Build-in-Public", "objective": "Build anticipation", "len": 50, "ctaType": "Build in public",
+      "hook": "We're building an app specifically for contractors, and here's what we're trying to fix.",
+      "curiosity": "We're going to show you the messy parts too.",
+      "payoff": "Show the real beta, name what works, and what we're still working on.",
+      "connection": "BUILDFlow is a beta for customer and project management with a public contractor profile. Everything else is in progress.",
+      "cta": "We're building this. What should we add next?",
+      "beats": [
+        {"t": "0-3", "visual": "Talking head, hard cut in on a laptop with the beta open.", "vo": "We're building an app specifically for contractors, and here's what we're trying to fix.", "text": "Building for contractors"},
+        {"t": "3-8", "visual": "Phone full of WhatsApp threads next to a notebook.", "vo": "Jobs scattered across chats, notebooks and memory.", "text": "The problem"},
+        {"t": "8-15", "visual": "Screen recording: creating a customer and a project in the beta.", "vo": "Right now the beta handles customers and projects, and gives you a public profile.", "text": "What exists today (beta)"},
+        {"t": "15-30", "visual": "Whiteboard or notes screen listing what's next.", "vo": "What we're working on next: better lead alerts and how customers and contractors message. We haven't decided that part yet.", "text": "What we're working on"},
+        {"t": "30-40", "visual": "Talking head.", "vo": "We're not going to pretend it's finished. We're going to build it with contractors.", "text": "Built with contractors"},
+        {"t": "CTA", "visual": "Question on screen.", "vo": "We're building this. What should we add next?", "text": "What's missing?"}
+      ],
+      "caption": "Beta today. Honest about what's missing. Tell us what to build next.",
+      "tags": "#buildinpublic #contractor #construction #startup #jamaica #buildflow",
+      "variable": "Presentation style",
+      "hypothesis": "A rough screen recording with honest narration earns more comments than a polished explainer.",
+      "check": "Lead alerts and messaging are not live. Keep 'we're working on'."
+    },
+    {
+      "id": "C-D7", "day": 7, "aud": "C", "theme": "Build in public", "pillar": "BUILDFlow Build-in-Public", "objective": "Build anticipation", "len": 35, "ctaType": "Product",
+      "hook": "What if finding a contractor didn't mean asking everyone you know?",
+      "curiosity": "What would you want to see before you picked someone?",
+      "payoff": "A profile with real work, so you can look before you call.",
+      "connection": "BUILDFlow is in beta with public contractor profiles. We're working on making them easier to browse.",
+      "cta": "Want to see the full workflow? Follow BUILDFlow.",
+      "beats": [
+        {"t": "0-3", "visual": "Homeowner texting 'anyone know a good electrician?' to five different people.", "vo": "What if finding a contractor didn't mean asking everyone you know?", "text": "Ask everyone you know?"},
+        {"t": "3-8", "visual": "Replies roll in: three numbers, one 'try this guy'.", "vo": "You get a few numbers and no way to check any of them.", "text": "A number isn't proof"},
+        {"t": "8-15", "visual": "Screen recording scrolls to a contractor profile in the beta.", "vo": "What would you want to see before you pick someone?", "text": "What would you want to see?"},
+        {"t": "15-30", "visual": "Zoom on profile sections: the work, the trade, the area.", "vo": "Real work they've done, what they do, where they work. So you can look before you call.", "text": "Look before you call"},
+        {"t": "30-40", "visual": "Talking head.", "vo": "BUILDFlow is in beta with public contractor profiles. We're working on making them easier to browse.", "text": "In beta"},
+        {"t": "CTA", "visual": "Point at follow button.", "vo": "Want to see where this goes? Follow BUILDFlow.", "text": "Follow along"}
+      ],
+      "caption": "Asking around works until it doesn't. We're building a way to look first, call second.",
+      "tags": "#homeowner #findacontractor #buildinpublic #construction #jamaica #buildflow",
+      "variable": "Topic",
+      "hypothesis": "Consumer build-in-public pulls more profile visits than a pure education video.",
+      "check": "Match profile sections to what the beta really shows."
+    }
+  ]
+}

@@ -12,6 +12,8 @@ This is not a trading bot. No profit is assumed and nothing is "live" yet.
 - Architecture & plan: [docs/architecture/PHASE0_ARCHITECTURE.md](docs/architecture/PHASE0_ARCHITECTURE.md)
 - Security: [SECURITY.md](SECURITY.md)
 
+Branch map, what was merged, open decisions: [docs/master/CONSOLIDATION.md](docs/master/CONSOLIDATION.md).
+
 ## Run tests
 ```
 TEST_DATABASE_URL=postgresql://... python3 -m unittest discover -s tests -t .  # throwaway Postgres

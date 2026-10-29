@@ -29,7 +29,7 @@
     const L = W.research_lab; if (bad(L)) { root.append(Z.ws.secErr("Strategies")); return; }
     const c = card("Strategies", "Each is judged on the evidence you recorded, shown as what is still missing, never as a score.");
     c.append(Z.add(el("div", "row"), btn("Add strategy", "gold small", async () => Z.formDialog("Add strategy", STRATEGY(), b => post("businesses/trading/trading-strategies", b)))));
-    if (!L.strategies.length) c.append(Z.none("No strategies yet", "Write the hypothesis and your failure conditions BEFORE running any test."));
+    if (!L.strategies.length) c.append(Z.empty("No strategies yet", "Write the hypothesis and your failure conditions BEFORE running any test."));
     root.append(c);
     L.strategies.forEach(st => {
       const e = st.evaluation, sc = card(st.name, [st.instrument, st.hypothesis].filter(Boolean).join(" · "));

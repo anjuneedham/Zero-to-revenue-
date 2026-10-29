@@ -1,0 +1,768 @@
+<title>BUILDFlow Partner Playbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: scrolling pitch deck for two new partners. Orange = Builder lane, blue = Consumer lane, everywhere. */
+:root{
+  --bg:#E6EBEF; --surface:#F5F7F9; --surface2:#DCE3E9; --ink:#0F1A25; --muted:#4F5E6C; --line:#BFC9D2;
+  --bld:#FF6A1A; --bld-ink:#0F1A25; --bld-text:#B03A00; --bld-soft:#FFE3D2;
+  --con:#2F5BEA; --con-ink:#FFFFFF; --con-text:#2143B5; --con-soft:#DCE5FF;
+  --ok:#17803F; --ok-soft:#D4F0DE; --warn-soft:#FFF1C2; --warn:#7A5600;
+  --f-display:'Bricolage Grotesque','Arial Narrow',Arial,sans-serif;
+  --f-body:'DM Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 1px 0 rgba(15,26,37,.06),0 10px 28px -14px rgba(15,26,37,.28);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C131A; --surface:#15212B; --surface2:#1D2C39; --ink:#EAF0F5; --muted:#9AABB9; --line:#2B3B49;
+  --bld:#FF7A33; --bld-ink:#0C131A; --bld-text:#FF9A66; --bld-soft:#3A2417;
+  --con:#6A8EFF; --con-ink:#0C131A; --con-text:#9DB4FF; --con-soft:#1B2747;
+  --ok:#4BCB7C; --ok-soft:#173826; --warn-soft:#3A3014; --warn:#F2C94C;
+  --shadow:0 1px 0 rgba(255,255,255,.04),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C131A; --surface:#15212B; --surface2:#1D2C39; --ink:#EAF0F5; --muted:#9AABB9; --line:#2B3B49;
+  --bld:#FF7A33; --bld-ink:#0C131A; --bld-text:#FF9A66; --bld-soft:#3A2417;
+  --con:#6A8EFF; --con-ink:#0C131A; --con-text:#9DB4FF; --con-soft:#1B2747;
+  --ok:#4BCB7C; --ok-soft:#173826; --warn-soft:#3A3014; --warn:#F2C94C;
+  --shadow:0 1px 0 rgba(255,255,255,.04),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:60}
+h1,h2,h3{font-family:var(--f-display);line-height:1.04;margin:0;text-wrap:balance;letter-spacing:-.02em}
+h2{font-size:clamp(30px,5vw,50px);font-weight:800}
+h3{font-size:20px;font-weight:800;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--con);outline-offset:2px}
+.wrap{max-width:1120px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.muted{color:var(--muted)}
+section{padding-block:72px}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--muted);margin-bottom:14px}
+.lede{font-size:18px;color:var(--muted);max-width:60ch;margin-top:16px}
+.band{background:var(--surface);border-block:1px solid var(--line)}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--surface);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:16px;height:52px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:19px;white-space:nowrap;display:flex;align-items:center;gap:8px;text-decoration:none}
+.brand i{width:14px;height:14px;background:var(--bld);display:inline-block;transform:rotate(45deg)}
+.nav ul{display:flex;gap:4px;list-style:none;margin:0;padding:0;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.nav li a{display:block;padding:6px 12px;border-radius:99px;text-decoration:none;font-size:14px;font-weight:500;color:var(--muted);white-space:nowrap}
+.nav li a:hover{background:var(--surface2);color:var(--ink)}
+.theme{margin-left:auto;border:1px solid var(--line);background:transparent;border-radius:99px;padding:5px 12px;font-size:13px}
+
+/* hero */
+.hero{padding-block:56px 64px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(42px,8vw,92px);font-weight:800}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--bld) 62%,var(--bld) 92%,transparent 92%);padding-inline:2px}
+.hello{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:28px}
+.hello input{background:var(--surface);border:2px solid var(--ink);border-radius:10px;padding:10px 14px;font:inherit;color:var(--ink);width:min(260px,100%)}
+.hello label{font-weight:700}
+.greet{margin-top:12px;font-size:18px;min-height:28px;font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:36px;border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--surface)}
+.stats div{padding:14px 12px;border-right:2px solid var(--ink)}
+.stats div:last-child{border-right:0}
+.stats b{display:block;font-family:var(--f-display);font-size:34px;line-height:1;font-weight:800}
+.stats span{font-size:12px;color:var(--muted)}
+
+/* phone */
+.stage{position:relative;display:grid;place-items:center;min-height:540px}
+.phone{width:min(290px,78vw);aspect-ratio:9/17;background:var(--ink);border-radius:36px;padding:9px;box-shadow:var(--shadow);position:relative;z-index:2;animation:bob 6s ease-in-out infinite}
+.screen{height:100%;border-radius:28px;background:linear-gradient(170deg,#25384A 0%,#0F1A25 70%);position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 54px 18px 16px;gap:12px}
+.screen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 18px,rgba(255,255,255,.035) 18px 19px)}
+.tag{position:absolute;top:16px;left:16px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;font-weight:700;padding:5px 9px;border-radius:99px;background:var(--bld);color:#0F1A25;transition:background .3s}
+.phone[data-aud="C"] .tag{background:var(--con);color:#fff}
+.scan{position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.35);top:0;animation:scan 4.5s linear infinite}
+.hooktext{position:relative;font-family:var(--f-display);font-weight:800;font-size:23px;line-height:1.08;min-height:5.4em;text-wrap:balance}
+.caret{display:inline-block;width:3px;height:1em;background:var(--bld);vertical-align:-.12em;margin-left:2px;animation:blink 1s steps(2) infinite}
+.phone[data-aud="C"] .caret{background:#8FAAFF}
+.rail{position:absolute;right:10px;bottom:70px;display:flex;flex-direction:column;gap:14px}
+.rail span{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center}
+.rail svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rail span:nth-child(1){animation:beat 3s infinite .2s}
+.rail span:nth-child(3){animation:beat 3s infinite 1.1s}
+.rail span:nth-child(4){animation:beat 3s infinite 1.9s}
+.ret{position:relative;height:46px}
+.ret svg{width:100%;height:100%;overflow:visible}
+.ret path{fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;animation:draw 5s ease-out infinite}
+.ret small{position:absolute;left:0;top:-14px;font-family:var(--f-mono);font-size:9px;letter-spacing:.08em;opacity:.7}
+.chip{position:absolute;z-index:3;background:var(--surface);border:2px solid var(--ink);border-radius:14px;padding:8px 12px;font-size:13px;font-weight:700;box-shadow:var(--shadow);opacity:0;animation:floaty 9s infinite}
+.chip.c1{left:0;top:16%;animation-delay:.5s}
+.chip.c2{right:-4px;top:38%;animation-delay:3.5s;background:var(--bld);color:#0F1A25}
+.chip.c3{left:4%;bottom:14%;animation-delay:6.5s;background:var(--con);color:var(--con-ink)}
+
+.tape{overflow:hidden;background:var(--ink);color:var(--bg);padding-block:12px;border-block:2px solid var(--ink)}
+.tape div{display:flex;gap:42px;width:max-content;animation:slide 26s linear infinite;font-family:var(--f-mono);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.tape b{color:var(--bld)}
+
+/* journey */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px;position:relative}
+.steps::before{content:"";position:absolute;left:0;right:0;top:19px;height:4px;background:var(--line);border-radius:4px}
+.steps::after{content:"";position:absolute;left:0;top:19px;height:4px;background:linear-gradient(90deg,var(--bld),var(--con));border-radius:4px;width:100%;transform-origin:left}
+.steps.in::after{animation:grow 2.2s ease-out}
+.step{position:relative;padding-top:48px}
+.step .dot{position:absolute;top:8px;left:0;width:26px;height:26px;border-radius:50%;background:var(--surface);border:4px solid var(--ink);z-index:1}
+.step .when{color:var(--muted);margin-bottom:6px}
+.step p{color:var(--muted);margin-top:8px;font-size:15px}
+
+/* outcome */
+.out-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.out{padding:24px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);min-width:0}
+.out .mono{color:var(--muted);display:block;margin-bottom:10px}
+.out p{color:var(--muted);margin-top:8px}
+.out.big{grid-column:1/-1;background:var(--ink);color:var(--bg);border:0}
+.out.big p,.out.big .mono{color:#B6C3CE}
+.honest{margin-top:16px;padding:18px 20px;border-radius:14px;background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn)}
+.honest b{color:var(--warn)}
+
+/* two audiences */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px}
+.aud{border-radius:20px;padding:26px;min-width:0;border:2px solid var(--ink);position:relative;overflow:hidden}
+.aud.B{background:var(--bld-soft)}
+.aud.C{background:var(--con-soft)}
+.aud h3{font-size:30px}
+.aud .mono{display:block;margin-bottom:10px}
+.aud.B .mono{color:var(--bld-text)} .aud.C .mono{color:var(--con-text)}
+.aud ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.aud li{display:flex;gap:10px;font-size:15px}
+.aud li::before{content:"";flex:none;width:8px;height:8px;margin-top:8px;background:currentColor;transform:rotate(45deg)}
+.aud.B li::before{color:var(--bld-text)} .aud.C li::before{color:var(--con-text)}
+.rule{margin-top:16px;font-family:var(--f-display);font-weight:800;font-size:22px}
+
+/* playbook */
+.anat{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow)}
+.bar{display:flex;gap:3px;height:64px;position:relative}
+.seg{border:0;border-radius:8px;background:var(--surface2);color:var(--ink);font-weight:700;font-size:12px;padding:0 4px;overflow:hidden;position:relative;transition:background .2s,transform .2s;min-width:0}
+.seg:hover{transform:translateY(-3px)}
+.seg.on{background:var(--ink);color:var(--bg)}
+.seg small{display:block;font-family:var(--f-mono);font-weight:500;font-size:10px;opacity:.7}
+.head{position:absolute;top:-8px;bottom:-8px;width:3px;background:var(--bld);border-radius:3px;pointer-events:none;left:0;box-shadow:0 0 0 4px rgba(255,106,26,.18)}
+.seginfo{margin-top:20px;display:grid;grid-template-columns:auto 1fr;gap:6px 20px;align-items:baseline}
+.seginfo .clock{font-family:var(--f-mono);font-size:28px;font-weight:700}
+.seginfo h3{font-size:24px}
+.seginfo p{grid-column:2;color:var(--muted)}
+.ctrl{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:2px solid var(--ink);background:var(--surface);border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.solid{background:var(--ink);color:var(--bg)}
+.lens{display:flex;gap:8px;flex-wrap:wrap}
+.lens .btn{padding:6px 12px;font-size:13px;border-color:var(--line)}
+.lens .btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.lab{margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow);min-width:0}
+.roulette{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,3vw,30px);line-height:1.1;min-height:3.4em;margin:14px 0;text-wrap:balance}
+.roulette.spin{animation:shake .12s linear infinite;color:var(--muted)}
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.cats button{border:1px solid var(--line);background:transparent;border-radius:99px;padding:5px 11px;font-size:13px}
+.cats button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.score-row{display:grid;grid-template-columns:1fr 54px;gap:6px 12px;align-items:center;margin-top:10px;font-size:14px}
+.score-row input{width:100%;accent-color:var(--con);grid-column:1/2}
+.score-row output{font-family:var(--f-mono);font-weight:700;text-align:right}
+.total{margin-top:16px;display:flex;align-items:baseline;gap:8px}
+.total b{font-family:var(--f-display);font-size:56px;line-height:1;font-weight:800}
+.meter{height:10px;background:var(--surface2);border-radius:10px;overflow:hidden;margin-top:8px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--bld),var(--con));width:50%;transition:width .3s}
+
+/* week board */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;font-size:14px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.prog{margin-top:28px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:var(--ink);color:var(--bg);border-radius:20px;padding:20px 24px}
+.ring{width:96px;height:96px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:9}
+.ring .bg{stroke:rgba(255,255,255,.18)} .ring .fg{stroke:var(--bld);stroke-linecap:round;transition:stroke-dashoffset .5s}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-size:26px;font-weight:800}
+.plats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.plats div{font-size:12px}
+.plats .pb{height:7px;background:rgba(255,255,255,.18);border-radius:7px;margin-top:5px;overflow:hidden}
+.plats .pb i{display:block;height:100%;background:var(--bld);width:0;transition:width .4s}
+.days{display:flex;gap:6px;margin-top:28px;overflow-x:auto;padding-bottom:6px}
+.days button{flex:1 0 auto;border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 14px;text-align:left;min-width:96px}
+.days button.on{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.days small{display:block;font-size:11px;opacity:.75;white-space:nowrap}
+.days b{font-family:var(--f-display);font-size:18px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+.vid{border-radius:20px;border:2px solid var(--ink);background:var(--surface);overflow:hidden;min-width:0;animation:rise .45s both}
+.vid:nth-child(2){animation-delay:.08s}
+.vh{padding:14px 18px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.vid.B .vh{background:var(--bld);color:var(--bld-ink)} .vid.C .vh{background:var(--con);color:var(--con-ink)}
+.vb{padding:18px;display:grid;gap:14px}
+.vb .hk{font-family:var(--f-display);font-weight:800;font-size:23px;line-height:1.12;text-wrap:balance}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--muted);font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding-top:2px}
+.kv dd{margin:0;min-width:0}
+.post{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.post label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12.5px;font-weight:500;cursor:pointer;user-select:none;min-width:0;transition:background .2s}
+.post label:has(input:checked){background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.post input{accent-color:var(--ok);width:16px;height:16px;flex:none}
+.story{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:12px}
+.beat{display:grid;grid-template-columns:62px 1fr;gap:4px 12px;font-size:14px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.beat:last-of-type{border-bottom:0}
+.beat .t{font-family:var(--f-mono);font-weight:700;font-size:12px;padding-top:2px}
+.beat p{min-width:0}
+.beat .v{color:var(--muted)}
+.beat .o{font-weight:500}
+.beat .x{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink);background:var(--surface2);display:inline-block;padding:2px 7px;border-radius:5px}
+.copyrow{display:flex;gap:8px;flex-wrap:wrap}
+.tiny{font-size:13px;padding:6px 10px;border-radius:8px}
+
+/* testing */
+.fam-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:24px;align-items:center;margin-top:36px}
+.winner{background:var(--ink);color:var(--bg);border-radius:20px;padding:26px}
+.winner .mono{color:var(--bld)}
+.winner p{font-family:var(--f-display);font-weight:800;font-size:24px;line-height:1.1;margin-top:10px}
+.fam{list-style:none;margin:0;padding:0 0 0 28px;display:grid;gap:8px;position:relative}
+.fam::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:3px;background:var(--line);border-radius:3px}
+.fam li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px;position:relative;font-weight:500}
+.fam li::before{content:"";position:absolute;left:-20px;top:50%;width:20px;height:3px;background:var(--line)}
+.fam.in li{animation:pop .5s backwards;animation-delay:calc(var(--i)*.14s)}
+.ladder{margin:20px 0 0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:l}
+.ladder li{counter-increment:l;display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.ladder li::before{content:counter(l);font-family:var(--f-mono);font-weight:700;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;flex:none}
+.rank{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:6px;counter-reset:r}
+.rank li{counter-increment:r;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;font-weight:500}
+.rank li::before{content:counter(r);font-family:var(--f-mono);font-weight:700;color:var(--muted)}
+.rank li:nth-child(-n+3){font-weight:700}
+.wide{grid-column:span 2}.fam-grid.tight{margin-top:12px;grid-template-columns:.7fr 1.3fr}
+.rules3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+
+/* loop */
+.loop{display:flex;flex-wrap:wrap;gap:8px 6px;align-items:center;margin-top:32px}
+.loop button{border:2px solid var(--line);background:var(--surface);border-radius:99px;padding:9px 16px;font-weight:700;font-size:14px;transition:all .25s}
+.loop button.on{background:var(--bld);border-color:var(--ink);color:var(--bld-ink);transform:scale(1.07)}
+.loop .ar{color:var(--muted);font-family:var(--f-mono)}
+.loopinfo{margin-top:16px;font-size:18px;min-height:56px;max-width:62ch}
+.qs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:28px;padding:0;list-style:none}
+.qs li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px}
+
+/* rules */
+.truth{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px}
+.truth ul{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.truth li{display:flex;gap:10px}
+.truth .yes li::before{content:"✓";color:var(--ok);font-weight:800}
+.truth .soon li::before{content:"→";color:var(--warn);font-weight:800}
+.nevers{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.nevers span{border:2px solid var(--ink);border-radius:99px;padding:6px 13px;font-size:14px;font-weight:500;text-decoration:line-through;text-decoration-color:var(--bld);text-decoration-thickness:2px}
+
+/* roles */
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.role{border-radius:20px;padding:22px;border:2px solid var(--ink);min-width:0}
+.role.B{background:var(--bld-soft)} .role.C{background:var(--con-soft)} .role.A{background:var(--surface)}
+.role ul{margin:12px 0 0;padding-left:18px;display:grid;gap:6px;font-size:15px}
+.terms{margin-top:16px}
+.terms label{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.terms label:last-child{border-bottom:0}
+.terms input{margin-top:4px;width:18px;height:18px;accent-color:var(--ok);flex:none}
+.terms label:has(input:checked) span{text-decoration:line-through;color:var(--muted)}
+
+.go{background:var(--ink);color:var(--bg);text-align:left}
+.go h2{font-size:clamp(36px,7vw,80px)}
+.go .lede{color:#B6C3CE}
+.first{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.first div{border:2px solid #3A4B5B;border-radius:18px;padding:20px}
+.first b{font-family:var(--f-display);font-size:22px;display:block;margin:6px 0}
+.first .mono{color:var(--bld)}
+.first p{color:#B6C3CE;font-size:15px}
+footer{padding-block:28px;color:var(--muted);font-size:13px}
+
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-12px) rotate(1.5deg)}}
+@keyframes scan{from{top:0}to{top:100%}}
+@keyframes blink{50%{opacity:0}}
+@keyframes beat{0%,70%,100%{transform:scale(1)}80%{transform:scale(1.28)}90%{transform:scale(.96)}}
+@keyframes draw{0%{stroke-dashoffset:240}60%,100%{stroke-dashoffset:0}}
+@keyframes floaty{0%{opacity:0;transform:translateY(14px) scale(.92)}6%,22%{opacity:1;transform:none}30%,100%{opacity:0;transform:translateY(-12px)}}
+@keyframes slide{to{transform:translateX(-50%)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pop{from{opacity:0;transform:translateX(-14px) scale(.96)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes shake{0%{transform:translateY(-2px)}50%{transform:translateY(2px)}100%{transform:translateY(-2px)}}
+
+@media (max-width:900px){
+  section{padding-block:56px}
+  .wide{grid-column:auto}.fam-grid.tight{grid-template-columns:1fr}
+  .hero-grid,.split,.lab,.pair,.fam-grid,.truth,.roles,.first,.out-grid,.rules3,.qs{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:24px;padding-left:36px}
+  .steps::before,.steps::after{left:12px;right:auto;top:0;bottom:0;width:4px;height:auto}
+  .steps::after{background:linear-gradient(var(--bld),var(--con));transform-origin:top}
+  .steps.in::after{animation-name:growy}
+  .step{padding-top:0}
+  .step .dot{left:-36px;top:2px}
+  .stage{min-height:480px}
+  .prog{grid-template-columns:1fr}
+  .post{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stats div:nth-child(2){border-right:0}
+  .stats div:nth-child(-n+2){border-bottom:2px solid var(--ink)}
+}
+@keyframes growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media (max-width:520px){.brand span{display:none}.seg small{display:none}.seg{font-size:10px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.chip{opacity:1;position:static;margin:4px}.ret path{stroke-dashoffset:0}}
+</style>
+
+<nav class="nav" aria-label="Sections"><div class="wrap">
+  <a class="brand" href="#top"><i></i><span>BUILDFlow</span></a>
+  <ul>
+    <li><a href="#journey">Journey</a></li><li><a href="#outcome">Outcome</a></li>
+    <li><a href="#audiences">Two audiences</a></li><li><a href="#playbook">Playbook</a></li>
+    <li><a href="#week1">Week 1</a></li><li><a href="#testing">Testing</a></li>
+    <li><a href="#rules">Rules</a></li><li><a href="#team">The team</a></li>
+  </ul>
+  <button class="theme" id="theme" type="button" aria-label="Switch light or dark">Theme</button>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap hero-grid">
+  <div>
+    <div class="eyebrow mono">Partner playbook · v1.0 · Week 1</div>
+    <h1>Make the right person <em>stop scrolling.</em></h1>
+    <p class="lede">Two cousins, four platforms, fourteen videos a week. You are not just posting. Every video is an experiment, and what comes back decides what BUILDFlow becomes for contractors and homeowners.</p>
+    <div class="hello">
+      <label for="who">Your name</label>
+      <input id="who" type="text" placeholder="Type it in" autocomplete="given-name" maxlength="24">
+    </div>
+    <p class="greet" id="greet" aria-live="polite"></p>
+    <div class="stats" role="list">
+      <div role="listitem"><b>2</b><span>videos a day</span></div>
+      <div role="listitem"><b>4</b><span>platforms</span></div>
+      <div role="listitem"><b>14</b><span>videos a week</span></div>
+      <div role="listitem"><b>56</b><span>posts a week</span></div>
+    </div>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="chip c1">"That's exactly my problem."</div>
+    <div class="chip c2">Saved</div>
+    <div class="chip c3">"Send this to my mason"</div>
+    <div class="phone" id="phone" data-aud="B">
+      <div class="screen">
+        <span class="tag" id="ptag">BUILDER</span>
+        <div class="scan"></div>
+        <div class="hooktext"><span id="ptext"></span><span class="caret"></span></div>
+        <div class="ret"><small>STAY-WATCHING LINE · GOAL</small>
+          <svg viewBox="0 0 200 46" preserveAspectRatio="none"><path d="M2 6 C40 8 50 22 80 26 S130 28 150 34 S185 38 198 40"/></svg></div>
+        <div class="rail">
+          <span><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.6-9.5 9-9.5 9z"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 20l1-4.7A8 8 0 1 1 21 12z"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><path d="M4 12v7h16v-7M12 3v12M7 8l5-5 5 5"/></svg></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></header>
+
+<div class="tape" aria-hidden="true"><div>
+  <span>YouTube Shorts <b>◆</b></span><span>TikTok <b>◆</b></span><span>Instagram Reels <b>◆</b></span><span>Facebook Reels <b>◆</b></span>
+  <span>Test the hook <b>◆</b></span><span>Read the numbers <b>◆</b></span><span>Make a family <b>◆</b></span><span>Repeat <b>◆</b></span>
+  <span>YouTube Shorts <b>◆</b></span><span>TikTok <b>◆</b></span><span>Instagram Reels <b>◆</b></span><span>Facebook Reels <b>◆</b></span>
+  <span>Test the hook <b>◆</b></span><span>Read the numbers <b>◆</b></span><span>Make a family <b>◆</b></span><span>Repeat <b>◆</b></span>
+</div></div>
+
+<section id="journey"><div class="wrap">
+  <div class="eyebrow mono">The journey</div>
+  <h2>Where this goes, and what you do at each stop.</h2>
+  <p class="lede">The first week is about learning. After that it gets sharper every cycle, because each week starts from what the last one proved.</p>
+  <div class="steps" id="steps">
+    <div class="step"><span class="dot"></span><div class="when mono">Week 1</div><h3>Learn the game</h3><p>Film the 7-day loop. Post every video on all four platforms. Log the numbers. Nobody expects winners yet.</p></div>
+    <div class="step"><span class="dot"></span><div class="when mono">Week 2</div><h3>Find the first signals</h3><p>Look at retention before views. Re-cut the hooks that held people. Drop nothing until you have tried a new hook, a stronger first shot and a shorter cut.</p></div>
+    <div class="step"><span class="dot"></span><div class="when mono">Weeks 3 and 4</div><h3>Grow a content family</h3><p>A winner becomes five or more variations. One problem that hits can feed weeks of videos.</p></div>
+    <div class="step"><span class="dot"></span><div class="when mono">Month 2 and on</div><h3>Run the engine</h3><p>You know which problems make builders and homeowners stop. That shapes what BUILDFlow builds next.</p></div>
+  </div>
+</div></section>
+
+<section id="outcome" class="band"><div class="wrap">
+  <div class="eyebrow mono">The outcome</div>
+  <h2>What you walk away with.</h2>
+  <div class="out-grid">
+    <div class="out big"><span class="mono">The big one</span><h3>A seat in the middle of a real company.</h3><p>Content here is product research. What you find out about what contractors and homeowners care about goes straight into what BUILDFlow builds. Your work is not on the side of the business. It steers it.</p></div>
+    <div class="out"><span class="mono">Skill</span><h3>Hooks, editing, reading analytics</h3><p>The three things every brand and every creator pays for, learned on a live project with real numbers.</p></div>
+    <div class="out"><span class="mono">Proof</span><h3>A public track record</h3><p>Channels you helped grow and a log of what you tested and what you learned. It is yours to show.</p></div>
+    <div class="out"><span class="mono">Ownership</span><h3>Partner terms, in writing</h3><p>Roles, split and who owns what get agreed before Day 1. The checklist is in The team section below.</p></div>
+    <div class="out"><span class="mono">Position</span><h3>Early, with people you trust</h3><p>BUILDFlow is a beta with no promised results yet. You are here at the start, with family, finding out what works.</p></div>
+  </div>
+  <p class="honest"><b>Straight talk.</b> BUILDFlow is live in beta and has not been proven with real contractors yet. We are not promising income or followers. We are promising a real project, honest numbers, and a say in where it goes.</p>
+</div></section>
+
+<section id="audiences"><div class="wrap">
+  <div class="eyebrow mono">The first rule</div>
+  <h2>Every video talks to one person.</h2>
+  <p class="lede">Two audiences. Never mixed in one video. Orange is Builder, blue is Consumer, and that colour code runs through the whole page.</p>
+  <div class="split">
+    <div class="aud B"><span class="mono">Audience A · 1 video a day</span><h3>Builders and contractors</h3>
+      <ul><li>Run jobs, workers and customers, mostly in WhatsApp</li><li>Lose track of tasks and deadlines</li><li>Need more work and a way to be found</li><li>Want customers to trust them</li></ul>
+      <p class="rule">"You have three jobs running at once..."</p></div>
+    <div class="aud C"><span class="mono">Audience B · 1 video a day</span><h3>Homeowners and project owners</h3>
+      <ul><li>Need building, repairs or a renovation</li><li>Can't tell who to trust</li><li>Worry about delays and poor work</li><li>Want to see progress and know what to ask</li></ul>
+      <p class="rule">"Need a contractor but have no idea who to trust?"</p></div>
+  </div>
+</div></section>
+
+<section id="playbook" class="band"><div class="wrap">
+  <div class="eyebrow mono">The playbook</div>
+  <h2>How a 45-second video works.</h2>
+  <p class="lede">Problem first, product last. Press play and watch the clock, or tap any block.</p>
+  <div class="anat">
+    <div class="lens" id="lens" role="group" aria-label="Video length"></div>
+    <div class="bar" id="bar" style="margin-top:22px"><div class="head" id="head"></div></div>
+    <div class="seginfo"><div class="clock" id="clock">0:00</div><h3 id="segname"></h3><p id="segtext"></p></div>
+    <div class="ctrl"><button class="btn solid" id="play" type="button">Pause</button></div>
+  </div>
+
+  <div class="lab">
+    <div class="card">
+      <div class="mono muted">Hook roulette</div>
+      <div class="roulette" id="roul" aria-live="polite">Spin to see a hook.</div>
+      <div class="cats" id="cats" role="group" aria-label="Hook type"></div>
+      <div class="ctrl"><button class="btn solid" id="spin" type="button">Spin</button><button class="btn" id="copyhook" type="button">Copy hook</button></div>
+      <p class="muted" style="margin-top:12px;font-size:14px">Good hooks name the person or the problem in the first three seconds. Use them to write your own.</p>
+    </div>
+    <div class="card">
+      <div class="mono muted">Score a topic · /60</div>
+      <div id="sliders"></div>
+      <div class="total"><b id="tot">30</b><span class="muted">of 60 · weekly pick the strongest 14</span></div>
+      <div class="meter"><i id="meter"></i></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="week1"><div class="wrap">
+  <div class="eyebrow mono">Week 1 · your batch</div>
+  <h2>Fourteen videos, ready to film.</h2>
+  <p class="lede">One Builder video and one Consumer video every day. Film each once, then post it on all four platforms with the caption for that platform. Tick them off as they go live.</p>
+  <div class="legend"><span><i class="sw" style="background:var(--bld)"></i>Builder</span><span><i class="sw" style="background:var(--con)"></i>Consumer</span><span class="muted">Ticks save on this device only.</span></div>
+  <div class="prog">
+    <div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="42"/><circle class="fg" id="ringfg" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/></svg><b id="ringn">0</b></div>
+    <div><div class="mono" style="margin-bottom:10px"><span id="ringtxt">0 of 56 posts live</span></div><div class="plats" id="plats"></div></div>
+  </div>
+  <div class="days" id="days" role="tablist" aria-label="Day"></div>
+  <div class="pair" id="pair"></div>
+</div></section>
+
+<section id="testing" class="band"><div class="wrap">
+  <div class="eyebrow mono">Testing</div>
+  <h2>Change one thing at a time.</h2>
+  <p class="lede">Every video tests one variable: the hook, the opening shot, the length, the topic, the CTA, the style, the curiosity, or where BUILDFlow shows up. Keep the core topic the same so the result means something.</p>
+  <div class="rules3">
+    <div class="card"><div class="mono muted">Read these, in this order</div>
+      <ol class="rank"><li>Retention</li><li>Average watch %</li><li>Shares</li><li>Saves</li><li>Comments</li><li>Profile visits</li><li>Follows</li></ol>
+      <p class="muted" style="margin-top:12px;font-size:14px">Views alone don't decide who won.</p></div>
+    <div class="card wide"><div class="mono muted">When one video beats your recent baseline</div>
+      <div class="fam-grid tight">
+        <div class="winner"><span class="mono">Winner</span><p>"If you're managing construction projects through WhatsApp..."</p></div>
+        <ul class="fam" id="fam">
+          <li style="--i:0">"If you're running three construction jobs through WhatsApp..."</li>
+          <li style="--i:1">"If your entire construction business is inside WhatsApp..."</li>
+          <li style="--i:2">"Contractors: WhatsApp isn't your project management system."</li>
+          <li style="--i:3">"Here's what happens when your construction projects live in WhatsApp."</li>
+          <li style="--i:4">"Your WhatsApp might be costing you money."</li>
+        </ul></div>
+      <p class="muted" style="margin-top:14px;font-size:14px">Don't just celebrate. Make a family.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="mono muted">When a video flops, try these before you drop the topic</div>
+    <ol class="ladder"><li>A new hook</li><li>A stronger first visual</li><li>A shorter version</li><li>A different presentation</li><li>A stronger curiosity loop</li></ol>
+    <p class="muted" style="margin-top:12px;font-size:14px">If several versions fail, move the topic down the list.</p>
+  </div>
+
+  <div style="margin-top:56px">
+    <h3 style="font-size:32px">The loop that makes it all worth it.</h3>
+    <p class="lede" style="margin-top:10px">Social media is not just marketing here. It's how we find out what to build. Tap a step.</p>
+    <div class="loop" id="loop"></div>
+    <p class="loopinfo" id="loopinfo"></p>
+  </div>
+
+  <div style="margin-top:48px">
+    <h3 style="font-size:28px">Every idea has to answer these seven.</h3>
+    <ul class="qs">
+      <li><b>Who is this for?</b> One audience.</li><li><b>What problem is it about?</b> A real one from site or home.</li>
+      <li><b>Why would they stop?</b> It names them.</li><li><b>What keeps them watching?</b> An open question that's relevant.</li>
+      <li><b>What do they get?</b> Something useful.</li><li><b>How does BUILDFlow relate?</b> Truthfully.</li>
+      <li style="grid-column:1/-1"><b>What should they do next?</b> Follow, save, share, comment. Rotate the ask.</li>
+    </ul>
+  </div>
+</div></section>
+
+<section id="rules"><div class="wrap">
+  <div class="eyebrow mono">Rules of the road</div>
+  <h2>Stay true. It's the whole brand.</h2>
+  <p class="lede">Contractors and homeowners can smell fake. Check every claim against the live app before you film it. Product state as of 25 Oct 2026.</p>
+  <div class="truth">
+    <div class="card yes"><div class="mono muted">Say it plainly, it exists in the beta</div>
+      <ul><li>Customer and project management for contractors</li><li>A public contractor profile where customers can find them</li></ul></div>
+    <div class="card soon"><div class="mono muted">Say "we're building", "we're testing" or "we're working on"</div>
+      <ul><li>Push alerts for new leads</li><li>Messaging between customers and contractors</li><li>Paid billing and trials</li><li>Anything you haven't seen working on the phone</li></ul></div>
+  </div>
+  <div class="nevers" aria-label="Never do">
+    <span>Fake testimonials</span><span>Invented users</span><span>Made-up revenue</span><span>Fake statistics</span><span>"Thousands of contractors"</span><span>Features that don't exist</span><span>Every video an ad</span><span>Logo-first intros</span><span>Generic motivation</span>
+  </div>
+  <div class="card" style="margin-top:24px"><div class="mono muted">Make it local and real</div>
+    <p style="margin-top:8px;max-width:70ch">Job sites, WhatsApp, delayed materials, workers waiting, masonry, plumbing, electrical, roofing, tiling, painting, extensions. Use Jamaican realities when they fit, but don't make every video Jamaica-only. BUILDFlow is meant to grow beyond one island. Phone footage, screen recordings, POV and handheld beat stock footage and polished ads.</p></div>
+</div></section>
+
+<section id="team" class="band"><div class="wrap">
+  <div class="eyebrow mono">The team</div>
+  <h2>Three people, three lanes.</h2>
+  <p class="lede">A starting split. Change it together on the first call.</p>
+  <div class="roles">
+    <div class="role B"><span class="mono">Partner 1 · suggested</span><h3>Builder lane</h3>
+      <ul><li>Films the 7 Builder videos</li><li>Job sites, WhatsApp scenes, contractor footage</li><li>Replies to contractor comments</li></ul></div>
+    <div class="role C"><span class="mono">Partner 2 · suggested</span><h3>Consumer lane</h3>
+      <ul><li>Films the 7 Consumer videos</li><li>Homeowner POV, red flags, checklists</li><li>Replies to homeowner comments</li></ul></div>
+    <div class="role A"><span class="mono">Anju · suggested</span><h3>Product truth and strategy</h3>
+      <ul><li>Checks every product claim and screen</li><li>Runs the weekly review and next week's tests</li><li>Turns what you find into what BUILDFlow builds</li></ul></div>
+  </div>
+  <div class="card terms">
+    <div class="mono muted">Agree these before Day 1</div>
+    <div id="terms" style="margin-top:6px"></div>
+  </div>
+</div></section>
+
+<section class="go"><div class="wrap">
+  <div class="eyebrow mono" style="color:#B6C3CE">Day 1 starts here</div>
+  <h2>First 48 hours.</h2>
+  <p class="lede">Small, concrete, doable on a phone.</p>
+  <div class="first">
+    <div><span class="mono">Step 1</span><b>Pick your lane and set up the four accounts</b><p>YouTube, TikTok, Instagram and Facebook. Same name and picture everywhere.</p></div>
+    <div><span class="mono">Step 2</span><b>Film Day 1 as a pair</b><p>The Builder video and the Consumer video from the Week 1 board. Phone, good light, no big setup.</p></div>
+    <div><span class="mono">Step 3</span><b>Post, tick, and write down the numbers</b><p>Use the weekly report to track what happened. The first read isn't about winning. It's about learning.</p></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">BUILDFlow Content Engine v1.0 · Week 1 batch · Data lives in docs/buildflow-content/engine-data.json for the dashboard rebuild.</div></footer>
+
+<script>
+const D = {"meta": {"project": "BUILDFlow", "version": "1.0", "built": "2026-10-28", "source": "BUILDFlow Content Engine master prompt v1.0", "platforms": ["YouTube Shorts", "Facebook Reels", "Instagram Reels", "TikTok"], "cadence": "2 videos per day: 1 Builder + 1 Consumer, 14 per week", "productStateAsOf": "2026-10-25 (docs/strategy/BUILDFLOW_LAUNCH_PLAN.md)", "productTruth": {"existsInBeta": ["Customer and project management for contractors", "A public contractor profile where customers can find them"], "inProgressOrPlanned": ["Push notifications for new leads", "In-app or private client messaging (undecided)", "Paid billing and trial enforcement (billing is a stub today)"], "voiceRule": "Anything not in the first list is said as 'We're building...', 'We're testing...' or 'We're working on...'. Never 'BuildFlow lets you...' for it. Never claim users, revenue, testimonials or statistics we do not have."}}, "audiences": {"B": {"name": "Builder", "line": "Contractors who run jobs, workers and customers, mostly through WhatsApp, and want more work."}, "C": {"name": "Consumer", "line": "Homeowners and project owners who need work done and can't tell who to trust."}}, "hookCategories": [{"key": "Direct target", "examples": ["If you're a contractor managing multiple projects, watch this.", "If you're planning a renovation, don't hire a contractor before watching this.", "If you own a construction company, you need to see this."]}, {"key": "Problem", "examples": ["If you're managing your construction projects through WhatsApp, we need to talk.", "If your projects keep getting delayed, this might be why.", "If you have no idea what's happening on your construction project, watch this."]}, {"key": "Warning", "examples": ["Don't hire a contractor before asking this.", "Contractors: stop doing this with your projects.", "One mistake can turn a 3-month project into a 6-month project."]}, {"key": "Curiosity", "examples": ["There's one thing successful contractors do differently.", "Most people choose contractors the wrong way.", "There's a reason your contractor keeps missing deadlines."]}, {"key": "Contrarian", "examples": ["You don't need more customers. You need a better system.", "The cheapest contractor isn't always the cheapest option.", "Your contractor saying 'don't worry' isn't a project management system."]}, {"key": "Specific scenario", "examples": ["You have three jobs running at once...", "Your plumber says he's waiting on the electrician...", "The homeowner asks for an update and you're searching through 200 WhatsApp messages..."]}], "ctas": [{"type": "Follow", "line": "Follow BUILDFlow as we build this."}, {"type": "Save", "line": "Save this before your next project."}, {"type": "Comment", "line": "Would you use this?"}, {"type": "Share", "line": "Send this to a contractor."}, {"type": "Discussion", "line": "What's the biggest problem you've had with a contractor?"}, {"type": "Build in public", "line": "We're building this. What should we add next?"}, {"type": "Product", "line": "Want to see the full workflow? Follow BUILDFlow."}], "metrics": ["Retention", "Average watch %", "Shares", "Saves", "Comments", "Profile visits", "Follows"], "trackingColumns": ["Platform", "Video ID", "Audience", "Hook", "Topic", "Pillar", "Length", "Views", "Likes", "Comments", "Shares", "Saves", "Profile visits", "Follows", "Avg watch duration", "Avg % watched", "Completion rate", "3-sec retention"], "topicScoring": ["Audience relevance", "Pain intensity", "Curiosity potential", "Visual potential", "BUILDFlow relevance", "Shareability"], "weeklyReport": ["Total videos", "Total views", "Total shares", "Total saves", "Total comments", "Total profile visits", "Total new followers", "Top 5 videos", "Top 3 hooks", "Top 3 topics", "Top builder topic", "Top consumer topic", "Best video length", "Best content format", "Worst performing format", "Key learning", "Next week's tests"], "videos": [{"id": "B-D1", "day": 1, "aud": "B", "theme": "Project management", "pillar": "Project Management", "objective": "Problem identification", "len": 45, "ctaType": "Follow", "hook": "If you're struggling to manage multiple construction projects, watch this.", "curiosity": "Your project info is in five places. There's a better way to structure it.", "payoff": "Customer, tasks, deadlines, updates and progress should all connect.", "connection": "That's the problem we're building BUILDFlow to solve.", "cta": "Follow BUILDFlow as we build it.", "beats": [{"t": "0-3", "visual": "Phone buzzing on a job site: WhatsApp, a call and a calendar alert land at once.", "vo": "If you're struggling to manage multiple construction projects, watch this.", "text": "Managing multiple projects?"}, {"t": "3-8", "visual": "Screen recording: scroll WhatsApp chats, a notes app, a paper calendar.", "vo": "Your project information might be scattered across five different places.", "text": "5 places. 1 job."}, {"t": "8-15", "visual": "Freeze on a half-typed reply. One beat of black.", "vo": "And that's where things start falling through the cracks. There's a better way to structure the project.", "text": "Where it falls through"}, {"t": "15-30", "visual": "Screen recording of the BUILDFlow beta: customer, project, tasks.", "vo": "Customer, tasks, deadlines, updates and progress should all connect.", "text": "One job. One place."}, {"t": "30-40", "visual": "Talking head, job site behind you.", "vo": "That's exactly the problem we're building BUILDFlow to solve.", "text": "We're building this"}, {"t": "CTA", "visual": "Point to the follow button.", "vo": "Follow BUILDFlow as we build it.", "text": "Follow along"}], "caption": "Five projects, three workers, one phone full of WhatsApp. We're building BUILDFlow for exactly this.", "tags": "#contractor #construction #projectmanagement #jamaica #buildflow", "variable": "Hook", "hypothesis": "A named scenario ('Five projects. Three workers. Twenty WhatsApp messages...') holds the first 3 seconds better than the generic 'if you're struggling' hook.", "check": "Only show screens that match the current beta."}, {"id": "C-D1", "day": 1, "aud": "C", "theme": "Project management", "pillar": "Avoiding Bad Contractors", "objective": "Warn and teach", "len": 35, "ctaType": "Save", "hook": "If you're paying someone to build or renovate your property, don't make this mistake.", "curiosity": "The mistake happens before any work starts.", "payoff": "Get the scope and a date for each phase in writing before work begins.", "connection": "We're building BUILDFlow so the plan and the progress sit in one place you can both see.", "cta": "Save this before your next project.", "beats": [{"t": "0-3", "visual": "POV: standing in a half-built house, bare block walls.", "vo": "If you're paying someone to build or renovate, don't make this mistake.", "text": "Renovating? Read this first."}, {"t": "3-8", "visual": "Homeowner scrolling WhatsApp, hunting for what was agreed.", "vo": "A lot of arguments start with 'I thought you said...'", "text": "'I thought you said...'"}, {"t": "8-15", "visual": "Notes app with an empty line labelled Scope.", "vo": "The mistake isn't the contractor. It's starting with nothing written down. Here's what to write.", "text": "The mistake is before day 1"}, {"t": "15-30", "visual": "Three quick text cards, each ticking on: What work, What's included, Date per phase.", "vo": "What exactly is being done. What is and isn't included. And a date for every phase, not just a finish date.", "text": "Scope. Included. Dates."}, {"t": "30-40", "visual": "Phone showing the idea of a shared project view. Label it 'in development'.", "vo": "We're building BUILDFlow so the plan and the progress sit in one place you can both see.", "text": "We're building this"}, {"t": "CTA", "visual": "Tap the save icon.", "vo": "Save this before your next project.", "text": "Save it"}], "caption": "Write it down before the first block is laid. Scope, what's included, and a date for each phase.", "tags": "#renovation #homeowner #construction #contractor #jamaica #buildflow", "variable": "Opening visual", "hypothesis": "A POV shot of an unfinished house stops more homeowners than a talking head.", "check": "Shared project view is not confirmed. Say 'we're building'."}, {"id": "B-D2", "day": 2, "aud": "B", "theme": "Trust", "pillar": "Trust & Professionalism", "objective": "Build trust", "len": 40, "ctaType": "Share", "hook": "Want customers to trust your construction company before they meet you?", "curiosity": "Customers decide before the first call. What are they looking at?", "payoff": "Show your work while it is happening: progress photos, before and after, a clear profile.", "connection": "BUILDFlow is in beta with a public contractor profile where customers can find you.", "cta": "Send this to a contractor.", "beats": [{"t": "0-3", "visual": "Homeowner on a phone, scrolling past three contractor pages with no photos.", "vo": "Want customers to trust your company before they meet you?", "text": "Trusted before the first call?"}, {"t": "3-8", "visual": "Split screen: a blank page vs a page full of finished jobs.", "vo": "Customers decide fast. They look at what you can show them.", "text": "They're checking you out"}, {"t": "8-15", "visual": "Hand holds up one finger.", "vo": "And the thing that builds the most trust isn't the finished photo. I'll show you.", "text": "Not the finished photo"}, {"t": "15-30", "visual": "Before / during / after of a tiling or roofing job, quick cuts.", "vo": "It's the middle. Photos while the work is happening show you're organised and nothing is hidden.", "text": "Show the middle"}, {"t": "30-40", "visual": "Screen recording of the BUILDFlow beta public profile.", "vo": "BUILDFlow is in beta with a public profile built for exactly this, so customers can find you and see your work.", "text": "Your public profile"}, {"t": "CTA", "visual": "Point at camera.", "vo": "Send this to a contractor who needs it.", "text": "Send to a builder"}], "caption": "Finished photos are expected. Progress photos build trust. Show the middle of the job.", "tags": "#contractor #construction #beforeandafter #jamaica #buildflow", "variable": "Curiosity mechanism", "hypothesis": "Delaying the answer ('not the finished photo') raises average watch % over stating the tip up front.", "check": "Confirm the public profile screens match the live beta."}, {"id": "C-D2", "day": 2, "aud": "C", "theme": "Trust", "pillar": "Finding Trustworthy Contractors", "objective": "Teach and build trust", "len": 35, "ctaType": "Comment", "hook": "If you want to know whether a contractor is actually trustworthy, don't just look at their finished photos.", "curiosity": "What should you ask to see instead?", "payoff": "Ask for in-progress photos, a past customer to talk to, and watch how clearly they reply.", "connection": "That's why we're building BUILDFlow around real project history, not just a nice final photo.", "cta": "What's the biggest problem you've had with a contractor?", "beats": [{"t": "0-3", "visual": "A perfect finished kitchen photo. Zoom in slowly.", "vo": "Want to know if a contractor is trustworthy? Don't just look at the finished photos.", "text": "Finished photos prove little"}, {"t": "3-8", "visual": "Finger swipes through a contractor's page of only polished photos.", "vo": "Anyone can post their best angle.", "text": "Best angle only"}, {"t": "8-15", "visual": "Text card: 3 things to ask for.", "vo": "Here are three things to ask for instead.", "text": "Ask for these 3"}, {"t": "15-30", "visual": "Cards tick in: in-progress photos, a past customer to call, how fast and clearly they reply.", "vo": "Photos from the middle of a job. A past customer you can actually speak to. And watch how clearly they answer you.", "text": "Middle photos. Past customer. Clear replies."}, {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow around real project history so you can see more than the last photo.", "text": "We're building this"}, {"t": "CTA", "visual": "Question on screen.", "vo": "What's the biggest problem you've had with a contractor? Tell us below.", "text": "Tell us below"}], "caption": "A finished photo shows the result. It doesn't show how they got there. Ask for the middle.", "tags": "#homeowner #contractor #renovation #trust #jamaica #buildflow", "variable": "CTA", "hypothesis": "A story-prompt CTA pulls more comments than a follow CTA, and those comments become content ideas.", "check": "'Project history' is a plan. Keep it as 'we're building'."}, {"id": "B-D3", "day": 3, "aud": "B", "theme": "Discovery", "pillar": "Getting More Work", "objective": "Start a conversation", "len": 40, "ctaType": "Comment", "hook": "Good contractors don't always struggle because they're bad at construction.", "curiosity": "So why do skilled people still go quiet for weeks?", "payoff": "Nobody can see their work, so nobody can pick them.", "connection": "BUILDFlow is in beta with a public profile so customers can find and look at your work.", "cta": "Would you use this?", "beats": [{"t": "0-3", "visual": "Contractor on a ladder, finishing a clean wall.", "vo": "Good contractors don't always struggle because they're bad at construction.", "text": "Great work. Quiet phone."}, {"t": "3-8", "visual": "Same contractor checking a phone with no new messages.", "vo": "They struggle because of something else.", "text": "So what's the problem?"}, {"t": "8-15", "visual": "Phone camera roll full of job photos nobody sees.", "vo": "Their best work is sitting in their camera roll, and nobody can see it.", "text": "Camera roll ≠ shopfront"}, {"t": "15-30", "visual": "Quick cuts of finished jobs: masonry, painting, roofing.", "vo": "Customers choose who they can see. If they can't see your work, they pick whoever they can.", "text": "People pick who they can see"}, {"t": "30-40", "visual": "Screen recording of the BUILDFlow beta public profile.", "vo": "BUILDFlow is in beta with a public profile so customers can find you and look at your work.", "text": "A place for your work"}, {"t": "CTA", "visual": "Talking head, question on screen.", "vo": "Would you use this? Tell us why or why not.", "text": "Would you use this?"}], "caption": "Skill isn't always the problem. Visibility is. Would a profile for your work help you?", "tags": "#contractor #construction #getmorework #jamaica #buildflow", "variable": "Topic", "hypothesis": "Visibility (getting found) pulls stronger comments from builders than organisation topics.", "check": "Confirm profile fields on screen exist today."}, {"id": "C-D3", "day": 3, "aud": "C", "theme": "Discovery", "pillar": "Contractor Discovery", "objective": "Create interest", "len": 35, "ctaType": "Save", "hook": "Need a contractor but have no idea who to trust?", "curiosity": "There are three things you can check before you call anyone.", "payoff": "Past work you can see, a clear reply, and a written scope.", "connection": "We're building a place where homeowners can look at contractors and their work in one spot.", "cta": "Save this before your next project.", "beats": [{"t": "0-3", "visual": "Homeowner scrolling through a group chat full of 'does anyone know a good mason?'", "vo": "Need a contractor but have no idea who to trust?", "text": "Who do you trust?"}, {"t": "3-8", "visual": "Phone contacts: 'Mason 1', 'Mason new', 'Plumber Mike'.", "vo": "Most of us ask around and hope.", "text": "Ask around and hope"}, {"t": "8-15", "visual": "Text card with three blank boxes.", "vo": "Before you call anyone, check these three things.", "text": "3 checks first"}, {"t": "15-30", "visual": "Boxes fill: past work you can see, a clear reply, a written scope.", "vo": "Past work you can actually see. A clear reply when you message. And a written scope before any money moves.", "text": "See it. Clear reply. In writing."}, {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so you can look at contractors and their work in one place.", "text": "We're building this"}, {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this for your next project.", "text": "Save it"}], "caption": "See it, test the reply, get it in writing. Three checks before you pick a contractor.", "tags": "#homeowner #findacontractor #renovation #jamaica #buildflow", "variable": "Presentation style", "hypothesis": "Fast text-card format beats talking head for saves on checklist topics.", "check": "Consumer discovery is a plan. Keep it as 'we're building'."}, {"id": "B-D4", "day": 4, "aud": "B", "theme": "Communication", "pillar": "Customer Management", "objective": "Stop the scroll, start a conversation", "len": 35, "ctaType": "Discussion", "hook": "If your construction business runs entirely through WhatsApp, this is for you.", "curiosity": "There's a moment where WhatsApp costs you the job. Do you know when?", "payoff": "The moment is when a customer asks for an update and you have to dig for the answer.", "connection": "We're building BUILDFlow so each customer's project history is in one place, next to the job.", "cta": "What's the biggest problem you've had with a contractor?", "beats": [{"t": "0-3", "visual": "Phone screen: 200 unread WhatsApp messages.", "vo": "If your construction business runs entirely through WhatsApp, this is for you.", "text": "Your business is in WhatsApp?"}, {"t": "3-8", "visual": "Customer calls while you're mid-job. Phone ringing on a scaffold.", "vo": "A customer asks for an update while you're on the job.", "text": "'Any update?'"}, {"t": "8-15", "visual": "Thumb scrolling endlessly up through old chats.", "vo": "And you're scrolling through 200 messages to find what was agreed.", "text": "200 messages later..."}, {"t": "15-30", "visual": "Cut to a clean list of one customer's project history (screen recording or mock).", "vo": "That's when WhatsApp costs you trust. Not because of the app. Because there's no single place for the job.", "text": "No single place"}, {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so each customer's project history sits in one place, next to the job.", "text": "We're building this"}, {"t": "CTA", "visual": "Question on screen.", "vo": "What's the worst WhatsApp mix-up you've had on a job?", "text": "Tell us below"}], "caption": "WhatsApp is great for talking. It's not a project record. What's your worst mix-up?", "tags": "#contractor #whatsapp #construction #customerservice #jamaica #buildflow", "variable": "Opening visual", "hypothesis": "A real phone-screen of unread chats stops more contractors than a talking head.", "check": "Mark any unreleased screens as mock-ups on screen."}, {"id": "C-D4", "day": 4, "aud": "C", "theme": "Communication", "pillar": "Project Management", "objective": "Start a conversation", "len": 30, "ctaType": "Share", "hook": "Your contractor saying 'don't worry, I got it' isn't a project update.", "curiosity": "So what does a real update sound like?", "payoff": "A real update says what's done, what's next, what's blocked, and a date.", "connection": "We're working on BUILDFlow so updates are easy for a contractor to give and easy for you to see.", "cta": "Send this to someone renovating.", "beats": [{"t": "0-3", "visual": "Phone showing the text: 'Don't worry, I got it 👍'.", "vo": "'Don't worry, I got it' isn't a project update.", "text": "That's not an update"}, {"t": "3-8", "visual": "Homeowner staring at a wall that looks the same as last week.", "vo": "You still don't know what's done or what's next.", "text": "Same wall. Same week."}, {"t": "8-15", "visual": "Text card with four empty lines.", "vo": "A real update has four parts. Most people only get one.", "text": "4 parts"}, {"t": "15-30", "visual": "Lines fill: Done. Next. Blocked. Date.", "vo": "What's done. What's next. What's blocking it. And when the next step happens.", "text": "Done. Next. Blocked. Date."}, {"t": "30-40", "visual": "Talking head.", "vo": "We're working on BUILDFlow so updates are easy for a contractor to give and easy for you to see.", "text": "We're working on this"}, {"t": "CTA", "visual": "Point at camera.", "vo": "Send this to someone who's renovating.", "text": "Send it on"}], "caption": "Done, next, blocked, date. If you're not getting those four, you don't have an update.", "tags": "#homeowner #renovation #contractor #construction #jamaica #buildflow", "variable": "Hook", "hypothesis": "A contrarian hook gets more shares than a how-to hook on the same update topic.", "check": "Updates for clients are not confirmed in the product. Use 'we're working on'."}, {"id": "B-D5", "day": 5, "aud": "B", "theme": "Money and delays", "pillar": "Business Operations", "objective": "Teach and create curiosity", "len": 40, "ctaType": "Save", "hook": "Want to know where construction businesses lose money without realizing it?", "curiosity": "It isn't the big costs. It's four small leaks.", "payoff": "Rework, workers waiting, late materials and forgotten follow-ups.", "connection": "We're building BUILDFlow so tasks, deadlines and follow-ups connect to the job.", "cta": "Save this before your next project.", "beats": [{"t": "0-3", "visual": "Workers standing around a site, waiting.", "vo": "Want to know where construction businesses lose money without realizing it?", "text": "Where's the money going?"}, {"t": "3-8", "visual": "Close-up of a hand tapping a watch.", "vo": "It's rarely the big costs. It's four small leaks.", "text": "4 small leaks"}, {"t": "8-15", "visual": "Quick cut to materials delivery that hasn't arrived.", "vo": "Number one: workers waiting because materials or the next trade aren't ready.", "text": "1. Waiting"}, {"t": "15-30", "visual": "Quick cuts for each: redoing a tile job, a missed callback, a late invoice.", "vo": "Two: rework. Three: late materials. Four: a follow-up that never happened.", "text": "2. Rework  3. Late materials  4. Forgotten follow-ups"}, {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so tasks, deadlines and follow-ups connect to the job instead of living in your head.", "text": "We're building this"}, {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this and check your last job against all four.", "text": "Check your last job"}], "caption": "Four small leaks. Check your last job against all four.", "tags": "#contractor #construction #business #profit #jamaica #buildflow", "variable": "Video length", "hypothesis": "A 25-second cut of the same list beats the 40-second cut on completion rate.", "check": "No statistics. Do not put a dollar figure on screen."}, {"id": "C-D5", "day": 5, "aud": "C", "theme": "Money and delays", "pillar": "Avoiding Bad Contractors", "objective": "Warn and stop the scroll", "len": 30, "ctaType": "Share", "hook": "Your construction project being 'a little delayed' can become VERY expensive.", "curiosity": "What should you ask the moment someone says 'a little delay'?", "payoff": "Ask what caused it, what the new date is, and what it changes in the cost.", "connection": "We're building BUILDFlow so delays and new dates are recorded in the project.", "cta": "Send this to someone building.", "beats": [{"t": "0-3", "visual": "Calendar with the finish date crossed out.", "vo": "'A little delayed' can become very expensive.", "text": "'A little delayed'"}, {"t": "3-8", "visual": "Homeowner on the phone: 'Just another week.'", "vo": "It's rarely just one week.", "text": "One week becomes three"}, {"t": "8-15", "visual": "Three question cards stacked up.", "vo": "The moment you hear 'a little delay', ask three things.", "text": "Ask 3 things"}, {"t": "15-30", "visual": "Cards flip: What caused it? What's the new date? Does it change the cost?", "vo": "What caused it. What's the new date. And does it change the cost. Get the answers in writing.", "text": "Cause. New date. Cost."}, {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so delays and new dates get recorded in the project.", "text": "We're building this"}, {"t": "CTA", "visual": "Point at camera.", "vo": "Send this to someone building right now.", "text": "Send it on"}], "caption": "'A little delay' needs three answers: cause, new date, cost. In writing.", "tags": "#homeowner #renovation #construction #delays #jamaica #buildflow", "variable": "Hook", "hypothesis": "Specific-scenario hooks ('Your contractor says just another week...') beat the warning hook for 3-second retention.", "check": "Delay tracking is a plan. Keep as 'we're building'."}, {"id": "B-D6", "day": 6, "aud": "B", "theme": "Checklist", "pillar": "Contractor Education", "objective": "Teach and get saves", "len": 30, "ctaType": "Save", "hook": "Here's the 30-second project management checklist every contractor should have.", "curiosity": "Five checks. Most contractors skip number five.", "payoff": "Customer, scope, who's doing what, deadline, and when the customer last heard from you.", "connection": "We're building BUILDFlow around exactly these five.", "cta": "Save this before your next project.", "beats": [{"t": "0-3", "visual": "Clipboard slammed onto a truck bonnet.", "vo": "Here's the 30-second project management checklist every contractor should have.", "text": "30-second checklist"}, {"t": "3-8", "visual": "Hand writes five blank lines.", "vo": "Five checks, and most contractors skip number five.", "text": "5 checks"}, {"t": "8-15", "visual": "Lines fill: Customer. Scope. Who's doing what.", "vo": "One, who the customer is. Two, what the scope is. Three, who's doing what.", "text": "1 Customer  2 Scope  3 Who"}, {"t": "15-30", "visual": "Lines fill: Deadline. Last update sent.", "vo": "Four, the deadline. And five, when the customer last heard from you.", "text": "4 Deadline  5 Last update"}, {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow around exactly these five.", "text": "We're building this"}, {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this and run your next job through it.", "text": "Save the checklist"}], "caption": "Five checks for every job. Number five is the one that wins repeat customers.", "tags": "#contractor #checklist #construction #projectmanagement #jamaica #buildflow", "variable": "Product placement", "hypothesis": "Putting the BUILDFlow line at the end of a pure checklist keeps saves high versus mentioning it up front.", "check": "Do not claim the app has all five today unless verified."}, {"id": "C-D6", "day": 6, "aud": "C", "theme": "Checklist", "pillar": "Customer Empowerment", "objective": "Teach and get saves", "len": 40, "ctaType": "Save", "hook": "Before you hire a contractor, ask these 5 questions.", "curiosity": "The fourth question is the one most people forget.", "payoff": "Similar jobs you can see, a past customer, written timeline, update rhythm, and what happens if the price changes.", "connection": "We're building BUILDFlow so these answers are easier to see before you hire.", "cta": "Save this before your next project.", "beats": [{"t": "0-3", "visual": "Homeowner and contractor shaking hands. Freeze frame.", "vo": "Before you hire a contractor, ask these five questions.", "text": "Ask these 5"}, {"t": "3-8", "visual": "Numbers 1-5 appear down the side.", "vo": "And the fourth one is the question most people forget.", "text": "#4 is the one people skip"}, {"t": "8-15", "visual": "Cards tick in for 1 and 2.", "vo": "One, can I see similar jobs? Two, can I speak to a past customer?", "text": "1 Similar jobs  2 Past customer"}, {"t": "15-30", "visual": "Cards 3, 4 and 5 tick in; 4 glows.", "vo": "Three, what's the timeline in writing by phase? Four, how and how often will you update me? Five, what happens if the price changes?", "text": "3 Timeline  4 Updates  5 Price change"}, {"t": "30-40", "visual": "Talking head.", "vo": "We're building BUILDFlow so these answers are easier to see before you hire.", "text": "We're building this"}, {"t": "CTA", "visual": "Tap save icon.", "vo": "Save this before your next project.", "text": "Save the 5"}], "caption": "Five questions. Question four is the one almost nobody asks. Save this.", "tags": "#homeowner #hiringacontractor #renovation #construction #jamaica #buildflow", "variable": "Curiosity mechanism", "hypothesis": "Naming the 'fourth question' up front lifts average watch % over a plain list.", "check": "Consumer discovery is a plan. Keep it as 'we're building'."}, {"id": "B-D7", "day": 7, "aud": "B", "theme": "Build in public", "pillar": "BUILDFlow Build-in-Public", "objective": "Build anticipation", "len": 50, "ctaType": "Build in public", "hook": "We're building an app specifically for contractors, and here's what we're trying to fix.", "curiosity": "We're going to show you the messy parts too.", "payoff": "Show the real beta, name what works, and what we're still working on.", "connection": "BUILDFlow is a beta for customer and project management with a public contractor profile. Everything else is in progress.", "cta": "We're building this. What should we add next?", "beats": [{"t": "0-3", "visual": "Talking head, hard cut in on a laptop with the beta open.", "vo": "We're building an app specifically for contractors, and here's what we're trying to fix.", "text": "Building for contractors"}, {"t": "3-8", "visual": "Phone full of WhatsApp threads next to a notebook.", "vo": "Jobs scattered across chats, notebooks and memory.", "text": "The problem"}, {"t": "8-15", "visual": "Screen recording: creating a customer and a project in the beta.", "vo": "Right now the beta handles customers and projects, and gives you a public profile.", "text": "What exists today (beta)"}, {"t": "15-30", "visual": "Whiteboard or notes screen listing what's next.", "vo": "What we're working on next: better lead alerts and how customers and contractors message. We haven't decided that part yet.", "text": "What we're working on"}, {"t": "30-40", "visual": "Talking head.", "vo": "We're not going to pretend it's finished. We're going to build it with contractors.", "text": "Built with contractors"}, {"t": "CTA", "visual": "Question on screen.", "vo": "We're building this. What should we add next?", "text": "What's missing?"}], "caption": "Beta today. Honest about what's missing. Tell us what to build next.", "tags": "#buildinpublic #contractor #construction #startup #jamaica #buildflow", "variable": "Presentation style", "hypothesis": "A rough screen recording with honest narration earns more comments than a polished explainer.", "check": "Lead alerts and messaging are not live. Keep 'we're working on'."}, {"id": "C-D7", "day": 7, "aud": "C", "theme": "Build in public", "pillar": "BUILDFlow Build-in-Public", "objective": "Build anticipation", "len": 35, "ctaType": "Product", "hook": "What if finding a contractor didn't mean asking everyone you know?", "curiosity": "What would you want to see before you picked someone?", "payoff": "A profile with real work, so you can look before you call.", "connection": "BUILDFlow is in beta with public contractor profiles. We're working on making them easier to browse.", "cta": "Want to see the full workflow? Follow BUILDFlow.", "beats": [{"t": "0-3", "visual": "Homeowner texting 'anyone know a good electrician?' to five different people.", "vo": "What if finding a contractor didn't mean asking everyone you know?", "text": "Ask everyone you know?"}, {"t": "3-8", "visual": "Replies roll in: three numbers, one 'try this guy'.", "vo": "You get a few numbers and no way to check any of them.", "text": "A number isn't proof"}, {"t": "8-15", "visual": "Screen recording scrolls to a contractor profile in the beta.", "vo": "What would you want to see before you pick someone?", "text": "What would you want to see?"}, {"t": "15-30", "visual": "Zoom on profile sections: the work, the trade, the area.", "vo": "Real work they've done, what they do, where they work. So you can look before you call.", "text": "Look before you call"}, {"t": "30-40", "visual": "Talking head.", "vo": "BUILDFlow is in beta with public contractor profiles. We're working on making them easier to browse.", "text": "In beta"}, {"t": "CTA", "visual": "Point at follow button.", "vo": "Want to see where this goes? Follow BUILDFlow.", "text": "Follow along"}], "caption": "Asking around works until it doesn't. We're building a way to look first, call second.", "tags": "#homeowner #findacontractor #buildinpublic #construction #jamaica #buildflow", "variable": "Topic", "hypothesis": "Consumer build-in-public pulls more profile visits than a pure education video.", "check": "Match profile sections to what the beta really shows."}]};
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const copy = async (text, btn) => {
+  const old = btn.textContent;
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+  catch(e){ btn.textContent = 'Select and copy'; }
+  setTimeout(() => btn.textContent = old, 1400);
+};
+
+/* theme */
+$('#theme').addEventListener('click', () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme = dark ? 'light' : 'dark';
+});
+
+/* name greeting */
+const who = $('#who'), greet = $('#greet');
+who.value = store.get('bf-name', '');
+const sayHi = () => {
+  const n = who.value.trim();
+  greet.textContent = n ? `Welcome to the team, ${n}. Your first batch is already written.` : '';
+};
+who.addEventListener('input', () => { store.set('bf-name', who.value); sayHi(); });
+sayHi();
+
+/* hero phone: cycle real hooks, alternating audience */
+(() => {
+  const phone = $('#phone'), txt = $('#ptext'), tag = $('#ptag');
+  const B = D.videos.filter(v => v.aud === 'B'), C = D.videos.filter(v => v.aud === 'C');
+  const seq = []; for (let i = 0; i < 7; i++){ seq.push(B[i], C[i]); }
+  let i = 0;
+  const show = v => {
+    phone.dataset.aud = v.aud; tag.textContent = (v.aud === 'B' ? 'BUILDER' : 'CONSUMER') + ' · DAY ' + v.day;
+    if (reduce){ txt.textContent = v.hook; return; }
+    let n = 0; txt.textContent = '';
+    const t = setInterval(() => { n++; txt.textContent = v.hook.slice(0, n); if (n >= v.hook.length) clearInterval(t); }, 32);
+    show.t = t;
+  };
+  show(seq[0]);
+  if (!reduce) setInterval(() => { clearInterval(show.t); i = (i + 1) % seq.length; show(seq[i]); }, 6200);
+})();
+
+/* scroll-triggered line animations (content is visible without them) */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.3});
+['steps','fam'].forEach(id => io.observe(document.getElementById(id)));
+
+/* anatomy timeline */
+(() => {
+  const SEGS = {
+    45: [
+      ['Hook', 0, 3, 'Name the person or the problem. The first shot already shows it.'],
+      ['Problem', 3, 8, 'Make it feel like their day. Specific beats generic.'],
+      ['Curiosity loop', 8, 15, 'Open a question that matters to them, then hold the answer.'],
+      ['Payoff', 15, 30, 'Give the useful thing. This is why they stay.'],
+      ['BUILDFlow', 30, 40, 'Now, and only now, the connection. Truthful wording.'],
+      ['CTA', 40, 45, 'One ask. Rotate it so it never feels the same.']
+    ]
+  };
+  const LENS = {'15 to 25 sec': ['Fast insight, warning or checklist.', 20], '25 to 40 sec': ['Educational. The default for most of the week.', 33], '40 to 60 sec': ['Story, demo or product walkthrough.', 50], 'Master 45 sec': null};
+  const bar = $('#bar'), head = $('#head');
+  const segs = SEGS[45];
+  segs.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'seg'; b.style.flex = (s[2] - s[1]) + ' 1 0';
+    b.innerHTML = `${esc(s[0])}<small>${s[1]}-${s[2]}s</small>`;
+    b.addEventListener('click', () => { playing = false; $('#play').textContent = 'Play'; t = s[1] + .01; render(); });
+    bar.insertBefore(b, head);
+  });
+  const lens = $('#lens');
+  Object.keys(LENS).forEach(k => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (k === 'Master 45 sec' ? ' on' : ''); b.textContent = k;
+    b.addEventListener('click', () => {
+      lens.querySelectorAll('.btn').forEach(x => x.classList.toggle('on', x === b));
+      if (LENS[k]) { $('#segname').textContent = k; $('#segtext').textContent = LENS[k][0]; lens.dataset.note = '1'; playing = false; $('#play').textContent = 'Play'; bar.querySelectorAll('.seg').forEach(s => s.classList.remove('on')); }
+      else { lens.dataset.note = ''; playing = true; $('#play').textContent = 'Pause'; }
+    });
+    lens.appendChild(b);
+  });
+  let t = 0, playing = !reduce;
+  $('#play').textContent = playing ? 'Pause' : 'Play';
+  const fmt = s => '0:' + String(Math.floor(s)).padStart(2, '0');
+  function render(){
+    if (lens.dataset.note) return;
+    const idx = segs.findIndex(s => t >= s[1] && t < s[2]);
+    const k = idx < 0 ? segs.length - 1 : idx;
+    bar.querySelectorAll('.seg').forEach((el, i) => el.classList.toggle('on', i === k));
+    $('#segname').textContent = segs[k][0]; $('#segtext').textContent = segs[k][3]; $('#clock').textContent = fmt(t);
+    const el = bar.querySelectorAll('.seg')[k], r = el.getBoundingClientRect(), br = bar.getBoundingClientRect();
+    const frac = (t - segs[k][1]) / (segs[k][2] - segs[k][1]);
+    head.style.left = (r.left - br.left + r.width * Math.min(1, frac)) + 'px';
+  }
+  $('#play').addEventListener('click', () => {
+    if (lens.dataset.note) { lens.querySelectorAll('.btn').forEach(x => x.classList.toggle('on', x.textContent === 'Master 45 sec')); lens.dataset.note = ''; }
+    playing = !playing; $('#play').textContent = playing ? 'Pause' : 'Play';
+  });
+  setInterval(() => { if (playing){ t += .15; if (t >= 45) t = 0; render(); } }, 50);
+  addEventListener('resize', render);
+  render();
+})();
+
+/* hook roulette */
+(() => {
+  const cats = $('#cats'), roul = $('#roul');
+  let cur = 'All', last = '';
+  ['All', ...D.hookCategories.map(c => c.key)].forEach(k => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = k; if (k === cur) b.className = 'on';
+    b.addEventListener('click', () => { cur = k; cats.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); spin(); });
+    cats.appendChild(b);
+  });
+  const pool = () => (cur === 'All' ? D.hookCategories : D.hookCategories.filter(c => c.key === cur)).flatMap(c => c.examples);
+  function spin(){
+    const p = pool(); let n = 0;
+    roul.classList.add('spin');
+    const go = () => {
+      roul.textContent = p[Math.floor(Math.random() * p.length)];
+      if (++n < (reduce ? 1 : 9)) setTimeout(go, 70);
+      else { roul.classList.remove('spin'); last = roul.textContent; }
+    };
+    go();
+  }
+  $('#spin').addEventListener('click', spin);
+  $('#copyhook').addEventListener('click', e => { if (last) copy(last, e.currentTarget); });
+  spin();
+})();
+
+/* topic scoring */
+(() => {
+  const box = $('#sliders');
+  D.topicScoring.forEach((n, i) => {
+    box.insertAdjacentHTML('beforeend', `<div class="score-row"><label for="sc${i}">${esc(n)}</label><output id="so${i}">5</output><input id="sc${i}" type="range" min="0" max="10" value="5"></div>`);
+  });
+  const upd = () => {
+    let s = 0;
+    D.topicScoring.forEach((_, i) => { const v = +$('#sc' + i).value; $('#so' + i).textContent = v; s += v; });
+    $('#tot').textContent = s; $('#meter').style.width = (s / 60 * 100) + '%';
+  };
+  box.addEventListener('input', upd); upd();
+})();
+
+/* week 1 board */
+(() => {
+  const PL = [['YT','YouTube Shorts'],['FB','Facebook Reels'],['IG','Instagram Reels'],['TT','TikTok']];
+  const ids = D.videos.map(v => v.id);
+  let done = store.get('bf-posted', {});
+  let day = 1, open = {};
+  const total = ids.length * 4;
+  const R = 2 * Math.PI * 42;
+  $('#plats').innerHTML = PL.map(p => `<div>${p[1]}<div class="pb"><i id="pb-${p[0]}"></i></div></div>`).join('');
+  $('#days').innerHTML = [1,2,3,4,5,6,7].map(d => {
+    const th = D.videos.find(v => v.day === d).theme;
+    return `<button type="button" role="tab" data-d="${d}"><b>Day ${d}</b><small>${esc(th)}</small></button>`;
+  }).join('');
+  function stats(){
+    const n = Object.values(done).filter(Boolean).length;
+    $('#ringn').textContent = n; $('#ringtxt').textContent = `${n} of ${total} posts live`;
+    $('#ringfg').style.strokeDasharray = R; $('#ringfg').style.strokeDashoffset = R * (1 - n / total);
+    PL.forEach(p => { const c = ids.filter(id => done[id + ':' + p[0]]).length; $('#pb-' + p[0]).style.width = (c / ids.length * 100) + '%'; });
+  }
+  function card(v){
+    const who = v.aud === 'B' ? 'Builder' : 'Consumer';
+    const beats = v.beats.map(b => `<div class="beat"><div class="t">${esc(b.t)}${b.t === 'CTA' ? '' : 's'}</div><div><p class="v">${esc(b.visual)}</p><p class="o">${esc(b.vo)}</p><p style="margin-top:4px"><span class="x">${esc(b.text)}</span></p></div></div>`).join('');
+    return `<article class="vid ${v.aud}" data-id="${v.id}">
+      <div class="vh"><span class="mono">${esc(v.id)} · ${who}</span><span class="mono">${v.len}s</span></div>
+      <div class="vb">
+        <p class="hk">${esc(v.hook)}</p>
+        <dl class="kv"><dt>Pillar</dt><dd>${esc(v.pillar)}</dd><dt>Goal</dt><dd>${esc(v.objective)}</dd><dt>Curiosity</dt><dd>${esc(v.curiosity)}</dd><dt>Payoff</dt><dd>${esc(v.payoff)}</dd><dt>CTA</dt><dd>${esc(v.ctaType)}: ${esc(v.cta)}</dd><dt>Test</dt><dd><b>${esc(v.variable)}.</b> ${esc(v.hypothesis)}</dd></dl>
+        <div class="post" role="group" aria-label="Posted on">${PL.map(p => `<label><input type="checkbox" data-k="${v.id}:${p[0]}" ${done[v.id + ':' + p[0]] ? 'checked' : ''}>${p[1].split(' ')[0]}</label>`).join('')}</div>
+        <div class="copyrow"><button class="btn tiny" data-copy="${v.id}" type="button">Copy caption and tags</button><button class="btn tiny" data-open="${v.id}" type="button" aria-expanded="${!!open[v.id]}">${open[v.id] ? 'Hide storyboard' : 'Show storyboard'}</button></div>
+        ${open[v.id] ? `<div class="story">${beats}<dl class="kv"><dt>BUILDFlow</dt><dd>${esc(v.connection)}</dd><dt>Caption</dt><dd>${esc(v.caption)}</dd><dt>Tags</dt><dd>${esc(v.tags)}</dd><dt>Check first</dt><dd>${esc(v.check)}</dd></dl></div>` : ''}
+      </div></article>`;
+  }
+  function render(){
+    $('#days').querySelectorAll('button').forEach(b => { const on = +b.dataset.d === day; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $('#pair').innerHTML = D.videos.filter(v => v.day === day).map(card).join('');
+    stats();
+  }
+  $('#days').addEventListener('click', e => { const b = e.target.closest('button'); if (b){ day = +b.dataset.d; render(); } });
+  $('#pair').addEventListener('change', e => {
+    const k = e.target.dataset.k; if (!k) return;
+    done[k] = e.target.checked; store.set('bf-posted', done); stats();
+  });
+  $('#pair').addEventListener('click', e => {
+    const o = e.target.closest('[data-open]'), c = e.target.closest('[data-copy]');
+    if (o){ const id = o.dataset.open; open[id] = !open[id]; render(); }
+    if (c){ const v = D.videos.find(x => x.id === c.dataset.copy); copy(v.caption + '\n\n' + v.tags, c); }
+  });
+  render();
+})();
+
+/* feedback loop */
+(() => {
+  const STEPS = [
+    ['Content', 'You publish a video aimed at one person with one problem.'],
+    ['Audience response', 'They watch, rewatch, save, share, comment or scroll past.'],
+    ['Data', 'Retention, saves, shares, comments and profile visits get logged.'],
+    ['Problem validation', 'Topics that stop people prove the problem is real.'],
+    ['Product insight', 'Comments show what they wish existed.'],
+    ['BUILDFlow development', 'The product team builds what people kept asking for.'],
+    ['New content', 'The next batch is shaped by what you learned. Back to the start.']
+  ];
+  const box = $('#loop'), info = $('#loopinfo');
+  let i = 0, auto = !reduce;
+  STEPS.forEach((s, k) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = s[0];
+    b.addEventListener('click', () => { auto = false; i = k; paint(); });
+    box.appendChild(b);
+    if (k < STEPS.length - 1) box.insertAdjacentHTML('beforeend', '<span class="ar">→</span>');
+  });
+  box.insertAdjacentHTML('beforeend', '<span class="ar">↺</span>');
+  function paint(){ box.querySelectorAll('button').forEach((b, k) => b.classList.toggle('on', k === i)); info.textContent = STEPS[i][1]; }
+  paint();
+  if (!reduce) setInterval(() => { if (auto){ i = (i + 1) % STEPS.length; paint(); } }, 2200);
+})();
+
+/* terms checklist */
+(() => {
+  const T = ['Who films which lane, and who edits', 'How the split and ownership work, written down', 'Who owns and holds the four accounts', 'The weekly review time and the weekly report', 'How we decide when we disagree', 'What we say and never say about BUILDFlow (see Rules)'];
+  const saved = store.get('bf-terms', {});
+  $('#terms').innerHTML = T.map((t, i) => `<label for="t${i}"><input id="t${i}" type="checkbox" ${saved[i] ? 'checked' : ''}><span>${esc(t)}</span></label>`).join('');
+  $('#terms').addEventListener('change', e => { const m = e.target.id.match(/^t(\d+)$/); if (m){ saved[m[1]] = e.target.checked; store.set('bf-terms', saved); } });
+})();
+</script>

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>World Builders Construction | Quality You Can Trust. Transparency You Deserve.</title>
+<meta name="description" content="New house construction, extensions, renovations, concrete and masonry across Jamaica. Based in Clarendon. Request a quote and site visit.">
+<meta name="theme-color" content="#0A2A66">
+<link rel="icon" href="images/logo-mark.jpg">
+<link rel="preload" as="image" href="images/logo-full.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A2A66;--navy2:#071D49;--blue:#1565D8;--sky:#2EA3FF;--white:#fff;--mist:#F1F6FC;--line:#D3DEEE;--ink:#0E1B33;--mute:#5B6B86;--ok:#1B9A52}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:'Inter Tight',system-ui,sans-serif;background:var(--white);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.cond{font-family:'Barlow Condensed',Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.blueprint{background-image:linear-gradient(rgba(21,101,216,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(21,101,216,.10) 1px,transparent 1px);background-size:44px 44px}
+/* loader */
+#loader{position:fixed;inset:0;z-index:100;background:#fff;display:grid;place-items:center;transition:opacity .6s,visibility .6s}
+#loader.done{opacity:0;visibility:hidden}
+#loader img{width:min(340px,70vw);opacity:0;transform:scale(.94);animation:pop .9s .1s forwards cubic-bezier(.2,.8,.2,1)}
+#loader .bar{position:absolute;bottom:18vh;width:min(220px,50vw);height:3px;background:var(--line);overflow:hidden}
+#loader .bar:after{content:"";display:block;height:100%;background:var(--blue);transform:translateX(-100%);animation:load 1.7s .1s forwards ease-out}
+@keyframes pop{to{opacity:1;transform:none}}@keyframes load{to{transform:none}}
+/* preview notice (shown only while CFG.endpoint is empty) */
+#pv{display:none;background:#FFE9A8;color:#4a3800;font-size:13.5px;text-align:center;padding:10px 16px;font-weight:500;line-height:1.4}
+.pvnote{display:none;background:#FFF4CC;border-left:4px solid #E0A800;color:#4a3800;padding:12px 14px;font-size:13.5px;margin-bottom:18px;line-height:1.45}
+.nopv #pv,.nopv .pvnote{display:none}
+.showpv #pv{display:block}.showpv .pvnote{display:block}
+/* nav */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{height:46px;width:auto;mix-blend-mode:multiply}
+.brand b{font-family:'Barlow Condensed';font-size:22px;letter-spacing:.07em;text-transform:uppercase;line-height:.9;color:var(--navy)}
+.brand small{display:block;font-size:10px;letter-spacing:.3em;color:var(--blue);text-transform:uppercase;font-weight:600;margin-top:3px}
+.links{display:flex;gap:26px;align-items:center;font-size:14px;font-weight:500}
+.links a{text-decoration:none;color:var(--mute)}.links a:hover{color:var(--navy)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;border:0;padding:15px 26px;font:600 15px 'Inter Tight';text-decoration:none;cursor:pointer;transition:background .2s,transform .1s}
+.btn:hover{background:var(--navy)}.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}.btn.ghost:hover{background:var(--navy);color:#fff}
+.btn.wa{background:var(--ok)}.btn.wa:hover{background:#13793f}
+.links .btn{padding:10px 18px;font-size:14px;color:#fff}
+/* hero */
+.hero{position:relative;padding:60px 0 80px;overflow:hidden;background:var(--mist)}
+.hero:before{content:"";position:absolute;inset:0;background-image:inherit}
+.hero .blueprint{position:absolute;inset:0;mask-image:linear-gradient(to bottom,#000 40%,transparent)}
+.hero .wrap{position:relative;display:grid;gap:48px;grid-template-columns:1.15fr .85fr;align-items:center}
+.tag{display:inline-block;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--navy);font-weight:600;border-left:3px solid var(--blue);padding-left:10px;margin-bottom:22px}
+h1{font-size:clamp(52px,8.6vw,112px);font-weight:700;color:var(--navy)}
+h1 em{font-style:normal;color:var(--blue);display:block}
+.lead{font-size:19px;max-width:540px;margin:26px 0 30px;color:#2c3c58}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.trust{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px;font-size:13.5px;color:var(--mute)}
+.trust span:before{content:"✓ ";color:var(--blue);font-weight:700}
+.frame{position:relative}
+.frame:before{content:"";position:absolute;inset:18px -18px -18px 18px;background:var(--blue)}
+.frame img{position:relative;display:block;width:100%;aspect-ratio:4/4.2;object-fit:cover;border:6px solid #fff}
+.frame .cap{position:absolute;left:-14px;bottom:26px;background:var(--navy);color:#fff;padding:10px 16px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+/* sections */
+section{padding:88px 0}
+.eyebrow{font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:14px}
+h2{font-size:clamp(38px,6vw,70px);font-weight:700;max-width:780px;color:var(--navy)}
+.sec-sub{max-width:580px;color:var(--mute);margin-top:18px;font-size:17px}
+/* services */
+.services{background:var(--navy);color:#fff}
+.services h2{color:#fff}.services .eyebrow{color:var(--sky)}
+.services .sec-sub{color:#9db3d6}
+.spec{margin-top:48px;display:grid;grid-template-columns:1fr 1fr;column-gap:56px}
+.spec li{list-style:none;display:grid;grid-template-columns:48px 1fr;gap:6px 14px;padding:22px 0;border-top:1px solid rgba(255,255,255,.18);transition:background .2s,padding .2s}
+.spec li:hover{background:rgba(255,255,255,.05);padding-left:12px}
+.spec .n{font-family:'Barlow Condensed';font-size:28px;font-weight:700;color:var(--sky);line-height:1}
+.spec h3{font-size:23px;letter-spacing:.03em;line-height:1.05}
+.spec p{grid-column:2;color:#a9bddc;font-size:14.5px}
+.spec li.prio h3:after{content:"Most requested";font-family:'Inter Tight';font-size:10px;letter-spacing:.12em;background:var(--sky);color:var(--navy);padding:3px 7px;margin-left:10px;vertical-align:middle;font-weight:700}
+/* process */
+.steps{display:grid;grid-template-columns:repeat(5,1fr);margin-top:56px;border-top:2px solid var(--navy)}
+.step{padding:26px 18px 0 0;position:relative}
+.step:before{content:"";position:absolute;top:-8px;left:0;width:14px;height:14px;background:var(--blue)}
+.step .k{font-size:12px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase;font-weight:600}
+.step h3{font-size:27px;margin:8px 0;color:var(--navy)}
+.step p{font-size:14.5px;color:var(--mute)}
+/* promise */
+.promise{background:var(--mist)}
+.promise .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.promise blockquote{font-family:'Barlow Condensed';text-transform:uppercase;font-size:clamp(34px,4.6vw,54px);line-height:1;font-weight:700;color:var(--navy);margin:20px 0}
+.promise blockquote em{font-style:normal;color:var(--blue)}
+.checks{list-style:none;display:grid;gap:0}
+.checks li{padding:14px 0 14px 34px;border-bottom:1px solid var(--line);position:relative;font-weight:500}
+.checks li:before{content:"";position:absolute;left:4px;top:19px;width:14px;height:8px;border-left:3px solid var(--blue);border-bottom:3px solid var(--blue);transform:rotate(-45deg)}
+/* gallery */
+.gal{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:340px;gap:10px;margin-top:44px}
+.gal figure{position:relative;overflow:hidden;background:var(--mist);margin:0}
+.gal figure img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.gal figure:hover img{transform:scale(1.04)}
+.gal figcaption{position:absolute;left:0;bottom:0;right:0;padding:26px 14px 12px;background:linear-gradient(transparent,rgba(7,29,73,.85));color:#fff;font-size:12.5px;letter-spacing:.04em}
+/* quote */
+.quote{background:var(--navy2);color:#fff}
+.quote .wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px}
+.quote h2{color:#fff}.quote .eyebrow{color:var(--sky)}
+.qside p{color:#a9bddc;margin:18px 0}
+.qside .big{font-family:'Barlow Condensed';font-size:40px;font-weight:700;color:#fff;text-decoration:none;display:block;margin:6px 0 4px}
+.qside .alt{color:#a9bddc;font-size:14px;margin-bottom:22px}.qside .alt a{color:#fff}
+.ticks{list-style:none}.ticks li{padding:7px 0 7px 26px;position:relative;font-size:15px;color:#d5e1f5}
+.ticks li:before{content:"";position:absolute;left:0;top:13px;width:12px;height:7px;border-left:2.5px solid var(--sky);border-bottom:2.5px solid var(--sky);transform:rotate(-45deg)}
+.hours{margin-top:26px;padding-top:20px;border-top:1px solid rgba(255,255,255,.18);font-size:13.5px;color:#a9bddc}
+.hours b{color:#fff;font-weight:600}
+form{background:#fff;color:var(--ink);padding:34px;position:relative}
+.prog{display:flex;gap:6px;margin-bottom:8px}.prog i{flex:1;height:4px;background:var(--line);transition:background .3s}.prog i.on{background:var(--blue)}
+.stepno{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin-bottom:18px;font-weight:600}
+fieldset{border:0;display:none}fieldset.on{display:block;animation:in .35s}
+@keyframes in{from{opacity:0;transform:translateX(14px)}}
+legend{font-family:'Barlow Condensed';font-size:34px;text-transform:uppercase;font-weight:700;margin-bottom:18px;line-height:1;color:var(--navy)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{position:relative}.opt input{position:absolute;opacity:0;inset:0;cursor:pointer;width:100%;height:100%;margin:0}
+.opt span{display:block;border:1.5px solid var(--line);background:#fff;padding:15px 14px;font-size:15px;font-weight:500;transition:.15s}
+.opt input:checked+span{border-color:var(--blue);background:#EAF2FF;box-shadow:inset 0 0 0 1px var(--blue);color:var(--navy)}
+.opt input:focus-visible+span{outline:2px solid var(--navy);outline-offset:2px}
+.opt:hover span{border-color:var(--navy)}
+.lbl{display:block;font-size:13px;font-weight:600;margin:20px 0 8px;color:var(--navy)}
+input[type=text],input[type=tel],input[type=email],textarea{width:100%;border:1.5px solid var(--line);background:#fff;padding:14px;font:400 16px 'Inter Tight';border-radius:0;color:var(--ink)}
+input:focus,textarea:focus{outline:none;border-color:var(--blue)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.nav-btns{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px}
+.back{background:none;border:0;font:500 14px 'Inter Tight';color:var(--mute);cursor:pointer;text-decoration:underline}
+.err{color:#b3261e;font-size:13px;margin-top:10px;min-height:18px}
+.fine{font-size:12.5px;color:var(--mute);margin-top:14px}
+.hp{position:absolute;left:-9999px}
+.thanks{text-align:center;padding:20px 0;display:none}
+.thanks h3{font-size:48px;margin-bottom:12px;color:var(--navy)}.thanks p{color:var(--mute);margin-bottom:22px}
+footer{padding:44px 0 90px;background:#041333;color:#8ea3c9;font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px}
+footer b{color:#fff;font-family:'Barlow Condensed';font-size:22px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px}
+footer a{text-decoration:none;color:#c9d7f0}footer a:hover{color:#fff}
+.sticky{position:fixed;bottom:0;left:0;right:0;z-index:60;display:none;gap:1px;background:#fff}
+.sticky a{flex:1;text-align:center;padding:16px;font-weight:600;color:#fff;text-decoration:none;background:var(--blue)}
+.sticky a+a{background:var(--ok)}
+.reveal{opacity:0;transform:translateY(24px);transition:.7s}.reveal.in{opacity:1;transform:none}
+@media(max-width:900px){
+ .hero .wrap,.quote .wrap,.promise .wrap,.spec{grid-template-columns:1fr}
+ .frame{margin:0 14px 18px 0}
+ .steps{grid-template-columns:1fr;border-top:0;border-left:2px solid var(--navy);margin-left:6px}
+ .step{padding:0 0 28px 24px}.step:before{top:4px;left:-8px}
+ .gal{grid-auto-rows:220px}
+ section{padding:60px 0}.links a:not(.btn){display:none}.links .btn{display:none}.sticky{display:flex}form{padding:22px}.row{grid-template-columns:1fr}
+ .brand img{height:40px}.brand b{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+</style>
+</head>
+<body>
+<!-- Loader A/B test: ?loader=on or ?loader=off forces a variant; otherwise 50/50 split, remembered per visitor.
+     The variant is pushed to dataLayer and saved with every lead so conversion can be compared. -->
+<div id="loader" aria-hidden="true"><img src="images/logo-full.jpg" alt=""><div class="bar"></div></div>
+
+<div id="pv"><b>Preview draft.</b> Enquiries sent from this page are not delivered to World Builders yet. This is for review only.</div>
+<header><div class="wrap nav">
+ <a class="brand" href="#top" aria-label="World Builders Construction">
+  <img src="images/logo-mark.jpg" alt="">
+  <span><b>World Builders</b><small>Construction</small></span>
+ </a>
+ <nav class="links"><a href="#services">Services</a><a href="#process">Process</a><a href="#promise">Our promise</a><a href="#work">Projects</a><a class="btn" href="#quote">Request a quote</a></nav>
+</div></header>
+
+<main id="top">
+<section class="hero"><div class="blueprint"></div><div class="wrap">
+ <div>
+  <div class="tag">Clarendon · Island-wide</div>
+  <h1>Quality you can trust.<em>Transparency you deserve.</em></h1>
+  <p class="lead">From new homes to extensions and renovations, we build your vision from the foundation to the finish, with every cost, quantity and change put in writing.</p>
+  <div class="cta"><a class="btn" href="#quote">Request a quote →</a><a class="btn ghost" href="#process">How it works</a></div>
+  <div class="trust"><span>Written quotations</span><span>Agreed payment schedules</span><span>Progress updates</span></div>
+ </div>
+ <div class="frame reveal"><img src="images/site-team-house.jpg" alt="World Builders team on site in front of a completed house"><div class="cap">Site visit · Clarendon</div></div>
+</div></section>
+
+<section class="services" id="services"><div class="wrap">
+ <div class="eyebrow">What we build</div>
+ <h2 class="reveal">Everything from first line to final coat.</h2>
+ <p class="sec-sub">One team that handles the full build, so you are not chasing separate trades.</p>
+ <ul class="spec reveal">
+  <li class="prio"><span class="n">01</span><h3>New House Construction</h3><p>Homes built from the foundation to completion, to your plans and specifications.</p></li>
+  <li class="prio"><span class="n">02</span><h3>Extensions &amp; Renovations</h3><p>Expanding and upgrading residential or commercial properties.</p></li>
+  <li><span class="n">03</span><h3>Concrete &amp; Reinforced Concrete</h3><p>Foundations, columns, beams, lintels and slabs.</p></li>
+  <li><span class="n">04</span><h3>Block Laying &amp; Masonry</h3><p>Block walls, partitions, boundary walls and general masonry.</p></li>
+  <li><span class="n">05</span><h3>Steel Fixing &amp; Reinforcement</h3><p>Cutting, bending, positioning and tying reinforcement steel.</p></li>
+  <li><span class="n">06</span><h3>Roofing &amp; Structural Work</h3><p>Roof framing, structural timber work and related components.</p></li>
+  <li><span class="n">07</span><h3>Plastering &amp; Finishing</h3><p>Wall rendering, surface preparation and finishing.</p></li>
+  <li><span class="n">08</span><h3>Building Lining Out</h3><p>Measuring, setting out and marking layouts and foundation lines.</p></li>
+  <li><span class="n">09</span><h3>Material &amp; Labour Estimates</h3><p>Quantities, labour estimates and cost breakdowns to plan your budget.</p></li>
+  <li><span class="n">10</span><h3>Site Visits &amp; Consultations</h3><p>We assess your site, discuss requirements and advise on next steps.</p></li>
+  <li><span class="n">11</span><h3>General Construction &amp; Maintenance</h3><p>Building repairs, maintenance and other agreed construction tasks.</p></li>
+ </ul>
+</div></section>
+
+<section id="process"><div class="wrap">
+ <div class="eyebrow">How it works</div>
+ <h2 class="reveal">No guesswork. Five clear steps.</h2>
+ <p class="sec-sub">Larger projects cannot be priced accurately from a photo. So we assess, visit and then quote in writing.</p>
+ <div class="steps reveal">
+  <div class="step"><div class="k">Step 1</div><h3>Enquiry</h3><p>Tell us about your project using the form below.</p></div>
+  <div class="step"><div class="k">Step 2</div><h3>Assessment</h3><p>We review your details and what is still needed.</p></div>
+  <div class="step"><div class="k">Step 3</div><h3>Site visit</h3><p>We inspect the site, measure and discuss your requirements.</p></div>
+  <div class="step"><div class="k">Step 4</div><h3>Written quote</h3><p>Quantities, labour, materials and timeline, explained line by line.</p></div>
+  <div class="step"><div class="k">Step 5</div><h3>Contract</h3><p>Written approval, payment milestones, then we start building.</p></div>
+ </div>
+</div></section>
+
+<section class="promise" id="promise"><div class="wrap">
+ <div>
+  <div class="eyebrow">Our promise</div>
+  <blockquote>We don't just build structures. We build <em>trust, quality</em> and lasting relationships.</blockquote>
+  <p class="sec-sub">We build your world of hopes and dreams, turning your vision into reality. Proper workmanship and attention to detail, not just getting it done.</p>
+ </div>
+ <ul class="checks reveal">
+  <li>Written agreements before construction begins</li>
+  <li>Clearly defined scopes of work</li>
+  <li>Detailed quotations</li>
+  <li>Agreed payment schedules</li>
+  <li>Clear communication throughout the project</li>
+  <li>Progress updates</li>
+  <li>Documentation of any agreed changes</li>
+  <li>Accountability for the work being carried out</li>
+ </ul>
+</div></section>
+
+<section id="work"><div class="wrap">
+ <div class="eyebrow">Projects</div>
+ <h2 class="reveal">Real sites. Real crews.</h2>
+ <div class="gal reveal" id="gal"></div>
+</div></section>
+
+<section class="quote" id="quote"><div class="wrap">
+ <div class="qside">
+  <div class="eyebrow">Free enquiry</div>
+  <h2>Let's scope your build.</h2>
+  <p>Answer a few quick questions. Mr. Ricardo Gayle, our CEO, will contact you personally to arrange your site visit.</p>
+  <a class="big" href="https://wa.me/18765134962">WhatsApp 876-513-4962</a>
+  <div class="alt">Or call <a href="tel:+18765134942">876-513-4942</a></div>
+  <ul class="ticks"><li>Takes about 60 seconds</li><li>Personal reply from the CEO</li><li>Detailed written quotation after a site visit</li><li>No obligation</li></ul>
+  <div class="hours"><b>Site operations:</b> Mon–Fri 7:30am–5:00pm · Sat 7:30am–1:00pm<br><b>Office:</b> Mon–Fri 8:00am–5:00pm · Sat 8:00am–1:00pm<br>Sundays &amp; public holidays by prior arrangement.</div>
+ </div>
+ <form id="f" novalidate>
+  <div class="pvnote"><b>Test only:</b> this preview does not send enquiries to World Builders. Please do not use it for a real enquiry. Call or WhatsApp 876-513-4962 instead.</div>
+  <div class="prog"><i class="on"></i><i></i><i></i></div><div class="stepno" id="sn">Step 1 of 3</div>
+  <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off">
+  <fieldset class="on"><legend>What are we building?</legend>
+   <div class="opts">
+    <label class="opt"><input type="radio" name="project" value="New house construction"><span>New house</span></label>
+    <label class="opt"><input type="radio" name="project" value="Extension"><span>Extension</span></label>
+    <label class="opt"><input type="radio" name="project" value="Renovation"><span>Renovation</span></label>
+    <label class="opt"><input type="radio" name="project" value="Concrete, block or structural work"><span>Concrete, block or structural work</span></label>
+    <label class="opt"><input type="radio" name="project" value="Repairs / maintenance"><span>Repairs or maintenance</span></label>
+    <label class="opt"><input type="radio" name="project" value="Estimate / not sure yet"><span>Estimate / not sure yet</span></label>
+   </div><div class="err"></div>
+   <div class="nav-btns"><span></span><button type="button" class="btn next">Continue →</button></div>
+  </fieldset>
+  <fieldset><legend>Tell us the scope</legend>
+   <span class="lbl">Approximate size</span>
+   <div class="opts"><label class="opt"><input type="radio" name="size" value="Small"><span>Small</span></label><label class="opt"><input type="radio" name="size" value="Medium"><span>Medium</span></label><label class="opt"><input type="radio" name="size" value="Large"><span>Large</span></label><label class="opt"><input type="radio" name="size" value="Not sure"><span>Not sure</span></label></div>
+   <span class="lbl">Do you have plans or drawings?</span>
+   <div class="opts"><label class="opt"><input type="radio" name="plans" value="Yes, approved"><span>Yes, approved</span></label><label class="opt"><input type="radio" name="plans" value="Yes, not yet approved"><span>Yes, not yet approved</span></label><label class="opt"><input type="radio" name="plans" value="Sketches or photos only"><span>Sketches or photos only</span></label><label class="opt"><input type="radio" name="plans" value="No plans yet"><span>Not yet</span></label></div>
+   <span class="lbl">Budget range (JMD)</span>
+   <div class="opts"><label class="opt"><input type="radio" name="budget" value="Under 3M"><span>Under $3M</span></label><label class="opt"><input type="radio" name="budget" value="3M-8M"><span>$3M – $8M</span></label><label class="opt"><input type="radio" name="budget" value="8M-20M"><span>$8M – $20M</span></label><label class="opt"><input type="radio" name="budget" value="20M+"><span>$20M+</span></label><label class="opt"><input type="radio" name="budget" value="Not decided"><span>Not decided yet</span></label></div>
+   <span class="lbl">When do you want to start?</span>
+   <div class="opts"><label class="opt"><input type="radio" name="timeframe" value="Within 3 months"><span>Within 3 months</span></label><label class="opt"><input type="radio" name="timeframe" value="3-6 months"><span>3–6 months</span></label><label class="opt"><input type="radio" name="timeframe" value="6+ months"><span>6+ months</span></label><label class="opt"><input type="radio" name="timeframe" value="Just planning"><span>Just planning</span></label></div>
+   <div class="err"></div>
+   <div class="nav-btns"><button type="button" class="back">← Back</button><button type="button" class="btn next">Continue →</button></div>
+  </fieldset>
+  <fieldset><legend>Where do we reach you?</legend>
+   <label class="lbl" for="name">Full name</label><input id="name" name="name" type="text" autocomplete="name">
+   <div class="row"><div><label class="lbl" for="phone">Phone / WhatsApp</label><input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="876-000-0000"></div><div><label class="lbl" for="email">Email (optional)</label><input id="email" name="email" type="email" autocomplete="email"></div></div>
+   <label class="lbl" for="loc">Project location</label><input id="loc" name="location" type="text" placeholder="Town / parish">
+   <label class="lbl" for="msg">Anything else we should know? (optional)</label><textarea id="msg" name="message" rows="3"></textarea>
+   <div class="err" id="e3"></div>
+   <div class="nav-btns"><button type="button" class="back">← Back</button><button type="submit" class="btn" id="go">Send my enquiry</button></div>
+   <p class="fine">We only use your details to respond to this enquiry.</p>
+  </fieldset>
+  <div class="thanks" id="ok"><h3 id="okh">Enquiry received</h3><p id="okp">Thank you. Mr. Gayle will contact you shortly to arrange your site visit.</p><a class="btn wa" id="wa" target="_blank" rel="noopener">Send details on WhatsApp for a faster reply</a></div>
+ </form>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+ <div><b>World Builders Construction</b>Quality You Can Trust. Transparency You Deserve.<br>Clarendon, Jamaica · Island-wide</div>
+ <div>WhatsApp <a href="https://wa.me/18765134962">876-513-4962</a><br>Tel <a href="tel:+18765134942">876-513-4942</a><br><a href="mailto:gayle.r.ricardo@gmail.com">gayle.r.ricardo@gmail.com</a></div>
+ <div><a href="https://www.facebook.com/share/1FN6NYhPkT/?mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a> · <a href="https://www.instagram.com/worldbuilders123" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.tiktok.com/@worldbuilder123" target="_blank" rel="noopener">TikTok</a><br>© <span id="yr"></span> World Builders Construction</div>
+</div></footer>
+<div class="sticky"><a href="#quote">Get a quote</a><a href="https://wa.me/18765134962">WhatsApp</a></div>
+
+<script>
+/* ===== CONFIG ===== */
+var CFG={
+  whatsapp:'18765134962',
+  /* Paste a form endpoint (Formspree / Web3Forms / own API) to receive each lead by email.
+     Until set, leads are saved in the browser and the visitor is handed to WhatsApp with the enquiry prefilled. */
+  endpoint:''
+};
+/* Gallery: add or remove entries to update the site. src is a file in /images. */
+var GALLERY=[
+ {src:'images/site-team-house.jpg',cap:'Site team at a completed house'},
+ {src:'images/block-laying.jpg',cap:'Block laying on site'}
+];
+(function(){
+ document.getElementById('yr').textContent=new Date().getFullYear();
+ if(!CFG.endpoint)document.documentElement.classList.add('showpv');
+ document.getElementById('gal').innerHTML=GALLERY.map(function(g){return '<figure><img loading="lazy" src="'+g.src+'" alt="'+g.cap+'"><figcaption>'+g.cap+'</figcaption></figure>'}).join('');
+ /* loader A/B */
+ var q=new URLSearchParams(location.search).get('loader'),v;
+ try{v=localStorage.getItem('wb_loader')}catch(e){}
+ if(q==='on'||q==='off')v=q;else if(v!=='on'&&v!=='off')v=Math.random()<.5?'on':'off';
+ try{localStorage.setItem('wb_loader',v)}catch(e){}
+ window.WB_VARIANT='loader_'+v;
+ var L=document.getElementById('loader');
+ if(v==='off'||matchMedia('(prefers-reduced-motion:reduce)').matches)L.remove();
+ else{document.documentElement.style.overflow='hidden';var t0=Date.now(),gone=false;
+  function hide(){if(gone)return;gone=true;L.classList.add('done');document.documentElement.style.overflow='';setTimeout(function(){L.remove()},700)}
+  function ready(){setTimeout(hide,Math.max(0,1900-(Date.now()-t0)))}
+  if(document.readyState==='complete')ready();else addEventListener('load',ready);
+  setTimeout(hide,4500)}
+ (window.dataLayer=window.dataLayer||[]).push({event:'variant',variant:window.WB_VARIANT});
+ var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+ document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+ /* funnel */
+ var f=document.getElementById('f'),fs=[].slice.call(f.querySelectorAll('fieldset')),bars=f.querySelectorAll('.prog i'),i=0,sn=document.getElementById('sn');
+ function track(n){(window.dataLayer=window.dataLayer||[]).push({event:'funnel',step:n,variant:window.WB_VARIANT})}
+ function show(n){i=n;fs.forEach(function(x,k){x.classList.toggle('on',k===n)});bars.forEach(function(b,k){b.classList.toggle('on',k<=n)});sn.textContent='Step '+(n+1)+' of 3'}
+ function val(n){var e=fs[n].querySelector('.err');e.textContent='';
+  if(n===0&&!f.project.value){e.textContent='Please choose a project type.';return false}
+  if(n===1&&(!f.size.value||!f.plans.value||!f.budget.value||!f.timeframe.value)){e.textContent='Please answer all four questions. "Not sure" is fine.';return false}return true}
+ f.addEventListener('click',function(e){
+  if(e.target.classList.contains('next')&&val(i)){show(i+1);track('step_'+(i+1))}
+  if(e.target.classList.contains('back'))show(i-1)});
+ f.addEventListener('change',function(e){if(e.target.type==='radio'&&i===0&&val(0)){setTimeout(function(){show(1);track('step_1')},220)}});
+ f.addEventListener('submit',function(e){e.preventDefault();
+  var er=document.getElementById('e3'),name=f.name.value.trim(),ph=f.phone.value.replace(/\D/g,'');er.textContent='';
+  if(f.company_website.value)return;
+  if(name.length<2){er.textContent='Please enter your name.';return}
+  if(ph.length<7){er.textContent='Please enter a valid phone or WhatsApp number.';return}
+  if(!f.location.value.trim()){er.textContent='Please add the project location.';return}
+  var d={name:name,phone:f.phone.value.trim(),email:f.email.value.trim(),location:f.location.value.trim(),project:f.project.value,size:f.size.value,plans:f.plans.value,budget_jmd:f.budget.value,timeframe:f.timeframe.value,message:f.message.value.trim(),variant:window.WB_VARIANT,page:location.href,time:new Date().toISOString()};
+  try{var a=JSON.parse(localStorage.getItem('wb_leads')||'[]');a.push(d);localStorage.setItem('wb_leads',JSON.stringify(a))}catch(x){}
+  var msg='Hello World Builders, I would like a quote.\n\nName: '+d.name+'\nPhone: '+d.phone+'\nLocation: '+d.location+'\nProject: '+d.project+'\nSize: '+d.size+'\nPlans: '+d.plans+'\nBudget (JMD): '+d.budget_jmd+'\nStart: '+d.timeframe+(d.message?'\nNotes: '+d.message:'');
+  var wa='https://wa.me/'+CFG.whatsapp+'?text='+encodeURIComponent(msg);
+  var btn=document.getElementById('go');btn.disabled=true;btn.textContent='Sending…';
+  function done(sent){fs.forEach(function(x){x.classList.remove('on')});f.querySelector('.prog').style.display='none';sn.style.display='none';
+   document.getElementById('wa').href=wa;document.getElementById('ok').style.display='block';
+   if(!sent)document.getElementById('okp').textContent=CFG.endpoint?'Thank you. To get the fastest response, tap below to send your details to us on WhatsApp.':'TEST ONLY: this preview did not send your enquiry to World Builders. To really enquire, tap below to send these details on WhatsApp.';
+   if(!CFG.endpoint)document.getElementById('okh').textContent='Test received (not sent)';track('lead_submitted');if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead');
+   document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'})}
+  if(CFG.endpoint){fetch(CFG.endpoint,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(d)}).then(function(r){done(r.ok)}).catch(function(){done(false)})}
+  else done(false)})
+})();
+</script>
+</body>
+</html>
