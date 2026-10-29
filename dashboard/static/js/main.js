@@ -1,6 +1,6 @@
 (function () {
   const { $, el, add, text, icon } = Z;
-  const NAV = [["founder", "Founder"], ["buildflow", "BuildFlow", "side"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
+  const NAV = [["founder", "Founder"], ["buildflow", "BuildFlow", "side"], ["agriloop", "Agriloop", "side"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
   const AUTH = ["msgbox", "setup1", "setup2", "setup3", "login"];
   let timer = null, seq = 0, current = "founder";
 

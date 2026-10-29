@@ -2,6 +2,67 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 4: Agriloop Workspace. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Built and tested locally (303 tests + browser check at 3 sizes). Not applied to production Neon (awaiting founder approval + backup); no lint/type/build tooling. Phase 3 was reviewed before starting (no defects found; its handoff lists its limits).
+**Branch:** `ccr-9e3eecee-aucmfd` (stacked, PR #1).
+
+### Objective
+Agriloop marketplace workspace: farmers, buyers, supply, demand, matching, transactions, retention, partner-opportunity validation, using only recorded data.
+
+### Work completed
+- Migration `010_marketplace.sql`: `market_parties` (role farmer|buyer, stage lead/onboarded/active/churned), `market_listings` (supply, must belong to a farmer), `market_demand` (buyer requests, must belong to a buyer), `market_transactions` (proposed/agreed/completed/cancelled). Business-scoped; money rows carry their own currency.
+- `core/workspace.py`: `marketplace` section for `agriloop` (funnel by role/stage, liquidity per product, suggested matches, deal summary, repeat buyers). Pure, tested helpers `suggest_matches`, `liquidity`, `transaction_summary`.
+- Matching is rule-based and labelled **inference**: same product (case-insensitive) required; a known location mismatch or a known price above the buyer's max (same currency) rules a pair out; unknown fields neither help nor hurt and are listed as unknowns. Score = 50 base + location/price/quantity evidence. One click records a *proposed* deal; nothing is auto-confirmed.
+- Money: completed deal value is summed per currency, never across currencies; completed deals without an amount/currency are counted but not valued.
+- Partner hypothesis: knowledge notes tagged `partner-hypothesis` render as "HYPOTHESIS, not validated"; nothing about a partner is stored as fact.
+- UI `dashboard/static/js/agriloop.js` (`#agriloop`: Overview, Supply & demand, Matches, Deals, People, Notes). Overview/Notes are shared with BuildFlow via `Z.ws`. Side-nav entry; phones reach it from the Founder business card.
+
+### Files
+- Created: `database/migrations/010_marketplace.sql`, `database/rollback/010_marketplace_down.sql`, `dashboard/static/js/agriloop.js`, `tests/unit/test_marketplace.py`.
+- Modified: `core/founder.py` (4 entities, party-role check, `occurred_at` stamping), `core/workspace.py`, `dashboard/static/js/buildflow.js` (shared helpers, `Z.ws`), `main.js`, `index.html`, `sw.js`, docs.
+- Removed: none.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| `python3 -m unittest discover -s tests -t .` (local Postgres 16) | **303 OK** (12 new in `test_marketplace.py`: matching rules, liquidity, currency-safe money, end-to-end flow, farmer/buyer role enforcement, cross-business rejection, validation, repeat buyers) | PASS |
+| Headless Chromium, 6 tabs x phone/tablet/desktop | 0 px overflow, 0 console errors; match shown, add farmer via form | PASS |
+| Production Neon, the real Agriloop product/data source, real users | not exercised | NOT TESTED |
+
+### Acceptance criteria
+- Farmers/buyers/supply/demand/matching/transactions views: PASS
+- Retention: PARTIAL (funnel stage and repeat-buyer count only; no cohort or time-based retention)
+- Partner opportunity as hypothesis: PASS (tag-based; no formal validation workflow, see Phase 9)
+- Experiments/metrics/decisions: PASS (shared Overview/Notes)
+- Business isolation: PASS (tested)
+- Geographic expansion: NOT BUILT (location is free text; no parish/region model or expansion tracking)
+- Integration with the live Agriloop product: NOT BUILT (audit says its marketplace may be on an in-memory store; unverified)
+
+### Known issues and technical debt
+- All data is manual entry. Matching is naive text equality on product names (no synonyms, units are not converted).
+- No edit for all fields of listings/requests; no delete UI.
+- Migrations 007_a, 007, 008, 009, 010 are all unapplied on production Neon.
+
+### Decisions and assumptions
+- Matching is a suggestion list, never an automatic action. Currency never mixed. A proposed deal is the only thing the UI creates from a match.
+
+### Unfinished work
+Geography model, retention cohorts, product integration, unit conversion/product catalogue, partner validation workflow.
+
+### Next phase
+Phase 5: Fashion Workspace ("Yaad n Abroad": Pain into Art, Jamaican-inspired wear). Prerequisites: founder approval + Neon backup before any deployment is requested. The `fashion` business row is named "Fashion" with a description that says the brand is unconfirmed; updating it to the real brand name is a data change for the founder to approve.
+
+### Ready-to-paste next-chat instruction
+```
+Read /docs/FOUNDER_OS_BUILD_PROTOCOL.md, then /docs/PHASE_HANDOFF.md (Phase 4 entry first), then /docs/FOUNDER_OS_ARCHITECTURE.md.
+Verify first: tests against a throwaway Postgres (expect 303 OK); inspect core/workspace.py, core/founder.py, dashboard/static/js/{buildflow,agriloop}.js, migrations 007-010.
+Preview and production share one Neon database and migrate on first request: do not open any preview/production URL until I approve and back up Neon.
+Implement only Phase 5: Fashion Workspace (slug 'fashion'): consumer/e-commerce, NOT SaaS metrics. Reuse the workspace pattern. Update /docs/PHASE_HANDOFF.md and stop.
+```
+
+---
+
 ## Phase 3: BuildFlow Workspace. Completed 2026-10-29
 
 **Overall status: PARTIAL.** Built, tested (291 tests) and exercised in a real browser against a local Postgres 16. Not applied to or verified on production Neon (still awaiting founder approval + backup); no lint/type/build tooling exists.

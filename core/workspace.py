@@ -49,6 +49,76 @@ def content_summary(items: list[dict], today: date) -> dict:
     }
 
 
+def _norm(v):
+    return " ".join((v or "").lower().split())
+
+
+def suggest_matches(listings: list[dict], demands: list[dict], limit: int = 20) -> list[dict]:
+    """Rule-based supply/demand pairing. These are INFERENCES for the founder to act on, not confirmed deals.
+    Same product (case-insensitive) is required; a known location mismatch or a known price above the buyer's maximum
+    (same currency) rules a pair out. Unknown fields never count for or against a pair, they are listed as unknowns."""
+    out = []
+    for l in listings:
+        if l["status"] != "open":
+            continue
+        for d in demands:
+            if d["status"] != "open" or not _norm(l["product"]) or _norm(l["product"]) != _norm(d["product"]):
+                continue
+            score, why, unknown = 50, ["same product: " + l["product"]], []
+            if l.get("location") and d.get("location"):
+                if _norm(l["location"]) != _norm(d["location"]):
+                    continue
+                score += 20; why.append("same location: " + l["location"])
+            else:
+                unknown.append("location")
+            if l.get("price") is not None and d.get("max_price") is not None and _norm(l.get("currency")) and _norm(l.get("currency")) == _norm(d.get("currency")):
+                if l["price"] > d["max_price"]:
+                    continue
+                score += 20; why.append(f"price {l['price']:g} is within the buyer's max {d['max_price']:g} {l['currency']}")
+            else:
+                unknown.append("price comparison (missing price or different/missing currency)")
+            if l.get("quantity") and d.get("quantity") and _norm(l.get("unit")) == _norm(d.get("unit")) and _norm(l.get("unit")):
+                score += 10; why.append(f"supply {l['quantity']:g} vs need {d['quantity']:g} {l['unit']}" + (" (covers it)" if l["quantity"] >= d["quantity"] else " (partial)"))
+            else:
+                unknown.append("quantity comparison")
+            out.append({"listing_id": l["id"], "demand_id": d["id"], "product": l["product"], "farmer": l.get("party_name"), "buyer": d.get("party_name"),
+                        "score": score, "why": why, "unknown": unknown, "label": "inference"})
+    out.sort(key=lambda m: (-m["score"], m["listing_id"], m["demand_id"]))
+    return out[:limit]
+
+
+def liquidity(listings: list[dict], demands: list[dict]) -> list[dict]:
+    """Open supply vs open demand per product: counts only (units differ), flagging one-sided products."""
+    prod: dict[str, dict] = {}
+    for kind, rows in (("supply", listings), ("demand", demands)):
+        for r in rows:
+            if r["status"] != "open":
+                continue
+            p = prod.setdefault(_norm(r["product"]) or "(unnamed)", {"product": _norm(r["product"]) or "(unnamed)", "supply": 0, "demand": 0})
+            p[kind] += 1
+    out = sorted(prod.values(), key=lambda p: (-(p["supply"] + p["demand"]), p["product"]))
+    for p in out:
+        p["gap"] = "no buyers recorded" if p["demand"] == 0 else "no farmers recorded" if p["supply"] == 0 else "both sides present"
+    return out
+
+
+def transaction_summary(txns: list[dict]) -> dict:
+    by_status = {s: sum(1 for t in txns if t["status"] == s) for s in ("proposed", "agreed", "completed", "cancelled")}
+    money: dict[str, dict] = {}
+    unvalued = 0
+    for t in txns:
+        if t["status"] != "completed":
+            continue
+        if t["amount"] is None or not (t.get("currency") or "").strip():
+            unvalued += 1
+            continue
+        m = money.setdefault(t["currency"].strip().upper(), {"currency": t["currency"].strip().upper(), "count": 0, "amount": 0.0})
+        m["count"] += 1
+        m["amount"] = round(m["amount"] + t["amount"], 2)
+    return {"by_status": by_status, "completed_by_currency": sorted(money.values(), key=lambda m: m["currency"]), "completed_without_value": unvalued,
+            "note": "Amounts are never added across currencies; completed deals with no amount or currency are counted but not valued."}
+
+
 def workspace(conn, slug: str, today: date | None = None) -> dict:
     today = today or datetime.now(timezone.utc).date()
     b = founder.get_business(conn, slug)  # NotFound for an unknown slug
@@ -92,6 +162,27 @@ def workspace(conn, slug: str, today: date | None = None) -> dict:
         return {"items": items[:40], "summary": content_summary(items, today)}
 
     sec("content", content)
+
+    if slug == "agriloop":
+        def marketplace():
+            parties = rows("SELECT * FROM market_parties WHERE business_id=? ORDER BY created_at DESC LIMIT 300", (bid,))
+            names = {p["id"]: p["name"] for p in parties}
+            listings = rows("SELECT * FROM market_listings WHERE business_id=? ORDER BY created_at DESC LIMIT 300", (bid,))
+            demands = rows("SELECT * FROM market_demand WHERE business_id=? ORDER BY created_at DESC LIMIT 300", (bid,))
+            txns = rows("SELECT * FROM market_transactions WHERE business_id=? ORDER BY COALESCE(occurred_at, created_at) DESC LIMIT 300", (bid,))
+            for r in listings + demands:
+                r["party_name"] = names.get(r["party_id"])
+            funnel = {role: {st: sum(1 for p in parties if p["role"] == role and p["status"] == st) for st in ("lead", "onboarded", "active", "churned")} for role in ("farmer", "buyer")}
+            buyer_of = {d["id"]: d["party_id"] for d in demands}
+            done = {}
+            for t in txns:
+                if t["status"] == "completed" and t.get("demand_id") in buyer_of:
+                    done[buyer_of[t["demand_id"]]] = done.get(buyer_of[t["demand_id"]], 0) + 1
+            return {"parties": parties[:50], "funnel": funnel, "listings": listings[:50], "demand": demands[:50], "liquidity": liquidity(listings, demands),
+                    "matches": suggest_matches(listings, demands), "transactions": txns[:30], "transaction_summary": transaction_summary(txns),
+                    "repeat_buyers": sum(1 for n in done.values() if n >= 2), "buyers_with_completed": len(done)}
+
+        sec("marketplace", marketplace)
 
     if slug == "buildflow":
         def pipeline():

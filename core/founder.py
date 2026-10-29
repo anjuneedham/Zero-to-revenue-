@@ -19,6 +19,10 @@ STATUSES = {
     "blockers": ("open", "resolved"),
     "content_items": ("idea", "scripted", "filmed", "posted", "dropped"),
     "feedback_items": ("new", "triaged", "actioned", "dismissed"),
+    "market_parties": ("lead", "onboarded", "active", "churned"),
+    "market_listings": ("open", "matched", "closed", "expired"),
+    "market_demand": ("open", "fulfilled", "closed", "expired"),
+    "market_transactions": ("proposed", "agreed", "completed", "cancelled"),
     "research": ("open", "done", "archived"),
     "decisions": ("proposed", "decided", "reversed"),
 }
@@ -63,6 +67,19 @@ ENTITIES = {
                            cols={"source": (T, None), "contact": (T, None), "body": (T, None),
                                  "kind": (T, ("bug", "feature", "pricing", "onboarding", "praise", "other")), "status": (T, STATUSES["feedback_items"]),
                                  "work_task_id": (T, None)}),
+    "market_parties": dict(prefix="mp", business="required", required=("name", "role"), order="created_at DESC",
+                           cols={"role": (T, ("farmer", "buyer")), "name": (T, None), "location": (T, None), "contact": (T, None), "source": (T, None),
+                                 "produce": (T, None), "status": (T, STATUSES["market_parties"]), "notes": (T, None)}),
+    "market_listings": dict(prefix="ml", business="required", required=("party_id", "product"), order="created_at DESC", parents={"party_id": "market_parties"}, party_role="farmer",
+                            cols={"party_id": (T, None), "product": (T, None), "quantity": (N, None), "unit": (T, None), "price": (N, None), "currency": (T, None),
+                                  "location": (T, None), "available_from": (T, None), "status": (T, STATUSES["market_listings"])}),
+    "market_demand": dict(prefix="md", business="required", required=("party_id", "product"), order="created_at DESC", parents={"party_id": "market_parties"}, party_role="buyer",
+                          cols={"party_id": (T, None), "product": (T, None), "quantity": (N, None), "unit": (T, None), "max_price": (N, None), "currency": (T, None),
+                                "location": (T, None), "needed_by": (T, None), "status": (T, STATUSES["market_demand"])}),
+    "market_transactions": dict(prefix="mt", business="required", required=(), order="created_at DESC",
+                                parents={"listing_id": "market_listings", "demand_id": "market_demand"},
+                                cols={"listing_id": (T, None), "demand_id": (T, None), "quantity": (N, None), "unit": (T, None), "amount": (N, None), "currency": (T, None),
+                                      "status": (T, STATUSES["market_transactions"]), "occurred_at": (T, None), "notes": (T, None)}),
     "research": dict(prefix="res", business="required", required=("title",), order="created_at DESC",
                      cols={"title": (T, None), "question": (T, None), "summary": (T, None), "source_url": (T, None),
                            "status": (T, STATUSES["research"])}),
@@ -177,11 +194,23 @@ def _check_parents(conn, spec, business_id, values):
                 raise FounderError(f"{col}: not found in this business")
 
 
+def _check_party_role(conn, spec, values):
+    """A listing must belong to a farmer and a demand row to a buyer (supply and demand never get crossed)."""
+    role = spec.get("party_role")
+    if role and values.get("party_id"):
+        row = conn.execute("SELECT role FROM market_parties WHERE id=?", (values["party_id"],)).fetchone()
+        if row and row["role"] != role:
+            raise FounderError(f"party_id: must be a {role}")
+
+
 def create(conn, entity, data, actor):
     spec = ENTITIES[entity]
     values = _clean(entity, data, partial=False)
     business_id = _bid(conn, entity, data.get("business"), True)
     _check_parents(conn, spec, business_id, values)
+    _check_party_role(conn, spec, values)
+    if entity == "market_transactions" and values.get("status") == "completed" and not values.get("occurred_at"):
+        values["occurred_at"] = now()
     if entity == "work_tasks" and values.get("status") == "done":
         values["completed_at"] = now()
     if entity == "decisions" and values.get("status") == "decided":
@@ -217,7 +246,10 @@ def update(conn, entity, rid, data, actor):
     if not row:
         raise NotFound("not found")
     _check_parents(conn, spec, row["business_id"], values)
+    _check_party_role(conn, spec, values)
     ts = now()
+    if entity == "market_transactions" and values.get("status") == "completed" and not row["occurred_at"] and not values.get("occurred_at"):
+        values["occurred_at"] = ts
     if entity == "work_tasks" and "status" in values:
         values["completed_at"] = ts if values["status"] == "done" else None
     if entity == "decisions" and values.get("status") == "decided" and not row["decided_at"]:

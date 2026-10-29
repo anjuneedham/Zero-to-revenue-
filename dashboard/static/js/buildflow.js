@@ -1,7 +1,7 @@
 // BuildFlow workspace (Phase 3). One business only: everything here comes from /api/founder/workspace/buildflow.
 (function () {
   const { el, add, pill, btn, card, fmt, nice } = Z;
-  const SLUG = "buildflow", TABS = [["overview", "Overview"], ["content", "Content"], ["feedback", "Feedback"], ["pipeline", "Pipeline"], ["notes", "Notes"]];
+  let SLUG = "buildflow"; const TABS = [["overview", "Overview"], ["content", "Content"], ["feedback", "Feedback"], ["pipeline", "Pipeline"], ["notes", "Notes"]];
   const PLATFORMS = [["youtube_shorts", "YouTube Shorts"], ["tiktok", "TikTok"], ["instagram", "Instagram"], ["facebook", "Facebook"], ["other", "Other"]];
   const plat = v => (PLATFORMS.find(p => p[0] === v) || [0, nice(v)])[1];
   const day = d => (d ? new Date(d.length === 10 ? d + "T00:00:00" : d).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "");
@@ -17,15 +17,15 @@
   function overview(root) {
     const g = el("div", "grid");
     const top = Array.isArray(W.tasks) ? W.tasks.find(t => t.eligible) : null;
-    const c1 = card("BuildFlow right now", W.business.description || ""); c1.classList.add("s12");
+    const c1 = card(W.business.name + " right now", W.business.description || ""); c1.classList.add("s12");
     const m = el("div", "meta"); add(m, pill("stage: " + nice(W.business.stage), "royal"), pill("priority " + (W.business.priority || "?")));
     c1.append(m);
     if (Array.isArray(W.goals)) W.goals.forEach(x => c1.append(el("p", null, "Objective: " + x.title + (x.target_value != null ? " (target " + fmt.num(x.target_value, 2) + (x.target_metric ? " " + x.target_metric : "") + ")" : ""))));
     if (Array.isArray(W.goals) && !W.goals.length) c1.append(el("p", "sub", "No objective recorded yet."));
     c1.append(top ? Z.add(el("p", null, "Next: " + top.title), el("p", "sub", "Ranked because: " + (top.why.join(", ") || "no urgency, impact or effort recorded"))) : el("p", "sub", "No open tasks to recommend."));
     c1.append(Z.add(el("div", "row"), btn("Add task", "ghost small", async () => Z.openFounderForm("task", SLUG)), btn("Record blocker", "ghost small", async () => Z.openFounderForm("blocker", SLUG)),
-      btn("Import launch plan as tasks", "ghost small", async () => { const r = await post("/api/founder/workspace/buildflow/import-launch-plan"); Z.toast(r.created + " task(s) added, " + r.skipped + " already there", "ok"); await Z.rerender(); })));
-    c1.append(el("p", "sub", "The launch plan is your own list from docs/strategy/BUILDFLOW_LAUNCH_PLAN.md; importing adds each item once."));
+      SLUG === "buildflow" ? btn("Import launch plan as tasks", "ghost small", async () => { const r = await post("/api/founder/workspace/buildflow/import-launch-plan"); Z.toast(r.created + " task(s) added, " + r.skipped + " already there", "ok"); await Z.rerender(); }) : null));
+    if (SLUG === "buildflow") c1.append(el("p", "sub", "The launch plan is your own list from docs/strategy/BUILDFLOW_LAUNCH_PLAN.md; importing adds each item once."));
     g.append(c1);
 
     const k = card("KPIs", "Only values you recorded."); k.classList.add("s6");
@@ -133,18 +133,20 @@
     else W.experiments.forEach(x => e.append(Z.add(el("div", "item"), el("div", "t", x.hypothesis), Z.add(el("div", "meta"), pill(nice(x.status), x.status === "running" ? "royal" : ""), x.review_date ? pill("review " + day(x.review_date)) : null),
       x.success_metric ? el("p", "sub", "Metric: " + x.success_metric) : null, x.result ? el("p", "sub", "Result: " + x.result) : null)));
     root.append(e);
-    const k = card("Knowledge and constraints", "Tag a note \"constraint\" for hard limits (e.g. no Stripe in Jamaica).");
+    const k = card("Knowledge and constraints", "Tag a note \"constraint\" for hard limits, or \"partner-hypothesis\" for unvalidated partner claims.");
     k.append(Z.add(el("div", "row"), btn("Add note", "ghost small", async () => Z.formDialog("Add knowledge or constraint", [["title", "Title", "text", null, true], ["body", "Details", "text", null, true], ["tags", "Tags (comma separated, e.g. constraint)", "text"], ["source_url", "Source link", "text"]],
-      b => post("/api/founder/businesses/buildflow/knowledge", b)))));
+      b => post("/api/founder/businesses/" + SLUG + "/knowledge", b)))));
     if (bad(W.knowledge)) k.append(el("p", "err", "Could not load.")); else if (!W.knowledge.length) k.append(none("Nothing recorded yet"));
-    else W.knowledge.forEach(x => k.append(Z.add(el("div", "item"), el("div", "t", x.title), x.tags ? Z.add(el("div", "meta"), ...x.tags.split(",").map(t => pill(t.trim(), t.trim() === "constraint" ? "warn" : ""))) : null, el("p", "sub", x.body))));
+    else W.knowledge.forEach(x => k.append(Z.add(el("div", "item"), el("div", "t", x.title), x.tags ? Z.add(el("div", "meta"), ...x.tags.split(",").map(t => pill(t.trim() === "partner-hypothesis" ? "HYPOTHESIS, not validated" : t.trim(), ["constraint", "partner-hypothesis"].includes(t.trim()) ? "warn" : ""))) : null, el("p", "sub", x.body))));
     root.append(k);
   }
+
+  Z.ws = { overview: (root, w, slug) => { W = w; SLUG = slug; overview(root); }, notes: (root, w, slug) => { W = w; SLUG = slug; notes(root); }, tile, secErr, day, none, post };
 
   Z.pages.buildflow = {
     title: "BuildFlow", sub: "Priority 1 · product, growth, content, feedback", icon: "plan",
     async render(root) {
-      W = await Z.api("/api/founder/workspace/" + SLUG);
+      SLUG = "buildflow"; W = await Z.api("/api/founder/workspace/" + SLUG);
       const wrap = el("div", "list"), tabs = el("div", "tabs"); tabs.setAttribute("role", "tablist");
       TABS.forEach(([k, label]) => { const b = el("button", null, label); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(k === tab)); b.onclick = () => { tab = k; Z.store.set("z2r_bf_tab", k); Z.rerender(); }; tabs.append(b); });
       wrap.append(tabs);
