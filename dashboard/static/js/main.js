@@ -1,6 +1,6 @@
 (function () {
   const { $, el, add, text, icon } = Z;
-  const NAV = [["founder", "Founder"], ["challenge", "Challenge"], ["buildflow", "BuildFlow", "side"], ["agriloop", "Agriloop", "side"], ["fashion", "Fashion", "side"], ["trading", "Trading", "side"], ["lab", "Lab"], ["growth", "Growth"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
+  const NAV = [["founder", "Founder"], ["challenge", "Challenge"], ["buildflow", "BuildFlow", "side"], ["agriloop", "Agriloop", "side"], ["fashion", "Fashion", "side"], ["trading", "Trading", "side"], ["lab", "Lab"], ["growth", "Growth"], ["overview", "Overview"], ["payments", "Payments"], ["plan", "Game plan"]];
   const AUTH = ["msgbox", "setup1", "setup2", "setup3", "login"];
   let timer = null, seq = 0, current = "founder";
 
@@ -24,7 +24,7 @@
   function buildNav() {
     ["nav-side", "nav-tabs"].forEach(id => {
       const box = $(id); box.replaceChildren();
-      NAV.forEach(([k, label, only]) => { if (only === "side" && id !== "nav-side") return; const a = el("a"); a.href = "#" + k; a.dataset.page = k; add(a, icon(Z.pages[k].icon), el("span", null, label)); if (id === "nav-side" && k === "operator") { const bd = el("span", "badge"); bd.hidden = true; a.append(bd); } box.append(a); });
+      NAV.forEach(([k, label, only]) => { if (only === "side" && id !== "nav-side") return; const a = el("a"); a.href = "#" + k; a.dataset.page = k; add(a, icon(Z.pages[k].icon), el("span", null, label)); box.append(a); });
     });
   }
   function markNav() {
@@ -32,7 +32,6 @@
   }
   Z.paintStatus = s => {
     $("state-dot").className = "dot" + (s.paused ? " paused" : ""); text($("state-text"), s.paused ? "Paused · red card shown" : "In play");
-    const n = s.open_user_actions.length; document.querySelectorAll(".nav .badge").forEach(b => { b.hidden = !n; text(b, n); });
   };
   async function render() {
     const my = ++seq; const name = (NAV.find(([k]) => k === location.hash.slice(1)) || NAV[0])[0]; current = name; markNav();
@@ -44,7 +43,7 @@
       const c = Z.card("Could not load this page", e.message); c.append(Z.btn("Try again", "gold", () => render())); box.replaceChildren(c);
     }
     if (my !== seq) return; view.replaceChildren(...box.childNodes);
-    if (!Z.state.status || name === "scout" || name === "treasury" || name === "plan" || name === "challenge") Z.api("/api/status").then(st => { Z.state.status = st; Z.paintStatus(st); }).catch(() => {}); view.dataset.page = name; if (!first) scrollTo(0, y);
+    if (!Z.state.status || name === "payments" || name === "plan" || name === "challenge") Z.api("/api/status").then(st => { Z.state.status = st; Z.paintStatus(st); }).catch(() => {}); view.dataset.page = name; if (!first) scrollTo(0, y);
   }
   Z.rerender = render;
   window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); $("view").focus({ preventScroll: true }); });

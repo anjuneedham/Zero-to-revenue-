@@ -1,4 +1,4 @@
-"""Everything Scout reads from outside is UNTRUSTED DATA (spec section 32)."""
+"""Everything read from outside (pasted text, screenshots, imports) is UNTRUSTED DATA."""
 
 import re
 

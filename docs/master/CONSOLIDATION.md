@@ -62,3 +62,23 @@ Gmail token; `ANTHROPIC_API_KEY` + LLM budget/price vars; AgriLoop live data sou
 name/plan/repo (A's Fashion page exists, data is empty); rotate secrets pasted into chats; Scout gig features (keep or remove);
 no CI; Twilio is record-only. The brief's remaining checklist (single design language, one nav, one source of truth per domain)
 is mostly done; the 13-item nav is the main leftover.
+
+## Old agents removed (owner decision, 29 Oct 2026)
+Scout, Operator and Treasury were the Zero-to-Revenue agents (gig-feed scanning, proposal drafting and Gmail sending, crypto wallet
+watching). They are deleted: the `agents/` package, `core/actions.py`, `core/queue`, `core/policy/chains.py`, `integrations/gmail.py`,
+the Scout/Operator pages, their API routes (`/api/scout/*`, `/api/operator/*`, `/api/treasury/*`, `/api/opportunities*`,
+`/api/actions/*`, `/api/leads/draft|send-batch`, on-chain `/api/payments/:id/verify`), the scheduler's agent ticks, the Scout prompt,
+~140 tests and the job-source section of the Game plan.
+
+**Kept, moved out of `agents/`** because the challenge flow uses them: PayPal request/link/verify (`core/payments.py`), offer drafts
+(`core/pitches.py`), CSV lead import (`core/leads.py`), untrusted-text cleaning (`core/sanitize.py`), the Claude client (`core/llm.py`).
+The Treasury page became **Payments** (PayPal + ledger + currency calculator); Overview lost the agent widgets.
+
+Behaviour changes: a lead that declined or opted out can no longer be drafted for (it used to be enforced at send time, which no longer
+exists). The MCP connector lost `list_opportunities` and `list_open_actions`. The daily cron now only sends the daily report and the Sunday weekly report.
+
+**Not removed (needs your call):** the database tables the old agents used (`opportunities`, `tasks`, `task_events`, `user_actions`,
+`deliverables`, `submissions`, `agents`, `agent_runs`, `wallets`, `wallet_balances`, `transactions`, `events`) and the
+`llm_usage` ledger. `payments.opportunity_id` still anchors every payment to an `opportunities` row (deals create a synthetic
+`opp_manual_*` row), so dropping `opportunities` needs a customers table first. Old gig-era rows in those tables are inert.
+Gmail sending is gone with Operator; if you want to email prospects later it should be rebuilt on the challenge pipeline.

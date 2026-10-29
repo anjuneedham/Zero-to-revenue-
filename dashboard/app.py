@@ -9,10 +9,7 @@ import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from agents.operator import outreach, run as operator
-from agents.scout.run import run_scout
-from agents.treasury import run as treasury
-from core import actions, ai, challenge, founder, founder_dashboard, ingest, rates, scheduler, weekly, workspace
+from core import ai, challenge, founder, founder_dashboard, ingest, leads, payments, rates, scheduler, weekly, workspace
 from dashboard import api_data, founder_api, growth_api, lab_api
 from dashboard.mcp import handle_mcp
 from core import db
@@ -59,12 +56,8 @@ READ_LIMIT = 48_000  # most bytes read from a request; each route enforces its o
 def read_limit(path: str) -> int:
     """Bytes the HTTP handlers read before dispatch (one more than the limit so oversize is detected, not truncated)."""
     return max(READ_LIMIT, body_limit(path))
-SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
-SCOUT_CLIENT = None
-TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
-ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send|submit-email)$")
+INGEST_CLIENT = None  # None = built from the environment when configured; tests inject a fake
 WORKSPACE_RE = re.compile(r"^/api/founder/workspace/([a-z][a-z0-9_-]{1,40})(/import-launch-plan)?$")
-PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
 HEADERS = {
@@ -84,7 +77,7 @@ def _ingest_client():
     from core import budget
     if not budget.llm_enabled():
         return None
-    from agents.scout.enrich import ClaudeClient
+    from core.llm import ClaudeClient
     return ClaudeClient()
 
 
@@ -133,7 +126,7 @@ def _challenge_route(method, path, body, conn, owner):
     if path == "/api/challenge/deal":
         return challenge.create_deal(conn, owner, str(data.get("lead_id", "")), data.get("amount"), str(data.get("plan", "")))
     if path == "/api/challenge/ingest":
-        return ingest.extract(conn, SCOUT_CLIENT or _ingest_client(), str(data.get("text", "")),
+        return ingest.extract(conn, INGEST_CLIENT or _ingest_client(), str(data.get("text", "")),
                               str(data.get("image", "")), str(data.get("mime", "")))
     if path == "/api/challenge/paypal-message":
         return challenge.paypal_message(conn, owner, str(data.get("deal_id", "")))
@@ -206,7 +199,7 @@ def handle(method, path, authz, conn, body: bytes = b""):
         secret = os.environ.get("CRON_SECRET", "")
         if len(secret) < 16 or not hmac.compare_digest((authz or "").encode(), f"Bearer {secret}".encode()):
             return _json(401, {"error": "unauthorized"})
-        return _json(200, scheduler.tick(conn, SCOUT_SOURCES, TREASURY_RPC))
+        return _json(200, scheduler.tick(conn))
 
     # --- authenticated -------------------------------------------------------------
     token = authz[7:] if authz and authz.startswith("Bearer ") else ""
@@ -247,85 +240,19 @@ def handle(method, path, authz, conn, body: bytes = b""):
     if method == "POST" and path == "/api/resume":
         killswitch.resume(conn, owner)
         return _json(200, {"paused": False})
-    if method == "GET" and path == "/api/opportunities":
-        rows = conn.execute(
-            "SELECT id,title,organization,source_url,status,opportunity_score,risk_score,confidence,expected_payment,"
-            "required_capital,deadline,scam_indicators,missing_information,recommended_action,discovered_at "
-            "FROM opportunities ORDER BY (status='QUALIFIED') DESC, opportunity_score DESC, discovered_at DESC LIMIT 100").fetchall()
-        return _json(200, {"opportunities": [{k: (float(v) if hasattr(v, "as_tuple") else v) for k, v in dict(r).items()} for r in rows]})
-    if method == "POST" and path == "/api/opportunities/approve":
-        try:
-            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
-            ids = data.get("ids")
-            if not isinstance(ids, list) or not ids:
-                raise ValueError("bad request")
-            return _json(200, api_data.approve_for_drafting(conn, owner, ids))
-        except (ValueError, json.JSONDecodeError):
-            return _json(400, {"error": "bad request"})
-    if method == "POST" and path == "/api/opportunities/dismiss":
-        try:
-            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
-            ids = data.get("ids")
-            force = data.get("force", False)
-            if not isinstance(ids, list) or not ids or not isinstance(force, bool):
-                raise ValueError("bad request")
-            return _json(200, api_data.dismiss_opportunities(conn, owner, ids, force=force))
-        except (ValueError, json.JSONDecodeError):
-            return _json(400, {"error": "bad request"})
-    if method == "POST" and path == "/api/scout/run":
-        return _json(200, run_scout(conn, SCOUT_SOURCES, SCOUT_CLIENT))
-    if method == "GET" and path == "/api/scout/overview":
-        return _json(200, api_data.scout_overview(conn))
-    if method == "GET" and path == "/api/operator/board":
-        return _json(200, api_data.operator_board(conn))
-    if method == "GET" and path == "/api/treasury/overview":
-        return _json(200, api_data.treasury_overview(conn))
+    if method == "GET" and path == "/api/payments/overview":
+        return _json(200, api_data.payments_overview(conn))
     if method == "GET" and path == "/api/rates":
         return _json(200, rates.get_rates())
-    if method == "GET" and path == "/api/leads":
-        rows = conn.execute("SELECT id,name,business,email,phone,status,created_at FROM leads ORDER BY created_at DESC LIMIT 200")
-        return _json(200, {"leads": [dict(r) for r in rows]})
     if method == "POST" and path == "/api/leads/import":
         try:
             data = json.loads(body or b"{}") if len(body) <= 200_000 else {}
             csv_text = data.get("csv", "")
             if not isinstance(csv_text, str):
                 raise ValueError("bad request")
-            return _json(200, outreach.import_leads(conn, owner, csv_text, data.get("venture", "buildflow")))
-        except outreach.ImportError_ as e:
+            return _json(200, leads.import_leads(conn, owner, csv_text, data.get("venture", "buildflow")))
+        except leads.ImportError_ as e:
             return _json(400, {"error": str(e)})
-        except (ValueError, json.JSONDecodeError):
-            return _json(400, {"error": "bad request"})
-    if method == "POST" and path == "/api/leads/draft":
-        try:
-            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
-            n = max(1, min(int(data.get("count", 15)), 50))
-        except (ValueError, json.JSONDecodeError):
-            return _json(400, {"error": "bad request"})
-        rows = conn.execute("SELECT * FROM leads WHERE status='NEW' ORDER BY created_at LIMIT ?", (n,)).fetchall()
-        made = []
-        for r in rows:
-            lead = dict(r)
-            draft = challenge.draft_for(conn, lead["id"], "email")["draft"]
-            action_id = "ua_lead_" + lead["id"]
-            conn.execute(
-                "INSERT INTO user_actions(action_id, task_id, title, why_required, exact_action, risk, status, "
-                "created_at, kind, submission_id) VALUES (?, NULL, ?, ?, ?, 'LOW', 'OPEN', ?, 'send_outreach', NULL) "
-                "ON CONFLICT (action_id) DO NOTHING",
-                (action_id, f"Send outreach to {lead['business'] or lead['name'] or lead['email']}"[:200],
-                 "Needs your review and approval before it goes out - edit it if you want, then send "
-                 "it yourself through Gmail here, or confirm you sent it another way.",
-                 draft, now()))
-            conn.execute("UPDATE leads SET status='DRAFTED' WHERE id=?", (lead["id"],))
-            made.append(action_id)
-        return _json(200, {"drafted": len(made)})
-    if method == "POST" and path == "/api/leads/send-batch":
-        try:
-            data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
-            ids = data.get("action_ids")
-            if not isinstance(ids, list) or not ids:
-                raise ValueError("bad request")
-            return _json(200, outreach.send_outreach_batch(conn, owner, ids))
         except (ValueError, json.JSONDecodeError):
             return _json(400, {"error": "bad request"})
     if path.startswith("/api/challenge"):
@@ -345,10 +272,6 @@ def handle(method, path, authz, conn, body: bytes = b""):
             return _json(200, api_data.plan_set(conn, str(data.get("id", "")), data["done"]))
         except (ValueError, json.JSONDecodeError):
             return _json(400, {"error": "bad request"})
-    if method == "POST" and path == "/api/operator/run":
-        return _json(200, {"steps": operator.run(conn)})
-    if method == "POST" and path == "/api/treasury/run":
-        return _json(200, treasury.check_balances(conn, TREASURY_RPC))
     if method == "GET" and path == "/api/payments":
         rows = conn.execute("SELECT p.id, p.status, p.expected_amount, p.asset, p.chain_id, p.tx_hash, p.verified_at, o.title, "
                             "l.amount AS received_amount, l.asset AS received_asset FROM payments p "
@@ -367,54 +290,11 @@ def handle(method, path, authz, conn, body: bytes = b""):
     if method == "GET" and path == "/api/notifications":
         rows = conn.execute("SELECT priority, channel, title, body, status, created_at FROM notifications ORDER BY created_at DESC LIMIT 30")
         return _json(200, {"notifications": [dict(r) for r in rows]})
-    m = ACTION_RE.match(path)
-    if m:
-        aid, verb = m.groups()
-        try:
-            if verb == "draft" and method == "GET":
-                a_row = conn.execute("SELECT kind, exact_action FROM user_actions WHERE action_id=?", (aid,)).fetchone()
-                if a_row and a_row["kind"] == "send_outreach":
-                    return _json(200, {"draft": a_row["exact_action"] or ""})
-                row = conn.execute("SELECT d.content FROM user_actions a JOIN deliverables d ON d.task_id=a.task_id WHERE a.action_id=?", (aid,)).fetchone()
-                return _json(200, {"draft": row["content"] if row else ""})
-            if method != "POST":
-                return _json(404, {"error": "not found"})
-            if verb == "approve":
-                actions.approve(conn, aid, owner)
-            elif verb == "reject":
-                actions.reject(conn, aid, owner)
-            elif verb == "sent":
-                actions.mark_sent(conn, aid, owner)
-            elif verb == "send":
-                data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
-                return _json(200, outreach.send_outreach(conn, aid, owner, data.get("edited_body") or None))
-            elif verb == "submit-email":
-                data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
-                return _json(200, outreach.send_submission_email(conn, aid, owner, data.get("to_email", ""), data.get("edited_body") or None))
-            else:
-                (proof,) = _fields(body, "proof_url")
-                actions.mark_submitted(conn, aid, owner, proof)
-            return _json(200, {"ok": True})
-        except actions.ActionError as e:
-            return _json(409, {"error": str(e)})
-        except outreach.SendError as e:
-            return _json(422, {"error": str(e)})
-        except (ValueError, json.JSONDecodeError):
-            return _json(400, {"error": "bad request"})
-    m = PAY_RE.match(path)
-    if m and method == "POST":
-        try:
-            chain, tx = _fields(body, "chain_id", "tx_hash")
-            return _json(200, treasury.verify_payment(conn, m.group(1), int(chain), tx, TREASURY_RPC))
-        except treasury.VerifyError as e:
-            return _json(422, {"error": str(e)})
-        except ValueError:
-            return _json(400, {"error": "chain_id must be a number"})
     m = PAYPAL_LINK_RE.match(path)
     if m and method == "GET":
         try:
-            return _json(200, treasury.get_paypal_approval_link(conn, m.group(1)))
-        except treasury.VerifyError as e:
+            return _json(200, payments.get_paypal_approval_link(conn, m.group(1)))
+        except payments.VerifyError as e:
             return _json(422, {"error": str(e)})
     m = PAYPAL_RE.match(path)
     if m and method == "POST":
@@ -422,9 +302,9 @@ def handle(method, path, authz, conn, body: bytes = b""):
         try:
             data = json.loads(body or b"{}") if len(body) <= MAX_BODY else {}
             if verb == "request":
-                return _json(200, treasury.request_paypal_payment(conn, pid, data.get("currency", "USD") or "USD", data.get("description", "")))
-            return _json(200, treasury.verify_paypal_payment(conn, pid, data.get("order_id", "")))
-        except treasury.VerifyError as e:
+                return _json(200, payments.request_paypal_payment(conn, pid, data.get("currency", "USD") or "USD", data.get("description", "")))
+            return _json(200, payments.verify_paypal_payment(conn, pid, data.get("order_id", "")))
+        except payments.VerifyError as e:
             return _json(422, {"error": str(e)})
         except json.JSONDecodeError:
             return _json(400, {"error": "bad request"})

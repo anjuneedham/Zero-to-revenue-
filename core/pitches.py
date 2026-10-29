@@ -1,8 +1,8 @@
 """Challenge outreach copy for BuildFlow and Agriloop (annual plan, two months free, one-on-one onboarding).
 Deterministic templates: never invent a result, testimonial, user count or relationship about the prospect.
-Anything only the owner knows is an explicit [OWNER TO FILL] placeholder, same rule as agents.operator.drafts."""
+Anything only the owner knows is an explicit [OWNER TO FILL] placeholder, same rule everywhere in the app."""
 
-from agents.operator.drafts import FILL
+FILL = "[OWNER TO FILL]"
 
 PRODUCT = {
     "buildflow": {

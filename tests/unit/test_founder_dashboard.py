@@ -197,7 +197,7 @@ class DashboardApiTest(unittest.TestCase):
         self.call("POST", "/api/founder/ai-usage", {"model": "m2", "input_tokens": 10, "output_tokens": 5, "cost_usd": 0.5, "business": "buildflow"})
         u = self.dash()["ai_usage"]
         self.assertTrue(u["available"])
-        self.assertEqual([(s["name"], s["month"]["requests"]) for s in u["sources"]], [("Scout (llm_usage)", 1), ("Founder OS (ai_usage)", 1)])
+        self.assertEqual([(s["name"], s["month"]["requests"]) for s in u["sources"]], [("Usage ledger (llm_usage)", 1), ("Founder OS (ai_usage)", 1)])
         self.assertEqual(u["by_business"][0]["business_name"], "BuildFlow")
         self.assertIsNone(u["monthly_cap_usd"])
 

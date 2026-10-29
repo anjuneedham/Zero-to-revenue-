@@ -258,10 +258,10 @@
     if (!u.available) { c.append(Z.empty("No AI usage recorded this month", "Nothing has called the model yet, or usage logging is off.")); root.append(c); return; }
     const line = (label, m) => el("p", null, `${label}: ${m.requests} request(s) · ${fmt.num(m.input_tokens, 0)} in / ${fmt.num(m.output_tokens, 0)} out tokens · $${fmt.num(m.cost_usd, 4)} recorded cost` + (m.failed ? ` · ${m.failed} failed` : ""));
     u.sources.forEach(src => { add(c, el("div", "label", src.name), line("Today", src.today), line("This month", src.month)); if (src.note) c.append(el("p", "sub", src.note)); });
-    if (u.monthly_cap_usd) c.append(el("p", "sub", `Configured monthly cap $${fmt.num(u.monthly_cap_usd, 2)} (Scout's ledger enforces it).`));
+    if (u.monthly_cap_usd) c.append(el("p", "sub", `Configured monthly cap $${fmt.num(u.monthly_cap_usd, 2)} (the usage ledger enforces it).`));
     else c.append(el("p", "sub", "No monthly cap configured, so no remaining budget is shown."));
     if (u.by_business.length) u.by_business.forEach(p => c.append(el("p", "sub", `${p.business_name}: ${p.requests} request(s), $${fmt.num(p.cost_usd, 4)}`)));
-    else c.append(el("p", "sub", "Scout's log has no business column, so usage is not split by business."));
+    else c.append(el("p", "sub", "The usage log has no business column, so usage is not split by business."));
     root.append(c);
   }
 

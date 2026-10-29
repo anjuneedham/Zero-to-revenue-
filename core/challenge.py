@@ -1,5 +1,5 @@
 """The 60-day cash challenge (1 Nov - 31 Dec 2026): target, offers, prospect pipeline, touches, deals.
-Cash counted here is only what Treasury verified (ledger_entries receipts, VERIFIED, with a USD value) inside
+Cash counted here is only what was payment-verified (ledger_entries receipts, VERIFIED, with a USD value) inside
 the challenge window. A deal that has not been paid and verified is pipeline, never cash."""
 
 import json
@@ -9,7 +9,7 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 
-from agents.operator import pitches
+from core import pitches
 from core import ingest
 from core.audit import audit
 from core.db import money, now
@@ -205,6 +205,8 @@ def draft_for(conn, lead_id: str, channel: str = "email", follow_up: bool = Fals
     lead = conn.execute("SELECT * FROM leads WHERE id=?", (lead_id,)).fetchone()
     if lead is None:
         raise ChallengeError("lead not found")
+    if lead["status"] == "SKIPPED":
+        raise ChallengeError("this lead declined or opted out; no more drafts")
     cfg = get_config(conn)
     offer = {"free_months": cfg["offers"][lead["venture"]]["free_months"], "plans": _plans_for(cfg, dict(lead))}
     fn = pitches.follow_up if follow_up else pitches.draft
@@ -224,7 +226,7 @@ def _plans_for(cfg: dict, lead: dict, plan: str | None = None) -> list[dict]:
 # ---- deals ------------------------------------------------------------------------------------------------
 
 def create_deal(conn, owner: str, lead_id: str, amount=None, plan: str | None = None) -> dict:
-    """Records a sale and creates the payment Treasury will verify (PayPal link / on-chain). The amount defaults
+    """Records a sale and creates the payment to verify (PayPal link). The amount defaults
     to the plan's annual price (monthly x (12 - free months)); AgriLoop needs the plan chosen unless the lead's
     segment already says farmer or buyer."""
     from dashboard.api_data import create_manual_payment  # same anchor every other manual payment uses
@@ -252,8 +254,8 @@ def create_deal(conn, owner: str, lead_id: str, amount=None, plan: str | None = 
 def paypal_message(conn, owner: str, deal_id: str) -> dict:
     """One tap from a deal card: makes sure the deal's PayPal order exists (creating it on first use), fetches the
     approval link and returns a ready-to-send message containing it. Nothing is sent or charged here: the owner
-    copies the message and sends it; cash counts only after Treasury verifies the capture."""
-    from agents.treasury import run as treasury  # local import: treasury imports core modules at load
+    copies the message and sends it; cash counts only after PayPal confirms the capture."""
+    from core import payments
 
     deal = conn.execute("SELECT d.*, l.name, l.business, p.status AS pay_status, p.tx_hash, p.chain_id FROM deals d "
                         "JOIN leads l ON l.id=d.lead_id JOIN payments p ON p.id=d.payment_id WHERE d.id=?", (deal_id,)).fetchone()
@@ -266,13 +268,13 @@ def paypal_message(conn, owner: str, deal_id: str) -> dict:
     try:
         if not (deal["tx_hash"] or "").strip():
             who = deal["business"] or deal["name"] or "customer"
-            link = treasury.request_paypal_payment(
+            link = payments.request_paypal_payment(
                 conn, deal["payment_id"], "USD", f"{pitches.PRODUCT[deal['venture']]['name']} annual plan - {who}")["approval_link"]
             if not link:
                 raise ChallengeError("PayPal did not return a payment link")
         else:
-            link = treasury.get_paypal_approval_link(conn, deal["payment_id"])["approval_link"]
-    except treasury.VerifyError as e:
+            link = payments.get_paypal_approval_link(conn, deal["payment_id"])["approval_link"]
+    except payments.VerifyError as e:
         raise ChallengeError(str(e)) from e
     cfg = get_config(conn)
     pl = next((p for p in plans(cfg, deal["venture"]) if p["key"] == deal["plan"]), None)
@@ -298,7 +300,7 @@ def set_onboarding(conn, owner: str, deal_id: str, status: str) -> dict:
 
 
 def _sync_paid(conn):
-    """A deal is paid only when Treasury has verified its payment. Pulls that fact into deals and leads."""
+    """A deal is paid only when its payment is verified. Pulls that fact into deals and leads."""
     rows = conn.execute("SELECT d.id, d.lead_id, p.verified_at FROM deals d JOIN payments p ON p.id=d.payment_id "
                         "WHERE d.status='open' AND p.status='PAYMENT_VERIFIED'").fetchall()
     for r in rows:

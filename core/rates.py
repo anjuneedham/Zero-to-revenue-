@@ -1,6 +1,5 @@
-"""Read-only reference exchange rates for the payment calculator (spec section 18: this is display
-only, never used to value a receipt as USD revenue - that still requires an owner-confirmed
-stablecoin contract in Treasury). Two free public, no-key APIs; a short cache keeps this from
+"""Read-only reference exchange rates for the payment calculator (display only: never used to value a receipt
+as USD revenue). Two free public, no-key APIs; a short cache keeps this from
 hammering them on every page view."""
 
 import time

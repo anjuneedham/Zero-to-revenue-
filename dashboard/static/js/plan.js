@@ -1,7 +1,7 @@
 (function () {
   const { el, add, pill, btn, card, fmt } = Z;
   let tab = "os", data = null, ticks = {}, who = "ALL";
-  const TABS = [["os", "OS progress"], ["week", "This week"], ["bf", "BuildFlow launch"], ["sources", "Get more jobs"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
+  const TABS = [["os", "OS progress"], ["week", "This week"], ["bf", "BuildFlow launch"], ["sys", "Your checklist"], ["road", "Roadmap"], ["year", "12-month plan"], ["cmd", "Commands"], ["app", "Get the app"]];
   const WHO = { owner: ["You", "gold"], agent: ["Agent", "royal"], both: ["Both", ""] };
   const CAT = { buildflow: ["BuildFlow", "gold"], jobs: ["Jobs", "ok"], study: ["Study", "royal"], improve: ["Improve", ""] };
 
@@ -71,12 +71,6 @@
       c.append(el("p", "sub", "BuildFlow is live in beta at buildflow-app-beta.vercel.app: customer and project management for contractors, a public profile where customers find them, $50/month with a 14-day trial. The code is in good shape; launch is blocked by setup only you can do, and by billing, which is not built yet."), list(data.buildflow, redraw)); return c;
     },
     sys(redraw) { const c = card("Founder OS: your checklist", "Setup that only you can do."); c.append(list(data.system, redraw)); return c; },
-    sources(redraw) {
-      const c = card("Where to get more jobs", "Scout already reads these automatically: Superteam Earn, GitHub's bounty label, Freelancer.com, Remotive and Himalayas (contract/freelance only). Everything below needs a login, so Scout can't read it - this is what unlocks more and bigger work.");
-      c.append(list(data.sources_setup, redraw));
-      c.append(el("p", "sub", "Checked and skipped: OpenStreetMap Overpass (blocked here), Nominatim (refuses automated bulk use), WeWorkRemotely (almost entirely full-time salaried roles, not one-off paid work)."));
-      return c;
-    },
     road() {
       const c = card("Roadmap", "Each phase ships tested before the next starts."); const l = el("div", "list");
       data.phases.forEach(([n, name, what, st]) => { const it = el("div", "item"); add(it, add(el("div", "row"), el("b", null, n + " · " + name), pill({ done: "Complete", now: "Now", next: "Next", later: "Later" }[st], st === "done" ? "ok" : st === "now" ? "gold" : "")), el("div", "sub", what)); l.append(it); });

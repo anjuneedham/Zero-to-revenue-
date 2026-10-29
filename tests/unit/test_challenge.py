@@ -5,12 +5,11 @@ from datetime import date
 from unittest import mock
 
 import dashboard.app as dash
-from agents.operator import outreach, pitches
-from core import challenge
+from core import challenge, pitches
 from core.db import now
 from tests.authutil import session
 from tests.dbutil import make_conn
-from tests.unit.test_phases_3_6 import ENV
+from tests.unit.test_payments import ENV
 
 
 class ChallengeBase(unittest.TestCase):
@@ -33,7 +32,7 @@ class ChallengeBase(unittest.TestCase):
         return self.call("POST", "/api/challenge/leads", d)[1]["id"]
 
     def verify(self, payment_id, usd, when="2026-11-10T12:00:00+00:00"):
-        """Stand-in for Treasury's verification (PayPal/on-chain verification is covered in test_paypal/test_phases_3_6)."""
+        """Stand-in for payment verification (PayPal verification is covered in test_paypal and test_payments)."""
         eid = "led_" + payment_id
         self.conn.execute("INSERT INTO ledger_entries(entry_id,date,type,asset,amount,usd_value,status) VALUES (?,?,'receipt','USD',?,?,'VERIFIED')",
                           (eid, when, str(usd), usd))
@@ -85,28 +84,15 @@ class PipelineTest(ChallengeBase):
         self.assertEqual(stage()["stage"], "onboarding_booked")
         self.assertEqual(self.call("POST", "/api/challenge/touch", {"lead_id": lid, "channel": "fax"})[0], 400)
 
-    def test_decline_and_opt_out_stop_all_drafting_and_sending(self):
+    def test_decline_stops_drafting(self):
         lid = self.lead(email="x@y.co")
+        self.assertEqual(self.call("POST", "/api/challenge/draft", {"lead_id": lid, "channel": "email"})[0], 200)
         self.call("POST", "/api/challenge/touch", {"lead_id": lid, "channel": "email", "outcome": "declined"})
         row = self.conn.execute("SELECT stage, status FROM leads WHERE id=?", (lid,)).fetchone()
         self.assertEqual((row["stage"], row["status"]), ("lost", "SKIPPED"))
-        self.assertEqual(self.call("POST", "/api/leads/draft", {"count": 10})[1]["drafted"], 0)
-        self.conn.execute("INSERT INTO user_actions(action_id,title,why_required,exact_action,risk,status,created_at,kind) "
-                          "VALUES (?,?,?,?,'LOW','APPROVED',?,'send_outreach')", ("ua_lead_" + lid, "t", "w", "Subject: hi\n\nbody", now()))
-        with self.assertRaises(outreach.SendError) as cm:
-            outreach.send_outreach(self.conn, "ua_lead_" + lid, "owner")
-        self.assertIn("opted out", str(cm.exception))
-
-    def test_sending_email_logs_a_touch_and_advances_the_lead(self):
-        lid = self.lead(email="x@y.co")
-        self.assertEqual(self.call("POST", "/api/leads/draft", {"count": 5})[1]["drafted"], 1)
-        aid = "ua_lead_" + lid
-        self.assertIn("BuildFlow", self.call("GET", f"/api/actions/{aid}/draft")[1]["draft"])
-        self.call("POST", f"/api/actions/{aid}/approve")
-        with mock.patch("agents.operator.outreach.gmail.send_email", return_value={"message_id": "m1"}):
-            self.assertTrue(self.call("POST", f"/api/actions/{aid}/send", {})[1]["sent"])
-        self.assertEqual(self.conn.execute("SELECT stage FROM leads WHERE id=?", (lid,)).fetchone()[0], "contacted")
-        self.assertEqual(self.conn.execute("SELECT count(*) FROM lead_touches WHERE lead_id=? AND channel='email'", (lid,)).fetchone()[0], 1)
+        c, r = self.call("POST", "/api/challenge/draft", {"lead_id": lid, "channel": "email"})
+        self.assertEqual(c, 400)
+        self.assertIn("declined", r["error"])
 
     def test_csv_import_sets_venture(self):
         r = self.call("POST", "/api/leads/import", {"csv": "name,business,email\nA,Farm A,a@farm.co\n", "venture": "agriloop"})

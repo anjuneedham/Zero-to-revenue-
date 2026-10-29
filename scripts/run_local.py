@@ -30,8 +30,6 @@ def check_env() -> list[str]:
     if not url.startswith(("postgres://", "postgresql://")):
         problems.append("DATABASE_URL is missing. Copy .env.example to .env.local and paste your Neon connection string "
                         "(Neon console > your project > Connection string). It must start with postgresql://")
-    if not os.environ.get("OWNER_WALLET_ADDRESS"):
-        problems.append("note: OWNER_WALLET_ADDRESS is not set, so Treasury will show no wallet (the app still runs).")
     return problems
 
 

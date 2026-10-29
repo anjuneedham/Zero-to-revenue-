@@ -14,7 +14,7 @@ import json
 import re
 from pathlib import Path
 
-from agents.scout import sanitize
+from core import sanitize
 from core import budget
 
 PROMPT_VERSION = "lead-extract-v1"

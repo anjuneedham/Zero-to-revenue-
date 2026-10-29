@@ -1,34 +1,36 @@
 # Founder OS
 
-Founder OS (formerly the "Zero-to-Revenue Agent System"; the GitHub repo keeps its old name) runs four businesses (BuildFlow, Agriloop, fashion, trading) from one owner-only control room, plus the 60-day challenge pipeline.
-Pages: Founder, Challenge, BuildFlow, Agriloop, Fashion, Trading, Lab, Growth, Overview, Scout, Operator, Treasury, Game plan.
+Founder OS (formerly the "Zero-to-Revenue Agent System"; the GitHub repo keeps its old name) is an owner-only control room for
+four businesses (BuildFlow, Agriloop, fashion, trading) plus the 60-day challenge sales pipeline. Python 3.13, Postgres (Neon),
+Vercel, vanilla JS, no build step.
 
-Three cooperating agents — **Scout** (find opportunities), **Operator** (do the
-work), **Treasury** (read-only accounting) — starting from **$0 capital**.
+## What it does
+- **Founder / BuildFlow / Agriloop / Fashion / Trading**: per-business workspaces (goals, tasks, KPIs, blockers, content, marketplace, shop, trading research).
+- **Challenge**: prospect pipeline, copy-ready offer drafts per channel, deals, pace against $10,000 verified cash by 31 Dec 2026
+  ([runbook](docs/runbooks/CHALLENGE.md)).
+- **Lab / Growth**: research and evidence, prompt versions, experiments with decisions and learnings. The AI command center
+  only runs when `ANTHROPIC_API_KEY` and the budget variables are set.
+- **Payments**: request a PayPal payment link, check if it is paid, ledger of verified receipts. Only PayPal-confirmed payments count as revenue.
+- **Overview / Game plan**: cash, kill switch, alerts, progress checklists.
+- **Read-only MCP connector** so a Claude chat can ask "what needs my attention?".
 
-This is not a trading bot. No profit is assumed; only Treasury-verified payments count as revenue.
+Nothing is sent, charged or signed by the system. The old Scout, Operator and Treasury agents (gig-feed scanning, proposal
+drafting and Gmail sending, crypto wallet watching) were removed on 29 Oct 2026; see [docs/master/CONSOLIDATION.md](docs/master/CONSOLIDATION.md).
 
-## Current status: Phase 10 — 60-day challenge OS (`LIVE` on Vercel, `LOCAL` otherwise)
-- Challenge (1 Nov - 31 Dec 2026, $10k verified cash, annual plan + 2 months free + 1:1 onboarding for BuildFlow and AgriLoop): [docs/runbooks/CHALLENGE.md](docs/runbooks/CHALLENGE.md)
-- Original foundation below (Phase 1, agents never act without owner approval)
-- Spec: [MASTER_SYSTEM.md](MASTER_SYSTEM.md)
-- Architecture & plan: [docs/architecture/PHASE0_ARCHITECTURE.md](docs/architecture/PHASE0_ARCHITECTURE.md)
-- Security: [SECURITY.md](SECURITY.md)
-
-Branch map, what was merged, open decisions: [docs/master/CONSOLIDATION.md](docs/master/CONSOLIDATION.md).
-
-## Run tests
-```
-TEST_DATABASE_URL=postgresql://... python3 -m unittest discover -s tests -t .  # throwaway Postgres
-```
-
-Phase 1 pieces: SQLite schema (`database/migrations`), task queue with leases and
-idempotency (`core/queue`), kill switch (`core/orchestrator`), append-only audit log,
-owner-only password + authenticator-app login stored in Postgres (`core/auth`), notification service with a
-mock WhatsApp backend. Setup steps: [docs/runbooks/PHASE1_SETUP.md](docs/runbooks/PHASE1_SETUP.md).
-Dashboard + API run on Vercel with Neon Postgres (see [docs/runbooks/VERCEL_AND_APK.md](docs/runbooks/VERCEL_AND_APK.md)). Local: set `DATABASE_URL`, `python3 -m dashboard.app`. Scout ([docs](docs/architecture/SCOUT.md)), Operator, Treasury, the scheduler and notifications are all built; the Ventures workspace (tasks, decisions, experiments) is migration 008. State of the OS and what it still needs: [docs/master/OS_REVIEW.md](docs/master/OS_REVIEW.md).
-
-## Using it
+## Run
 - Live: https://zero-to-revenue-neon.vercel.app (install it as an app from the browser).
-- Local: `python scripts/run_local.py`, see [docs/runbooks/LOCAL_APP.md](docs/runbooks/LOCAL_APP.md).
-- Pages: **Challenge** (default), Overview, Scout, Operator, Treasury, Game plan (BuildFlow launch plan: [docs/strategy/BUILDFLOW_LAUNCH_PLAN.md](docs/strategy/BUILDFLOW_LAUNCH_PLAN.md)).
+- Local: set `DATABASE_URL` (see `.env.example`), then `python scripts/run_local.py` ([runbook](docs/runbooks/LOCAL_APP.md)).
+- Owner login is a password plus an authenticator app, stored in Postgres ([setup](docs/runbooks/PHASE1_SETUP.md)).
+
+## Test
+```
+TEST_DATABASE_URL=postgresql://... python3 -m unittest discover -s tests -t .  # throwaway Postgres, never production
+```
+
+## Code map
+`core/` domain logic (challenge, payments, founder, workspace, ai, growth, lab, weekly, scheduler, auth, audit, policy) ·
+`dashboard/` HTTP handler, API modules, static UI · `api/index.py` Vercel entry · `integrations/` PayPal, Twilio WhatsApp (record-only),
+web fetch · `database/migrations` forward-only SQL (rollbacks in `database/rollback`).
+
+Spec history: [MASTER_SYSTEM.md](MASTER_SYSTEM.md) (original, partly historical) · [SECURITY.md](SECURITY.md) ·
+[docs/master/CONSOLIDATION.md](docs/master/CONSOLIDATION.md) (branch map, open decisions).

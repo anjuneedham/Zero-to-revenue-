@@ -7,7 +7,7 @@ import dashboard.app as dash
 from core import db
 from tests.authutil import session
 from tests.dbutil import make_conn
-from tests.unit.test_phases_3_6 import ENV
+from tests.unit.test_payments import ENV
 
 SLUGS = {"buildflow", "agriloop", "fashion", "trading"}
 

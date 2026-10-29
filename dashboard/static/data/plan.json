@@ -141,13 +141,6 @@
    "who": "owner",
    "title": "Turn off Vercel Deployment Protection for production",
    "detail": "Needed so the phone app can load the manifest. The owner login protects the data."
-  },
-  {
-   "id": "sys-solana",
-   "p": "P2",
-   "who": "owner",
-   "title": "Create a Solana address only if you go after Superteam bounties",
-   "detail": "They pay in USDC/USDG on Solana; Treasury watches EVM chains only."
   }
  ],
  "phases": [
@@ -166,19 +159,19 @@
   [
    2,
    "Scout",
-   "Source scoring, scam and spam defense, optional Claude help",
+   "Removed 29 Oct 2026. Source scoring, scam and spam defense, optional Claude help",
    "done"
   ],
   [
    3,
    "Operator",
-   "Drafts and decisions, nothing submitted for you",
+   "Removed 29 Oct 2026. Drafts and decisions, nothing submitted for you",
    "done"
   ],
   [
    4,
    "Treasury",
-   "Read-only wallet watching on 7 chains, on-chain payment verification",
+   "Removed 29 Oct 2026. Read-only wallet watching on 7 chains, on-chain payment verification",
    "done"
   ],
   [
@@ -351,64 +344,6 @@
   ]
  },
  "live_url": "https://zero-to-revenue-neon.vercel.app",
- "sources_setup": [
-  {
-   "id": "src-ghtoken",
-   "p": "P1",
-   "who": "owner",
-   "title": "Add a GitHub token (read-only, no scopes)",
-   "detail": "Raises Scout's GitHub search rate limit so it can look further before giving up. Create one at GitHub > Settings > Developer settings > Personal access tokens (classic, no scopes needed, read-only is fine). Add GITHUB_TOKEN as a Secret in Vercel.",
-   "src": "sources research, 25 Oct"
-  },
-  {
-   "id": "src-upwork",
-   "p": "P1",
-   "who": "owner",
-   "title": "Create an Upwork profile",
-   "detail": "The largest general freelance market; $500+ fixed-price web/app work is common. Its job feed closed its public API in 2024, so this needs a manual profile and proposals - I can draft proposal text once you're set up.",
-   "src": "sources research, 25 Oct"
-  },
-  {
-   "id": "src-contra",
-   "p": "P2",
-   "who": "owner",
-   "title": "Create a Contra profile",
-   "detail": "No-fee, portfolio-first marketplace. A good fit for showing your BuildFlow and funnel work directly.",
-   "src": "sources research, 25 Oct"
-  },
-  {
-   "id": "src-braintrust",
-   "p": "P2",
-   "who": "owner",
-   "title": "Apply to Braintrust",
-   "detail": "Vetted talent network; the client pays the platform fee, so you keep more of the rate.",
-   "src": "sources research, 25 Oct"
-  },
-  {
-   "id": "src-webflow",
-   "p": "P2",
-   "who": "owner",
-   "title": "Apply as a Webflow/Framer Expert or Partner",
-   "detail": "Matches your website/funnel-building skill directly; these directories route client work to listed experts.",
-   "src": "sources research, 25 Oct"
-  },
-  {
-   "id": "src-freelancer-account",
-   "p": "P2",
-   "who": "owner",
-   "title": "Optional: create a Freelancer.com account",
-   "detail": "Scout already reads Freelancer.com's public listings with no login. An account is only needed to actually bid - not required for discovery.",
-   "src": "sources research, 25 Oct"
-  },
-  {
-   "id": "src-toptal",
-   "p": "P2",
-   "who": "owner",
-   "title": "Optional: apply to Toptal, Gun.io or Arc.dev",
-   "detail": "Vetted developer networks with larger projects; screening is extensive, worth it only once you want bigger, steadier work.",
-   "src": "sources research, 25 Oct"
-  }
- ],
  "week": {
   "range": "Mon 26 Oct - Sun 1 Nov 2026",
   "days": [
@@ -427,12 +362,6 @@
       "cat": "buildflow",
       "title": "Decide BuildFlow's first billing method",
       "detail": "Bank transfer or PayPal invoice for your first 10 contractors, while WiPay/PayPal integration gets built. One decision, not a build."
-     },
-     {
-      "id": "wk-mon-scout",
-      "cat": "jobs",
-      "title": "Run Scout + review the board",
-      "detail": "Click Run Scout now. Approve anything genuinely $500+ or easy; note which human-only Superteam listings you'll do yourself this week."
      },
      {
       "id": "wk-mon-study",
@@ -463,12 +392,6 @@
       "cat": "study",
       "title": "Study: Jamaica crypto off-ramp routes",
       "detail": "Test a small Binance->bank or Wise conversion if you're comfortable, so the route is proven before a real payment needs it."
-     },
-     {
-      "id": "wk-tue-improve",
-      "cat": "improve",
-      "title": "Weekly loop: review what Scout found this week so far",
-      "detail": "One line per rejected opportunity: why, and whether a scoring rule should change. This is the Monday loop from docs/runbooks/IMPROVEMENT_LOOP.md, run a day early this week."
      }
     ]
    },
@@ -481,12 +404,6 @@
       "cat": "buildflow",
       "title": "Confirm BuildFlow's production Firebase project",
       "detail": "build-6fa95 or a fresh buildflow-prod - pick one, I'll update .firebaserc and the deploy checklist."
-     },
-     {
-      "id": "wk-wed-jobs",
-      "cat": "jobs",
-      "title": "Run Scout + Operator; approve/reject the queue",
-      "detail": "Keep the decision queue at zero. Every approval or rejection also trains the scoring via the weekly review."
      },
      {
       "id": "wk-wed-study",
@@ -507,12 +424,6 @@
       "detail": "Doesn't need to be 15 - even 3 real names is enough to start. Past Needham's Construction / Yardscale contacts count."
      },
      {
-      "id": "wk-thu-jobs",
-      "cat": "jobs",
-      "title": "Run Scout + Operator",
-      "detail": "Standard daily pass."
-     },
-     {
       "id": "wk-thu-study",
       "cat": "study",
       "title": "Study: one Freelancer.com or Upwork proposal that won",
@@ -529,12 +440,6 @@
       "cat": "buildflow",
       "title": "Pitch BuildFlow to at least 1 of the contractors from Thursday",
       "detail": "Free for 60 days in exchange for feedback, photos, a testimonial. First real signal on the $50 price."
-     },
-     {
-      "id": "wk-fri-jobs",
-      "cat": "jobs",
-      "title": "Run Scout + Operator",
-      "detail": "Standard daily pass."
      },
      {
       "id": "wk-fri-improve",
@@ -558,7 +463,7 @@
       "id": "wk-sat-rest",
       "cat": "study",
       "title": "Light day: read, don't build",
-      "detail": "Skim the week's Founder's Log entry, Scout's run history, and the daily reports. Notice patterns, don't act on everything."
+      "detail": "Skim the week's Founder's Log entry, and the daily reports. Notice patterns, don't act on everything."
      }
     ]
    },

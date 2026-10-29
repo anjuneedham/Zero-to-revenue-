@@ -34,7 +34,7 @@ def _request(method: str, path: str, *, token: str | None = None, data: bytes | 
              basic: tuple[str, str] | None = None) -> dict:
     url = HOSTS[mode()] + path
     headers = {"Content-Type": "application/x-www-form-urlencoded" if basic else "application/json",
-               "Accept": "application/json", "User-Agent": "zero-to-revenue-treasury/1.0"}
+               "Accept": "application/json", "User-Agent": "founder-os/1.0"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     if basic:

@@ -1,58 +1,15 @@
 import unittest
 
-from core.policy.policy import (
-    Action, Agent, FORBIDDEN_ACTIONS, OpportunityStatus, authorize,
-    classify_opportunity, counts_as_verified_revenue, is_zero_capital,
-    opportunity_score, REQUIRED_PAYMENT_EVIDENCE,
-)
+from core.policy import policy
+from core.policy.policy import REQUIRED_PAYMENT_EVIDENCE, counts_as_verified_revenue
 
 
-class AuthorizeTest(unittest.TestCase):
-    def test_forbidden_actions_refused_even_with_approval(self):
-        for agent in Agent:
-            for action in FORBIDDEN_ACTIONS:
-                d = authorize(agent, action, paused=False, owner_approved=True)
-                self.assertFalse(d.allowed, (agent, action))
-
-    def test_kill_switch_blocks_work_but_not_owner_notification(self):
-        self.assertFalse(authorize(Agent.SCOUT, Action.RESEARCH, paused=True).allowed)
-        self.assertTrue(authorize(Agent.SCOUT, Action.NOTIFY_OWNER, paused=True).allowed)
-
-    def test_agent_isolation(self):
-        self.assertFalse(authorize(Agent.SCOUT, Action.SUBMIT_WORK,
-                                   paused=False, owner_approved=True).allowed)
-        self.assertFalse(authorize(Agent.TREASURY, Action.READ_EXTERNAL, paused=False).allowed)
-        self.assertFalse(authorize(Agent.OPERATOR, Action.READ_WALLET, paused=False).allowed)
-
-    def test_submission_requires_approval(self):
-        d = authorize(Agent.OPERATOR, Action.SUBMIT_WORK, paused=False)
-        self.assertFalse(d.allowed)
-        self.assertTrue(d.requires_approval)
-        self.assertTrue(authorize(Agent.OPERATOR, Action.SUBMIT_WORK,
-                                  paused=False, owner_approved=True).allowed)
-
-
-class ScoringTest(unittest.TestCase):
-    FULL = dict(legitimacy=1, zero_capital=1, payment_clarity=1, skill_fit=1,
-                repeatability=1, automation=1, deadline=1)
-
-    def test_weights_sum_to_100(self):
-        self.assertEqual(opportunity_score(self.FULL), 100)
-
-    def test_missing_or_out_of_range_factor_rejected(self):
-        with self.assertRaises(ValueError):
-            opportunity_score({"legitimacy": 1})
-        with self.assertRaises(ValueError):
-            opportunity_score({**self.FULL, "deadline": 2})
-
-    def test_classification_thresholds(self):
-        self.assertEqual(classify_opportunity(65, 35), OpportunityStatus.QUALIFIED)
-        self.assertEqual(classify_opportunity(64, 10), OpportunityStatus.REVIEW_REQUIRED)
-        self.assertEqual(classify_opportunity(90, 36), OpportunityStatus.REVIEW_REQUIRED)
-
-    def test_capital_required_is_not_zero_capital(self):
-        self.assertTrue(is_zero_capital(0))
-        self.assertFalse(is_zero_capital(0.01))
+class SafetyFlagsTest(unittest.TestCase):
+    def test_money_movement_is_hard_disabled(self):
+        self.assertEqual(policy.WALLET_MODE, "READ_ONLY")
+        for flag in ("TRADING_ENABLED", "AUTO_SPENDING_ENABLED", "TRANSACTION_SIGNING_ENABLED", "CONTRACT_INTERACTION_ENABLED",
+                     "BRIDGE_ENABLED", "SWAPS_ENABLED", "STAKING_ENABLED"):
+            self.assertIs(getattr(policy, flag), False, flag)
 
 
 class RevenueTest(unittest.TestCase):

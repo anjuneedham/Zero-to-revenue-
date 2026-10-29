@@ -10,8 +10,6 @@
   const NS = "http://www.w3.org/2000/svg";
   const ICONS = {
     home: "M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z",
-    scout: "M11 4a7 7 0 100 14 7 7 0 000-14zm9 16l-4.2-4.2",
-    operator: "M4 6h16M4 12h16M4 18h10",
     treasury: "M3 7h18v12H3zM3 7l3-3h12l3 3M16 13h2",
     plan: "M5 3h14v18l-7-4-7 4z",
     target: "M12 3a9 9 0 100 18 9 9 0 000-18zm0 5a4 4 0 100 8 4 4 0 000-8z",
@@ -86,7 +84,7 @@
       ["Build phases", pc(plan.phases.map(p => ({ id: p[0], st: p[3] })), i => i.st === "done")],
       ["Master plan", pc(plan.master, t)],
       ["BuildFlow launch", pc(plan.buildflow, t)],
-      ["Your setup", pc(plan.system.concat(plan.sources_setup), t)],
+      ["Your setup", pc(plan.system, t)],
       ["This week", pc(week, t)],
     ];
     const done = areas.reduce((a, [, x]) => a + x.done, 0), total = areas.reduce((a, [, x]) => a + x.total, 0);
@@ -137,54 +135,4 @@
     Z.text(Z.$("drawer-title"), title); const b = Z.$("drawer-body"); b.replaceChildren(node); Z.$("drawer").showModal();
   };
 
-  Z.decisionCard = (a, refresh) => {
-    const isOutreach = a.kind === "send_outreach";
-    const it = Z.el("div", "item");
-    it.append(Z.el("div", "t", a.title));
-    it.append(Z.add(Z.el("div", "meta"), Z.pill(Z.nice(a.status), a.status === "APPROVED" ? "gold" : "warn"),
-      Z.pill("risk " + (a.risk || "?"), a.risk === "HIGH" ? "bad" : "ok"), a.deadline ? Z.pill("due " + a.deadline.slice(0, 10)) : null,
-      isOutreach ? Z.pill("outreach") : null));
-    it.append(Z.el("p", "sub", a.why_required));
-    if (a.verified_url) { const l = Z.el("a", null, "Open the source page"); l.href = a.verified_url; l.target = "_blank"; l.rel = "noopener noreferrer"; it.append(l); }
-    const row = Z.el("div", "row");
-    const done = async (path, body, msg) => { await Z.api("/api/actions/" + a.action_id + "/" + path, "POST", body); Z.toast(msg, "ok"); await refresh(); };
-    if (isOutreach) {
-      const ta = Z.el("textarea", "draft"); ta.rows = 10; ta.placeholder = "Loading draft…"; ta.disabled = true;
-      Z.api("/api/actions/" + a.action_id + "/draft").then(d => { ta.value = d.draft || ""; ta.disabled = false; });
-      it.append(ta);
-      if (a.status === "OPEN") {
-        row.append(Z.btn("Approve", "small", () => done("approve", {}, "Approved. Edit above if you like, then send from here or confirm you sent it elsewhere.")),
-          Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
-      } else if (a.status === "APPROVED") {
-        row.append(
-          Z.btn("Send via Gmail", "gold small", async () => {
-            try { const r = await Z.api("/api/actions/" + a.action_id + "/send", "POST", { edited_body: ta.value }); Z.goal("Email sent (id " + r.message_id.slice(0, 8) + "…)"); await refresh(); }
-            catch (e) { Z.toast(e.message, "bad"); }
-          }),
-          Z.btn("I sent it another way", "ghost small", () => done("sent", {}, "Marked sent.")),
-          Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
-      }
-      it.append(row); return it;
-    }
-    row.append(Z.btn("View draft", "ghost small", async () => {
-      const d = await Z.api("/api/actions/" + a.action_id + "/draft"); const pre = Z.el("pre", "draft", d.draft || "No draft."); Z.openDrawer("Draft submission", pre);
-    }));
-    if (a.status === "OPEN") {
-      row.append(Z.btn("Approve", "small", () => done("approve", {}, "Approved. Submit it yourself, then confirm.")),
-        Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
-    } else if (a.status === "APPROVED") {
-      const inp = Z.el("input"); inp.placeholder = "Link to your submission (optional, https)"; inp.id = "proof-" + a.action_id; inp.setAttribute("aria-label", "Proof link");
-      const mail = Z.el("input"); mail.placeholder = "Or: contact's email, to submit via Gmail"; mail.type = "email"; mail.setAttribute("aria-label", "Recipient email");
-      it.append(inp, mail);
-      row.append(
-        Z.btn("I submitted it", "gold small", () => done("submitted", { proof_url: inp.value.trim() }, "Marked submitted. Waiting for payment.")),
-        Z.btn("Submit via email", "gold small", async () => {
-          if (!mail.value.trim()) { Z.toast("Enter the contact's email first", "bad"); return; }
-          try { const r = await Z.api("/api/actions/" + a.action_id + "/submit-email", "POST", { to_email: mail.value.trim() }); Z.goal("Submitted by email (id " + r.message_id.slice(0, 8) + "…)"); await refresh(); }
-          catch (e) { Z.toast(e.message, "bad"); }
-        }),
-        Z.btn("Reject", "ghost small", () => done("reject", {}, "Rejected")));
-    }
-    it.append(row); return it;
-  };
 })();

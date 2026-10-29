@@ -1,5 +1,8 @@
 # Phase 0 — Architecture Inspection
 
+> **Historical.** Describes the removed Scout/Operator/Treasury agents. Kept for history only.
+
+
 Status: **ARCHITECTURE ONLY.** No agent performs any external action yet.
 
 ## 1. Repository inspection (2026-10-25)

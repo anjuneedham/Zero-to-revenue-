@@ -1,5 +1,8 @@
 # Founder OS (originally Zero-to-Revenue Agent System) — Master Specification v1.0 (normative summary)
 
+> **Historical.** This is the original Zero-to-Revenue agent specification. The Scout, Operator and Treasury agents it describes were removed from Founder OS on 29 Oct 2026 (see docs/master/CONSOLIDATION.md). Only the safety rules (no spending, no signing, no secrets, verified-revenue-only) still apply; they live in `core/policy/policy.py`.
+
+
 Section numbers match the owner's original specification.
 
 - **§1–3 Identity & core principle.** Start at $0. Possibility ≠ revenue.

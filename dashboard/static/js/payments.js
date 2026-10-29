@@ -1,18 +1,6 @@
 (function () {
   const { el, add, pill, btn, card, fmt, nice } = Z;
 
-  function verifyForm(p, chains) {
-    const f = el("div", "form");
-    const l1 = el("label", "f", "Chain"); const sel = el("select"); sel.id = "chain-" + p.id; sel.setAttribute("aria-label", "Chain");
-    chains.forEach(c => { const o = el("option", null, c.name); o.value = c.chain_id; sel.append(o); }); l1.append(sel);
-    const l2 = el("label", "f", "Transaction hash"); const tx = el("input"); tx.id = "tx-" + p.id; tx.placeholder = "0x…"; l2.append(tx);
-    const b = btn("Verify on-chain", "gold small", async () => {
-      const r = await Z.api("/api/payments/" + p.id + "/verify", "POST", { chain_id: sel.value, tx_hash: tx.value.trim() });
-      Z.goal(r.amount + " " + r.asset + " verified"); await Z.rerender();
-    });
-    add(f, l1, l2, b); return f;
-  }
-
   function linkRow(url) {
     const row = el("div", "row");
     const a = el("a", null, "Open the payment page"); a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer";
@@ -50,37 +38,27 @@
     add(f, row, linkBtn, b); return f;
   }
 
-  Z.verifyForm = verifyForm; Z.paypalForm = paypalForm;
+  Z.paypalForm = paypalForm;
 
-  Z.pages.treasury = {
-    title: "Treasury", sub: "Watches your wallet and verifies payments. Read-only.", icon: "treasury",
+  Z.pages.payments = {
+    title: "Payments", sub: "What you are owed, what is verified, and your revenue ledger", icon: "treasury",
     async render(root) {
-      const [t, pay] = await Promise.all([Z.api("/api/treasury/overview"), Z.api("/api/payments")]);
+      const [t, pay] = await Promise.all([Z.api("/api/payments/overview"), Z.api("/api/payments")]);
       const g = el("div", "grid");
 
       const top = el("section", "card hero s8");
-      const head = el("div", "agent"); add(head, el("div", "shirt", "1"), el("h3", null, "Treasury"), el("div", "label", "Keeper · guards the money"),
-        el("div", "sub", t.chains.some(c => c.checked_at) ? "Last check " + fmt.ago(t.chains.map(c => c.checked_at).filter(Boolean).sort().pop()) : "Has not checked yet"));
-      top.append(head);
-      if (t.address) {
-        const row = el("div", "row"); const code = el("code", "key", t.address); code.style.margin = "0"; code.style.color = "var(--ink)";
-        row.append(code, btn("Copy", "ghost small", () => Z.copy(t.address, "Address"), "copy")); top.append(row);
-      } else top.append(el("p", "err", "OWNER_WALLET_ADDRESS is not set."));
-      if (t.problem) top.append(el("p", "err", t.problem));
-      top.append(add(el("div", "meta"), pill("Read-only", "ok"), pill("No signing", "ok"), pill("No spending", "ok"), pill(t.min_confirmations + " confirmations needed")));
-      top.append(btn("Check wallet now", "gold", async () => {
-        const r = await Z.api("/api/treasury/run", "POST");
-        Z.toast(r.ran ? "Wallet checked on " + Object.keys(r.balances).length + " chains" + (r.errors.length ? ", " + r.errors.length + " failed" : "") : "Not run: " + r.reason, r.errors && r.errors.length ? "bad" : "ok"); await Z.rerender();
-      }, "treasury"));
+      add(top, el("div", "label", "Collect and verify"), el("h3", null, "Payments"),
+        el("div", "sub", "Money counts as revenue only after PayPal confirms it was paid. This page never sends money."));
+      top.append(add(el("div", "meta"), pill("No signing", "ok"), pill("No spending", "ok"), t.paypal ? pill("PayPal connected", "ok") : pill("PayPal not configured", "warn")));
       g.append(top);
 
       const rev = card("Verified revenue", "Only fully verified receipts with a USD price"); rev.classList.add("s4");
       const unpriced = t.ledger.filter(e => e.type === "receipt" && e.status === "VERIFIED" && e.usd_value == null).length;
-      add(rev, el("div", "stat", fmt.usd(t.revenue_usd)), el("p", "sub", "A wallet-to-wallet transfer, loan, promised or estimated payment never counts."));
+      add(rev, el("div", "stat", fmt.usd(t.revenue_usd)), el("p", "sub", "A loan, promised or estimated payment never counts."));
       if (unpriced) rev.append(el("p", "flags", unpriced + " verified receipt(s) have no USD price yet (native coins and unconfirmed tokens are not valued), so they are not counted here."));
       g.append(rev);
 
-      const calc = card("Payment calculator", "Convert any amount you were paid - crypto or fiat - into USD or JMD. Not tied to a job; use it for any online payment."); calc.classList.add("s12");
+      const calc = card("Payment calculator", "Convert any amount you were paid into USD or JMD. Reference only."); calc.classList.add("s12");
       const rr = await Z.api("/api/rates");
       const CODES = Object.keys(rr.crypto_usd); const FIATS = ["USD", ...Object.keys(rr.fiat_per_usd)];
       const form = el("div", "form");
@@ -107,18 +85,7 @@
       calc.append(el("p", "sub", rr.as_of ? "Rates as of " + fmt.when(rr.as_of) + (rr.stale ? " (could not refresh just now; showing the last good rates)" : "") + ". Reference only - never counted as verified revenue on its own." : "Rates are not available right now."));
       g.append(calc);
 
-      const ch = card("Chains", "Native-coin balances on the chains you allow"); ch.classList.add("s12");
-      const cols = el("div", "cols");
-      if (!t.chains.length) cols.append(Z.empty("No chains configured", "Set OWNER_WALLET_CHAIN_IDS in Vercel."));
-      t.chains.forEach(c => {
-        const it = el("div", "item"); add(it, add(el("div", "row"), el("div", "t", c.name), pill(c.checked_at ? fmt.ago(c.checked_at) : "unchecked", c.checked_at ? "" : "warn")),
-          el("div", "stat", c.balance == null ? "n/a" : fmt.num(c.balance, 5)), Z.spark(c.history));
-        if (c.explorer && t.address) { const a = el("a", null, "View on explorer"); a.href = c.explorer + "/address/" + t.address; a.target = "_blank"; a.rel = "noopener noreferrer"; it.append(a); }
-        cols.append(it);
-      });
-      ch.append(cols); g.append(ch);
-
-      const pc = card("Payments you are owed", "Paste the transaction hash the payer sends you to check it on-chain, or request a PayPal payment link for card/bank transfer."); pc.classList.add("s12");
+      const pc = card("Payments you are owed", "Request a PayPal payment link (card or bank transfer), send it to the payer yourself, then check if it is paid."); pc.classList.add("s12");
       const addForm = el("div", "form");
       const t1 = el("input"); t1.placeholder = "What's this for? (e.g. BuildFlow subscription - Acme Co)";
       const t2 = el("input"); t2.placeholder = "Amount"; t2.type = "number"; t2.min = "0.01"; t2.step = "0.01";
@@ -126,12 +93,12 @@
       const addBtn = btn("Add a payment you're owed", "gold small", async () => {
         try {
           await Z.api("/api/payments/manual", "POST", { title: t1.value.trim(), amount: t2.value, currency: t3.value.trim() || "USD" });
-          Z.toast("Added - request PayPal or paste a tx hash below", "ok"); await Z.rerender();
+          Z.toast("Added - request a PayPal link below", "ok"); await Z.rerender();
         } catch (e) { Z.toast(e.message, "bad"); }
       });
       add(addForm, t1, t2, t3, addBtn); pc.append(addForm);
       const pl = el("div", "list");
-      if (!pay.payments.length) pl.append(Z.empty("No payments expected yet", "Add one above, for work outside the automated pipeline (like a BuildFlow subscription), or they appear automatically after you mark Scout work as submitted."));
+      if (!pay.payments.length) pl.append(Z.empty("No payments expected yet", "They appear here when you create a deal on the Challenge page, or add one above."));
       pay.payments.forEach(p => {
         const it = el("div", "item"); add(it, el("div", "t", p.title || p.id), add(el("div", "meta"), pill(nice(p.status), Z.statusKind(p.status)),
           pill((p.expected_amount == null ? "?" : fmt.num(p.expected_amount, 2)) + " " + (p.asset || "") + " expected")));
@@ -142,9 +109,8 @@
           else if (tok) it.append(el("div", "sub", "A token arrived. Confirm it is the asset and amount you agreed."));
         }
         if (p.status !== "PAYMENT_VERIFIED") {
-          if (t.chains.length) it.append(verifyForm(p, t.chains));
           if (t.paypal) it.append(paypalForm(p));
-          else if (!t.chains.length) it.append(el("p", "sub", "No chains or PayPal configured yet."));
+          else it.append(el("p", "sub", "PayPal is not configured yet."));
         }
         pl.append(it);
       });

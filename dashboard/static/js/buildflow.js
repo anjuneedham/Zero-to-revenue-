@@ -116,7 +116,6 @@
     else c.append(tiles);
     c.append(el("p", "sub", "This is the outreach list only. There is no contractor or customer CRM yet, so no conversion numbers are shown."));
     p.recent.forEach(x => c.append(el("p", "sub", (x.business || x.name || "(unnamed)") + " · " + nice(x.status) + " · " + day(x.created_at))));
-    c.append(Object.assign(el("a", "btn ghost small", "Open Operator"), { href: "#operator" }));
     root.append(c);
   }
 

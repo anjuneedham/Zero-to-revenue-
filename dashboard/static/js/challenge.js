@@ -19,7 +19,7 @@
     add(box, add(el("div", "meta"), pill(VENT[l.venture]), pill(nice(l.stage), "gold"), l.segment ? pill(l.segment) : null, l.location ? pill(l.location) : null),
       el("div", "sub", [l.name, l.email, l.phone].filter(Boolean).join(" · ")), l.notes ? el("p", "sub", l.notes) : null,
       field("Channel", ch), ta,
-      el("p", "sub", "Fill every [OWNER TO FILL] before sending. Nothing is sent from here: copy it, send it yourself (or send email through the Operator), then log it."));
+      el("p", "sub", "Fill every [OWNER TO FILL] before sending. Nothing is sent from here: copy it, send it yourself , then log it."));
     const row = el("div", "row");
     add(row,
       btn("Copy", "ghost small", () => Z.copy(ta.value, "Message"), "copy"),
@@ -134,7 +134,7 @@
   Z.pages.challenge = {
     title: "Challenge", sub: "60 days, $10k cash: sell annual plans with 1-on-1 onboarding", icon: "target",
     async render(root) {
-      const [s, ld, pay, t, wk] = await Promise.all([Z.api("/api/challenge"), Z.api("/api/challenge/leads"), Z.api("/api/payments"), Z.api("/api/treasury/overview"), Z.api("/api/challenge/weekly")]);
+      const [s, ld, pay, t, wk] = await Promise.all([Z.api("/api/challenge"), Z.api("/api/challenge/leads"), Z.api("/api/payments"), Z.api("/api/payments/overview"), Z.api("/api/challenge/weekly")]);
       const refresh = () => Z.rerender();
       const c = s.config, g = el("div", "grid");
 
@@ -222,7 +222,7 @@
             } catch (e) { Z.toast(e.message, "bad"); }
           }, "copy"));
         }
-        if (d.status !== "paid" && p) { if (t.paypal && p.tx_hash && p.chain_id == null) it.append(Z.paypalForm(p)); if (t.chains.length) it.append(Z.verifyForm(p, t.chains)); }
+        if (d.status !== "paid" && p) { if (t.paypal && p.tx_hash && p.chain_id == null) it.append(Z.paypalForm(p)); }
         const ob = select([["to_schedule", "Onboarding: to schedule"], ["scheduled", "Onboarding: scheduled"], ["done", "Onboarding: done"]], d.onboarding_status);
         ob.onchange = async () => { try { await Z.api("/api/challenge/onboarding", "POST", { deal_id: d.id, status: ob.value }); Z.toast("Saved", "ok"); } catch (e) { Z.toast(e.message, "bad"); } };
         it.append(ob); dlist.append(it);

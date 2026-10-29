@@ -1,6 +1,6 @@
 """Weekly learning report: messages -> replies -> onboardings booked -> paid, by channel and by plan, plus what to do
 next week. Pure counting over lead_touches and deals; the actions are fixed rules, never model output, and no number
-here is estimated. Paid = a deal whose payment Treasury verified. Deals carry no channel, so paid-by-channel uses the
+here is estimated. Paid = a deal whose payment was verified. Deals carry no channel, so paid-by-channel uses the
 channel the lead was first reached on (leads.channel); sent/replied/booked use the channel of each touch."""
 
 from datetime import date, datetime, timedelta, timezone

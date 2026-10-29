@@ -4,14 +4,9 @@ import unittest
 from unittest import mock
 
 import dashboard.app as dash
-from agents.operator import run as operator
-from agents.scout.run import run_scout
-from agents.treasury import run as treasury
 from tests.authutil import session
 from tests.dbutil import make_conn
-from tests.unit.test_phases_3_6 import ENV, TX, FakeChain, native_payment
-from tests.unit.test_scout import good
-from tests.unit.test_scout_db import Source
+from tests.unit.test_payments import ENV
 
 
 class StaticTest(unittest.TestCase):
@@ -51,8 +46,7 @@ class PagesApiTest(unittest.TestCase):
         return c, json.loads(out)
 
     def test_all_new_endpoints_require_login(self):
-        for m, p in (("GET", "/api/scout/overview"), ("GET", "/api/operator/board"), ("GET", "/api/treasury/overview"),
-                     ("GET", "/api/plan"), ("POST", "/api/plan")):
+        for m, p in (("GET", "/api/payments/overview"), ("GET", "/api/payments"), ("GET", "/api/plan"), ("POST", "/api/plan")):
             self.assertEqual(self.call(m, p, auth=False)[0], 401, p)
 
     def test_auth_state_reports_local_or_live(self):
@@ -60,53 +54,18 @@ class PagesApiTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {"VERCEL": "1"}):
             self.assertEqual(self.call("GET", "/api/auth/state", auth=False)[1]["mode"], "LIVE")
 
-    def test_scout_overview(self):
-        run_scout(self.conn, [Source([good()])])
-        c, d = self.call("GET", "/api/scout/overview")
-        self.assertEqual(c, 200)
-        self.assertEqual(d["runs"][0]["outcome"], "ok")
-        self.assertEqual(d["counts"], {"QUALIFIED": 1})
-        self.assertEqual({s["name"] for s in d["sources"]}, {"superteam-earn", "github-bounty-label"})
-        self.assertFalse(d["ai"]["enabled"])
-        self.assertIn("ANTHROPIC_API_KEY", d["ai"]["missing"])  # names only, never values
-        self.assertNotIn("test-key", json.dumps(d))
-
-    def test_operator_board(self):
-        run_scout(self.conn, [Source([good()])])
-        operator.step(self.conn)
-        d = self.call("GET", "/api/operator/board")[1]
-        t = d["tasks"][0]
-        self.assertEqual((t["status"], t["kind"], t["title"][:5]), ("WAITING_FOR_USER", "research_opportunity", "Build"))
-        self.assertTrue(t["action_id"])
-        self.assertTrue(d["events"])
-        self.assertIn("Submit anything", d["cannot"])
-
-    def test_treasury_overview_after_checks(self):
-        d = self.call("GET", "/api/treasury/overview")[1]
-        self.assertEqual([c["chain_id"] for c in d["chains"]], [56, 8453])
-        self.assertIsNone(d["chains"][0]["balance"])
-        treasury.check_balances(self.conn, FakeChain(balance=10**17))
-        d = self.call("GET", "/api/treasury/overview")[1]
-        self.assertEqual(d["chains"][0]["balance"], 0.1)
-        self.assertEqual(len(d["chains"][0]["history"]), 1)
-        self.assertEqual(d["address"], ENV["OWNER_WALLET_ADDRESS"])
-        self.assertEqual((d["safety"]["wallet_mode"], d["safety"]["signing"], d["safety"]["spending"]), ("READ_ONLY", False, False))
-
-    def test_treasury_ledger_has_explorer_link_and_unconfigured_chains_explain_themselves(self):
-        run_scout(self.conn, [Source([good()])])
-        operator.step(self.conn)
-        from core import actions
-        aid = self.conn.execute("select action_id from user_actions").fetchone()[0]
-        actions.approve(self.conn, aid, "owner")
-        actions.mark_submitted(self.conn, aid, "owner")
-        pid = self.conn.execute("select id from payments").fetchone()[0]
-        treasury.verify_payment(self.conn, pid, 56, TX, native_payment())
-        d = self.call("GET", "/api/treasury/overview")[1]
-        self.assertEqual(d["ledger"][0]["tx_url"], f"https://bscscan.com/tx/{TX}")
-        with mock.patch.dict(os.environ, {"OWNER_WALLET_CHAIN_IDS": ""}):
-            d = self.call("GET", "/api/treasury/overview")[1]
-            self.assertEqual(d["chains"], [])
-            self.assertIn("not configured", d["problem"])
+    def test_payments_overview_shows_verified_revenue_and_safety_flags(self):
+        d = self.call("GET", "/api/payments/overview")[1]
+        self.assertEqual((d["ledger"], d["revenue_usd"], d["paypal"]), ([], 0, False))
+        self.assertFalse(d["safety"]["signing"] or d["safety"]["spending"] or d["safety"]["trading"])
+        pid = self.call("POST", "/api/payments/manual", {"title": "Annual plan", "amount": "500"})[1]["payment_id"]
+        done = {"status": "COMPLETED", "purchase_units": [{"payments": {"captures": [{"amount": {"value": "500", "currency_code": "USD"}}]}}]}
+        with mock.patch("core.payments.paypal.get_order", return_value=done):
+            self.assertEqual(self.call("POST", f"/api/payments/{pid}/paypal/verify", {"order_id": "ORD1"})[0], 200)
+        d = self.call("GET", "/api/payments/overview")[1]
+        self.assertEqual((d["revenue_usd"], d["ledger"][0]["status"]), (500.0, "VERIFIED"))
+        with mock.patch.dict(os.environ, {"PAYPAL_CLIENT_ID": "a", "PAYPAL_CLIENT_SECRET": "b"}):
+            self.assertTrue(self.call("GET", "/api/payments/overview")[1]["paypal"])
 
     def test_plan_ticks_roundtrip_and_validation(self):
         self.assertEqual(self.call("GET", "/api/plan")[1], {"ticks": {}})

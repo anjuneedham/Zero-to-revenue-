@@ -67,7 +67,7 @@ class SundayTickTest(ChallengeBase):
             def now(cls, tz=None):
                 return when
         with mock.patch.object(scheduler, "datetime", Fake):
-            return scheduler.tick(self.conn, scout_sources=[], rpc=lambda *a, **k: {})
+            return scheduler.tick(self.conn)
 
     def test_weekly_report_goes_out_once_on_sunday_only(self):
         sunday = datetime(2026, 11, 1, 7, 0, tzinfo=timezone.utc)

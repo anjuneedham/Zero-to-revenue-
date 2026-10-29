@@ -1,4 +1,4 @@
-"""Hardened read-only HTTP GET for Scout: https only, host allowlist, no redirects,
+"""Hardened read-only HTTP GET: https only, host allowlist, no redirects,
 size cap, timeout. Everything fetched is UNTRUSTED DATA."""
 
 import json
@@ -23,7 +23,7 @@ def fetch_json(url: str, allowed_hosts: set[str], headers: dict | None = None):
     parts = urlsplit(url)
     if parts.scheme != "https" or parts.hostname not in allowed_hosts:
         raise FetchError(f"blocked url: {parts.scheme}://{parts.hostname}")
-    req = urllib.request.Request(url, headers={"User-Agent": "zero-to-revenue-scout/1.0", **(headers or {})})
+    req = urllib.request.Request(url, headers={"User-Agent": "founder-os/1.0", **(headers or {})})
     opener = urllib.request.build_opener(_NoRedirect)
     try:
         with opener.open(req, timeout=TIMEOUT) as r:
