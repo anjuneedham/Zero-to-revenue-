@@ -115,4 +115,27 @@ here: Agriloop is deployed, returns 200 and looks finished, and still can't keep
 what is persisted, not what renders.
 
 ---
+## 29 Oct 2026 (night) — Agriloop's data layer, built but not yet switched on
+
+**What we found.** The Supabase project behind Agriloop had been paused, and production had no
+product catalogue at all (zero categories, zero products), which means that even with a working
+database, nobody could have posted a listing. Neither was in the plan. The photo upload the plan
+listed as "move to Supabase Storage" turned out never to have existed: the form didn't send images.
+Real signup emails never existed either; they're all Supabase's own, hence the rate limit we hit.
+
+**What got done.** Project restored. Marketplace tables and the catalogue are live. The app can
+now run on Postgres instead of memory, with 30 automated tests including "one farmer cannot edit
+another's listing" (checked by deliberately breaking the rule and watching the test fail). Photo
+bucket is live. A daily ping keeps the free project from pausing.
+
+**What did not get done.** Nothing has run against the live database yet: that needs the database
+connection string, which only the owner adds in Vercel. Messages, notifications, favourites and
+community posts are still in memory and would disappear. Email still goes through Supabase's
+default sender until SMTP is set.
+
+**For Tuesday:** add the connection string, run the preview checklist in
+`agriloopmain/docs/GO_LIVE_RUNBOOK.md`, set up Resend SMTP, and decide: migrate messaging, or lead
+with WhatsApp. If the preview check fails, hold the creator's start rather than launching on memory.
+
+---
 <!-- Next entry goes above this line. Keep entries dated, honest, and short enough to actually read later. -->

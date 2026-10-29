@@ -41,6 +41,33 @@ Everything below was checked on 29 Oct in `agriloopmain` (commit 03eba34) and th
 | P1 | Agent | **Instrument the pilot metrics** | Listings per farmer, requests per buyer, response rate, first-contact time (from the repo's own MVP roadmap). |
 | P2 | You | Android build for Play Store | Web first. The creator's audience will arrive on phones via a link. |
 
+## Status update, 29 Oct (evening): what the fix session did
+
+Work is on branch `feat/prisma-data-source` in `agriloopmain` (not merged, no PR). "Verified"
+below means tested against a real Postgres or the live Supabase project; "in code" means written
+but not exercised live.
+
+| Item | Status |
+|---|---|
+| Supabase project | Was **paused**; restored and now ACTIVE_HEALTHY. Verified. |
+| Marketplace tables (Listing, PriceTier, BuyerRequest, RequestResponse, Category, Product) with RLS | Applied to the live project. Verified. |
+| Product catalogue | Production had **0 categories and 0 products**, so nobody could have posted a listing. Seeded 47 + 69. Verified. |
+| Prisma data source for users, profiles, parishes, catalogue, listings, requests | Written; 30 tests pass against a throwaway Postgres built from the migrations (includes ownership checks, and the tests were shown to fail when a guard is removed). **Not run against the live database**: that needs `DATABASE_URL`, which only you add. |
+| Photo uploads | The listing form never sent photos at all (`storageService` was unused). Built: `listing-photos` bucket (public read, 5 MB, image types, owner-folder write policies; applied live and verified), upload route, form field. **Not tested end to end with a signed-in user.** |
+| Real signup emails | App code never sent any: all emails are Supabase Auth's. Needs Resend SMTP in the Supabase dashboard (**you**; steps in `agriloopmain/docs/GO_LIVE_RUNBOOK.md`). |
+| Keep-alive | Daily Vercel cron + `/api/health` (in code). Pro plan still recommended: free projects have no backups. |
+| Vercel env + production promotion | **Not done.** Waiting on you for `DATABASE_URL`, then a preview check. |
+
+**Gap this session found that the plan did not list:** only listings, requests, people and
+reference data move to Postgres. **Messages, notifications, favourites, community posts, farm
+updates, orders and reviews stay in memory** and are lost on a cold start. Messaging is how a
+buyer currently contacts a farmer, so either migrate it next or lead with WhatsApp for the
+launch week. If neither happens by Tuesday, the fallback above applies: hold the start.
+
+**Still blocked on a Supabase confirmation prompt (needs you):** two small migrations that
+contain a `drop` (PriceTier policy split; viewCount no longer touching updatedAt). Neither
+blocks launch.
+
 ## Firebase options for BuildFlow (parked, for later)
 
 1. **Keep Firebase, do the Blaze upgrade.** Usage within the free quota costs nothing; the hurdle is the card. A virtual USD card may be accepted where a prepaid card is not. Add the budget alert.
