@@ -191,7 +191,7 @@
       g.append(lp);
 
       // weekly report
-      const wr = card("Weekly report", `Last ${wk.days} days: ${wk.funnel.sent} messages → ${wk.funnel.replies} replies → ${wk.funnel.booked} onboardings booked → ${wk.funnel.paid} paid. Also sent to you every Sunday.`); wr.classList.add("s12");
+      const wr = card("Weekly report", `Last ${wk.days} days: ${wk.funnel.sent} messages → ${wk.funnel.replies} replies → ${wk.funnel.booked} onboardings booked → ${wk.funnel.paid} paid. Recorded every Sunday too; open this page to read it.`); wr.classList.add("s12");
       wr.append(el("h3", null, "By channel"));
       if (!wk.by_channel.length) wr.append(Z.empty("No activity logged this week", "Log each message you send and mark replies and bookings."));
       wk.by_channel.forEach(c => wr.append(add(el("div", "row"), el("b", null, nice(c.channel)), pill(c.sent + " sent"), pill(c.replies + " replied", c.replies ? "gold" : ""), pill(c.booked + " booked"), pill(c.paid + " paid · " + usd0(c.paid_usd), c.paid ? "ok" : ""))));
@@ -218,10 +218,11 @@
               const r = await Z.api("/api/challenge/paypal-message", "POST", { deal_id: d.id });
               await Z.copy(r.message, "PayPal message");
               if (r.warning) Z.toast(r.warning, "bad");
+              await refresh();
             } catch (e) { Z.toast(e.message, "bad"); }
           }, "copy"));
         }
-        if (d.status !== "paid" && p) { if (t.paypal) it.append(Z.paypalForm(p)); if (t.chains.length) it.append(Z.verifyForm(p, t.chains)); }
+        if (d.status !== "paid" && p) { if (t.paypal && p.tx_hash && p.chain_id == null) it.append(Z.paypalForm(p)); if (t.chains.length) it.append(Z.verifyForm(p, t.chains)); }
         const ob = select([["to_schedule", "Onboarding: to schedule"], ["scheduled", "Onboarding: scheduled"], ["done", "Onboarding: done"]], d.onboarding_status);
         ob.onchange = async () => { try { await Z.api("/api/challenge/onboarding", "POST", { deal_id: d.id, status: ob.value }); Z.toast("Saved", "ok"); } catch (e) { Z.toast(e.message, "bad"); } };
         it.append(ob); dlist.append(it);

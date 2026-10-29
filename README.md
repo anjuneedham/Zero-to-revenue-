@@ -21,7 +21,7 @@ Phase 1 pieces: SQLite schema (`database/migrations`), task queue with leases an
 idempotency (`core/queue`), kill switch (`core/orchestrator`), append-only audit log,
 owner-only password + authenticator-app login stored in Postgres (`core/auth`), notification service with a
 mock WhatsApp backend. Setup steps: [docs/runbooks/PHASE1_SETUP.md](docs/runbooks/PHASE1_SETUP.md).
-Dashboard + API run on Vercel with Neon Postgres (see [docs/runbooks/VERCEL_AND_APK.md](docs/runbooks/VERCEL_AND_APK.md)). Local: set `DATABASE_URL`, `python3 -m dashboard.app`. Scout (read-only, [docs](docs/architecture/SCOUT.md)) is built. Not built yet: Operator, Treasury monitoring, scheduler, notifications.
+Dashboard + API run on Vercel with Neon Postgres (see [docs/runbooks/VERCEL_AND_APK.md](docs/runbooks/VERCEL_AND_APK.md)). Local: set `DATABASE_URL`, `python3 -m dashboard.app`. Scout ([docs](docs/architecture/SCOUT.md)), Operator, Treasury, the scheduler and notifications are all built; the Ventures workspace (tasks, decisions, experiments) is migration 008. State of the OS and what it still needs: [docs/master/OS_REVIEW.md](docs/master/OS_REVIEW.md).
 
 ## Using it
 - Live: https://zero-to-revenue-neon.vercel.app (install it as an app from the browser).

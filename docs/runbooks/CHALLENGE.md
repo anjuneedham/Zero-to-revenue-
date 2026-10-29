@@ -18,9 +18,17 @@ Roughly 3 BuildFlow deals a week for 61 days, or fewer if you mix in farmers.
 2. Tap a lead > pick the channel > edit the draft (fill every `[OWNER TO FILL]`) > send it yourself (WhatsApp, Instagram,
    call) or send email through Overview > press **I sent it - log it**. Follow-up is scheduled for +3 days.
 3. They reply: **They replied**. They book a call: **Onboarding booked**.
-4. They say yes: **They paid / close the deal** creates the payment. On the deal card press **Request PayPal payment**,
-   send them the link, then verify. The cash number moves only after verification. Set onboarding to scheduled / done.
+4. They say yes: **They said yes - create the deal** creates the payment. On the deal card press **Copy PayPal message**
+   (creates the PayPal order the first time, reuses it after), paste it to them yourself, then press **Check if paid**.
+   The cash number moves only after verification. Set onboarding to scheduled / done. For AgriLoop it asks you to confirm
+   the database is live first.
 5. "What's working" shows replies and paid by channel; double down on whatever converts.
+- Adding leads fast: **From screenshot / paste** reads pasted text (and screenshots once the AI key is set), shows what it
+  found, and only creates a lead when you press **Add lead** on a row you checked. Treat every extracted field as unverified.
+- **Weekly report** (Challenge page; also recorded as a notification every Sunday - it reaches WhatsApp only if Twilio is configured, which it is not today, so open the page to read it): messages -> replies -> onboardings booked -> paid, by
+  channel and by plan, with next-week actions from fixed rules. "Paid by channel" uses the channel you first reached the lead
+  on. Counts need you to log every message and reply; if you do not, the report says so.
+- **Ventures** page: per-venture tasks, open decisions and experiments (BuildFlow, AgriLoop, Trading, E-commerce).
 - Opt-outs: **Not interested / opt-out** marks the lead lost and the system will never draft or send to it again.
 
 ## Before you sell (from each product's own readiness report)
@@ -33,6 +41,7 @@ Roughly 3 BuildFlow deals a week for 61 days, or fewer if you mix in farmers.
 ## Known limits
 - Gmail refresh token (OAuth app in Testing mode) expires about 2 Nov: re-issue it or publish the OAuth app. Until then
   email sends fail with a clear error; WhatsApp/Instagram drafts need no integration.
-- No AI is running (`ANTHROPIC_API_KEY` unset). Drafts are deterministic templates with explicit fill-ins. Nothing is sent
-  without your approval or your own hands.
-- Vercel Cron runs once a day (daily report now includes the challenge status); everything else is on-demand.
+- No AI is running (`ANTHROPIC_API_KEY` unset). Drafts are deterministic templates with explicit fill-ins; screenshot reading
+  is off until the key plus `LLM_MONTHLY_BUDGET_USD`, `LLM_PRICE_IN_PER_MTOK`, `LLM_PRICE_OUT_PER_MTOK` are set. Nothing is
+  sent without your approval or your own hands.
+- Vercel Cron runs once a day (daily report includes the challenge status; Sundays also record the weekly report); everything else is on-demand.
