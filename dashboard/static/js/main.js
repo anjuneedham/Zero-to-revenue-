@@ -1,6 +1,6 @@
 (function () {
   const { $, el, add, text, icon } = Z;
-  const NAV = [["founder", "Founder"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
+  const NAV = [["founder", "Founder"], ["buildflow", "BuildFlow", "side"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
   const AUTH = ["msgbox", "setup1", "setup2", "setup3", "login"];
   let timer = null, seq = 0, current = "founder";
 
@@ -24,7 +24,7 @@
   function buildNav() {
     ["nav-side", "nav-tabs"].forEach(id => {
       const box = $(id); box.replaceChildren();
-      NAV.forEach(([k, label]) => { const a = el("a"); a.href = "#" + k; a.dataset.page = k; add(a, icon(Z.pages[k].icon), el("span", null, label)); if (id === "nav-side" && k === "operator") { const bd = el("span", "badge"); bd.hidden = true; a.append(bd); } box.append(a); });
+      NAV.forEach(([k, label, only]) => { if (only === "side" && id !== "nav-side") return; const a = el("a"); a.href = "#" + k; a.dataset.page = k; add(a, icon(Z.pages[k].icon), el("span", null, label)); if (id === "nav-side" && k === "operator") { const bd = el("span", "badge"); bd.hidden = true; a.append(bd); } box.append(a); });
     });
   }
   function markNav() {

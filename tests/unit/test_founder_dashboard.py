@@ -256,7 +256,7 @@ class EarlyDraftRepairTest(unittest.TestCase):
             conn.execute("INSERT INTO schema_migrations VALUES ('007_founder.sql', 'x')")
             conn.execute("INSERT INTO goals(id, venture_id, title, created_at) VALUES ('g1','buildflow','kept','x')")
             applied = db.migrate(conn)
-            self.assertEqual(applied, ["007_a_retire_early_dashboard_schema.sql", "007_founder_os_core.sql", "008_founder_dashboard.sql"])
+            self.assertEqual(applied[:3], ["007_a_retire_early_dashboard_schema.sql", "007_founder_os_core.sql", "008_founder_dashboard.sql"])  # later migrations may follow
             self.assertEqual(conn.execute("SELECT title FROM early_goals").fetchone()["title"], "kept")
             self.assertEqual(conn.execute("SELECT count(*) n FROM businesses").fetchone()["n"], 4)
             self.assertEqual(conn.execute("SELECT count(*) n FROM goals").fetchone()["n"], 0)

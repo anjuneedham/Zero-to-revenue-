@@ -62,6 +62,11 @@ Errors: 400 validation (message never contains driver text), 401 no session, 404
 - `AUTH_DISABLED=1` skips owner login on local runs and Vercel previews only (ignored when `VERCEL_ENV=production`).
 - Shared-DB warning: Vercel preview and production use the same Neon `DATABASE_URL`, and `api/index.py` runs pending migrations on the first request.
 
+## Phase 3 additions (BuildFlow workspace)
+- Migration `009_workspace_content_feedback.sql`: `content_items`, `feedback_items` (business-scoped; entities `content-items`, `feedback-items` in the CRUD API). Rollback in `database/rollback/`.
+- `GET /api/founder/workspace/<slug>` (`core/workspace.py`) returns one business's workspace; `POST /api/founder/workspace/buildflow/import-launch-plan`; `POST /api/founder/feedback-items/<id>/to-task`.
+- UI: `dashboard/static/js/buildflow.js` (`#buildflow`), reusable `Z.formDialog` in `founder.js`.
+
 ## Legacy (not deleted; migration strategy)
 Nothing was dropped or altered. Legacy tables (`agents`, `agent_runs`, `opportunities`, `tasks`, `task_events`, `user_actions`,
 `deliverables`, `submissions`, `payments`, `wallets`, `transactions`, `ledger_entries`, `leads`, `notifications`) and the

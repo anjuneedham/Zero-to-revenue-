@@ -17,6 +17,8 @@ STATUSES = {
     "work_tasks": ("todo", "doing", "blocked", "done", "cancelled"),
     "experiments": ("proposed", "running", "succeeded", "failed", "abandoned"),
     "blockers": ("open", "resolved"),
+    "content_items": ("idea", "scripted", "filmed", "posted", "dropped"),
+    "feedback_items": ("new", "triaged", "actioned", "dismissed"),
     "research": ("open", "done", "archived"),
     "decisions": ("proposed", "decided", "reversed"),
 }
@@ -53,6 +55,14 @@ ENTITIES = {
     "blockers": dict(prefix="blk", business="required", required=("description",), order="created_at ASC", parents={"work_task_id": "work_tasks"},
                      cols={"description": (T, None), "impact": (T, None), "suggested_action": (T, None), "work_task_id": (T, None),
                            "status": (T, STATUSES["blockers"])}),
+    "content_items": dict(prefix="cnt", business="required", required=("platform",), order="created_at DESC",
+                          cols={"platform": (T, ("youtube_shorts", "tiktok", "instagram", "facebook", "other")), "topic": (T, None), "hook": (T, None),
+                                "format": (T, None), "status": (T, STATUSES["content_items"]), "posted_at": (T, None), "url": (T, None),
+                                "views": (I, None), "likes": (I, None), "comments": (I, None), "shares": (I, None), "signups": (I, None), "notes": (T, None)}),
+    "feedback_items": dict(prefix="fb", business="required", required=("body",), order="created_at DESC", parents={"work_task_id": "work_tasks"},
+                           cols={"source": (T, None), "contact": (T, None), "body": (T, None),
+                                 "kind": (T, ("bug", "feature", "pricing", "onboarding", "praise", "other")), "status": (T, STATUSES["feedback_items"]),
+                                 "work_task_id": (T, None)}),
     "research": dict(prefix="res", business="required", required=("title",), order="created_at DESC",
                      cols={"title": (T, None), "question": (T, None), "summary": (T, None), "source_url": (T, None),
                            "status": (T, STATUSES["research"])}),
@@ -176,6 +186,8 @@ def create(conn, entity, data, actor):
         values["completed_at"] = now()
     if entity == "decisions" and values.get("status") == "decided":
         values["decided_at"] = now()
+    if entity == "content_items" and values.get("status") == "posted" and not values.get("posted_at"):
+        values["posted_at"] = now()
     rid = f"{spec['prefix']}_{uuid.uuid4().hex[:12]}"
     ts = now()
     cols = {"id": rid, "business_id": business_id, **values, "created_at": ts}
@@ -210,6 +222,8 @@ def update(conn, entity, rid, data, actor):
         values["completed_at"] = ts if values["status"] == "done" else None
     if entity == "decisions" and values.get("status") == "decided" and not row["decided_at"]:
         values["decided_at"] = ts
+    if entity == "content_items" and values.get("status") == "posted" and not row["posted_at"] and not values.get("posted_at"):
+        values["posted_at"] = ts
     if entity == "blockers" and "status" in values:
         values["resolved_at"] = ts if values["status"] == "resolved" else None
     values["updated_at"] = ts
@@ -235,3 +249,21 @@ def record_kpi_reading(conn, kpi_id, value, note, actor):
         conn.execute("UPDATE kpis SET current_value=?, updated_at=? WHERE id=?", (v, ts, kpi_id))
     audit(conn, actor, "founder.kpis.reading", kpi_id)
     return dict(conn.execute("SELECT * FROM kpis WHERE id=?", (kpi_id,)).fetchone())
+
+
+def feedback_to_task(conn, feedback_id, actor):
+    """Turn one feedback item into a work task in the same business. Idempotent: a second call returns the first task."""
+    fb = conn.execute("SELECT * FROM feedback_items WHERE id=?", (feedback_id,)).fetchone()
+    if not fb:
+        raise NotFound("not found")
+    if fb["work_task_id"]:
+        return {"task_id": fb["work_task_id"], "created": False}
+    ts = now()
+    tid = f"wt_{uuid.uuid4().hex[:12]}"
+    title = ("Feedback (" + fb["kind"] + "): " + " ".join(fb["body"].split()))[:200]
+    with conn.transaction():
+        conn.execute("INSERT INTO work_tasks(id,business_id,title,description,status,priority,created_at,updated_at) VALUES (?,?,?,?, 'todo', 3, ?, ?)",
+                     (tid, fb["business_id"], title, fb["body"] + "\n[from feedback " + feedback_id + "]", ts, ts))
+        conn.execute("UPDATE feedback_items SET work_task_id=?, status='actioned', updated_at=? WHERE id=?", (tid, ts, feedback_id))
+    audit(conn, actor, "founder.feedback.to_task", feedback_id, tid)
+    return {"task_id": tid, "created": True}

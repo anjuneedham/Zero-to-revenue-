@@ -2,6 +2,71 @@
 
 Latest entry on top. Rules and templates: [FOUNDER_OS_BUILD_PROTOCOL.md](FOUNDER_OS_BUILD_PROTOCOL.md).
 
+## Phase 3: BuildFlow Workspace. Completed 2026-10-29
+
+**Overall status: PARTIAL.** Built, tested (291 tests) and exercised in a real browser against a local Postgres 16. Not applied to or verified on production Neon (still awaiting founder approval + backup); no lint/type/build tooling exists.
+**Branch:** `ccr-9e3eecee-aucmfd` (stacked on Phase 2, same PR #1). Phase 2 was reviewed first: no defects found in its code (the automated review only flagged pre-existing planning docs, not this work).
+
+### Objective
+Priority-1 business workspace: objectives, KPIs, tasks, blockers, experiments, decisions, knowledge/constraints, plus a measurable content workflow and a customer-feedback-to-action workflow, scoped to BuildFlow only.
+
+### Work completed
+- Migration `009_workspace_content_feedback.sql`: `content_items` (platform, topic, hook, format, status, posted_at, url, views/likes/comments/shares/signups, all NULL until recorded) and `feedback_items` (source, contact, body, kind, status, `work_task_id`). Business-scoped, so Phases 4-5 can reuse them.
+- `core/workspace.py` + `GET /api/founder/workspace/<slug>`: per-business read model (generic for any slug; BuildFlow adds the legacy `leads` pipeline counts). Sections fail independently. Nothing from another business is returned (tested).
+- Content workflow: add idea -> update to posted + record metrics. Summary shows posted today / last 7 days / posted-without-metrics and breakdowns by platform, format and topic. Averages use ONLY posts with recorded views and carry a small-sample caveat; no targets are invented.
+- Feedback workflow: log feedback -> "Create task" (`POST /api/founder/feedback-items/<id>/to-task`, atomic and idempotent, same business) or triage/dismiss.
+- "Import launch plan as tasks": creates work tasks once each from the owner's own `plan.json` (BuildFlow launch plan), honouring ticked items. Only runs when clicked.
+- UI `dashboard/static/js/buildflow.js`: page `#buildflow` with Overview / Content / Feedback / Pipeline / Notes tabs. Side-nav entry; on phones reach it from the Founder business card ("Open workspace") to keep the tab bar at 6 items. Form builder from Phase 2 refactored into reusable `Z.formDialog`.
+
+### Files
+- Created: `core/workspace.py`, `dashboard/static/js/buildflow.js`, `database/migrations/009_workspace_content_feedback.sql`, `database/rollback/009_workspace_content_feedback_down.sql`, `tests/unit/test_workspace.py`.
+- Modified: `core/founder.py` (entities `content_items`, `feedback_items`, `feedback_to_task`, `posted_at` stamping), `dashboard/founder_api.py` (to-task route), `dashboard/app.py` (workspace routes), `dashboard/static/js/founder.js` (reusable form dialog, workspace link), `main.js`, `index.html`, `sw.js`, `tests/unit/test_founder_dashboard.py`, docs.
+- Removed: none.
+
+### Tests
+| Command | Result | Status |
+|---|---|---|
+| `python3 -m unittest discover -s tests -t .` (local Postgres 16) | **291 OK** (13 new in `test_workspace.py`: content math, isolation, content flow, feedback-to-task idempotency, plan import, legacy leads, section failure, auth) | PASS |
+| Headless Chromium, 5 tabs x phone/tablet/desktop | 0 px overflow, 0 console errors; feedback->task, plan import, add content verified | PASS |
+| Production Neon, deployed site, real BuildFlow product, social platform APIs | not exercised | NOT TESTED |
+
+### Acceptance criteria
+- Objectives/KPIs/tasks/blockers/experiments/decisions/knowledge views: PASS
+- Measurable content workflow: PASS (manual metrics entry; no platform API integration)
+- Feedback-to-action workflow: PASS
+- Business isolation: PASS (tested)
+- Customers/projects/contractor-discovery views: PARTIAL (only the legacy outreach `leads` counts exist; there is no BuildFlow customer/contractor data source, and no integration with the BuildFlow product was verified or built)
+- Loading/empty/error states: PARTIAL (per-section error tested via API; browser error path not exercised)
+- Mobile/tablet/desktop: PASS
+- Tests: PARTIAL (no lint/type/build tools exist)
+
+### Known issues and technical debt
+- Content metrics are typed in by hand; nothing is pulled from YouTube/TikTok/Instagram/Facebook. Attribution of signups to a post is the founder's own judgement.
+- No edit UI for goals/KPIs/knowledge; no BuildFlow product integration (read-only Firebase/Vercel metrics would be a future, separately verified step).
+- Creates are not idempotent server-side (buttons disable while saving).
+- `leads` stays a legacy table; the audit's plan to extend it into a prospect pipeline is not done.
+- Migrations 007_a, 007, 008, 009 are all unapplied on production Neon. Preview and production share one database and migrate on first request.
+
+### Decisions and assumptions
+- Content/feedback tables are generic (business-scoped), BuildFlow-specific only in the UI. Decisions on the workspace show only that business's rows (cross-business ones stay on the Founder dashboard).
+- Assumption: manual metrics are acceptable for now; platform APIs need separate verification.
+
+### Unfinished work
+Product integration, contractor/customer CRM, edit/delete UI, retirement of legacy agent pages.
+
+### Next phase
+Phase 4: Agriloop Workspace. Prerequisites: founder approval + Neon backup before any deployment is requested; confirm Agriloop's real data source (audit says marketplace may be on an in-memory store).
+
+### Ready-to-paste next-chat instruction
+```
+Read /docs/FOUNDER_OS_BUILD_PROTOCOL.md, then /docs/PHASE_HANDOFF.md (Phase 3 entry first), then /docs/FOUNDER_OS_ARCHITECTURE.md.
+Verify first: run the tests against a throwaway Postgres (expect 291 OK); inspect core/workspace.py, core/founder.py, dashboard/static/js/buildflow.js and migrations 007-009.
+Preview and production share one Neon database and migrate on first request: do not open any preview/production URL until I approve and back up Neon.
+Implement only Phase 4: Agriloop Workspace (slug 'agriloop'), reusing core/workspace.py and the Phase 3 patterns. Update /docs/PHASE_HANDOFF.md and stop.
+```
+
+---
+
 ## Phase 2: Founder Dashboard. Completed 2026-10-29
 
 **Overall status: PARTIAL.** Built, tested against a local Postgres 16 and in a real browser; not verified on the real Neon database or the deployed site, and no lint/type/build tooling exists in the repo.

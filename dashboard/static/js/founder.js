@@ -41,36 +41,47 @@
       ["status", "Status", "select", [["decided", "Decided"], ["proposed", "Proposed"]]]] },
   };
 
-  function openForm(name) {
-    const f = FORMS[name], form = el("form", "list"), inputs = {};
-    f.fields().forEach(([id, label, type, opts, req, dflt]) => {
+  // Reusable form dialog (also used by the business workspaces). field = [name, label, type, options, required, defaultChecked];
+  // submit(body) gets only the non-empty fields; "int"/"num" are numbers. It throws to show an error, resolves to close + refresh.
+  function formDialog(title, fields, submit, preset) {
+    const form = el("form", "list"), inputs = {};
+    fields.forEach(([id, label, type, opts, req, dflt]) => {
       const wrap = el("label", "f"); wrap.append(document.createTextNode(label + (req ? " *" : "")));
       let inp;
       if (type === "select") { inp = el("select"); opts.forEach(([v, l]) => { const o = el("option", null, l); o.value = v; inp.append(o); }); }
       else if (type === "checkbox") { inp = el("input"); inp.type = "checkbox"; inp.checked = dflt === true; inp.style.width = "auto"; inp.style.minHeight = "0"; }
-      else { inp = el("input"); inp.type = type === "date" ? "date" : type === "text" ? "text" : "number"; if (type === "num") inp.step = "any"; if (type === "int") inp.step = "1"; if (type === "text") inp.maxLength = 400; }
+      else { inp = el("input"); inp.type = type === "date" ? "date" : type === "text" ? "text" : "number"; if (type === "num") inp.step = "any"; if (type === "int") { inp.step = "1"; inp.min = "0"; } if (type === "text") inp.maxLength = 400; }
       if (req && type !== "checkbox") inp.required = true;
+      if (preset && preset[id] != null && type !== "checkbox") inp.value = preset[id];
       inp.name = id; inputs[id] = [inp, type]; wrap.append(inp); form.append(wrap);
     });
     const err = el("p", "err"); err.setAttribute("role", "alert");
-    const submit = el("button", "btn gold", "Save"); submit.type = "submit";
-    form.append(err, submit);
+    const submitBtn = el("button", "btn gold", "Save"); submitBtn.type = "submit";
+    form.append(err, submitBtn);
     form.onsubmit = async e => {
-      e.preventDefault(); err.textContent = ""; submit.disabled = true;  // disabled while saving: no double submit
-      const body = {}; let slug = "";
+      e.preventDefault(); err.textContent = ""; submitBtn.disabled = true;  // disabled while saving: no double submit
+      const body = {};
       Object.entries(inputs).forEach(([id, [inp, type]]) => {
         if (type === "checkbox") { body[id] = inp.checked; return; }
         if (inp.value === "") return;
-        if (id === "business") slug = inp.value; else body[id] = type === "int" || type === "num" ? Number(inp.value) : inp.value;
+        body[id] = type === "int" || type === "num" ? Number(inp.value) : inp.value;
       });
-      try {
-        if (name === "reading") { const { kpi_id, value } = body; await Z.api("/api/founder/kpis/" + kpi_id + "/readings", "POST", { value }); }
-        else await Z.api("/api/founder/businesses/" + slug + "/" + f.entity, "POST", body);
-        Z.toast("Saved", "ok"); Z.$("drawer").close(); await Z.rerender();
-      } catch (x) { if (x.message !== "Signed out") err.textContent = x.message; submit.disabled = false; }
+      try { await submit(body); Z.toast("Saved", "ok"); Z.$("drawer").close(); await Z.rerender(); }
+      catch (x) { if (x.message !== "Signed out") err.textContent = x.message; submitBtn.disabled = false; }
     };
-    Z.openDrawer(f.title, form);
+    Z.openDrawer(title, form);
   }
+  Z.formDialog = formDialog;
+
+  function openForm(name, preset) {
+    const f = FORMS[name];
+    formDialog(f.title, f.fields(), async body => {
+      if (name === "reading") { await Z.api("/api/founder/kpis/" + body.kpi_id + "/readings", "POST", { value: body.value }); return; }
+      const slug = body.business; delete body.business;
+      await Z.api("/api/founder/businesses/" + slug + "/" + f.entity, "POST", body);
+    }, preset);
+  }
+  Z.openFounderForm = async (name, slug) => { if (!D || !D.businesses) D = await Z.api("/api/founder/dashboard"); openForm(name, { business: slug }); };
 
   function detail(title, rows) {
     const box = el("div", "list");
@@ -162,6 +173,7 @@
       col.append(b.next_action ? el("p", null, "Next: " + b.next_action.title) : el("p", "sub", b.open_tasks ? "All open tasks are blocked." : "No open tasks."));
       col.append(el("p", "sub", b.open_tasks == null ? "Task count unavailable" : `${b.open_tasks} open task(s), ${b.blocked_tasks} blocked`));
       col.append(btn("Show its tasks", "ghost small", async () => { filters.business = b.id; await Z.rerender(); document.getElementById("today-card")?.scrollIntoView(); }));
+      if (Z.pages[b.slug]) { const a = el("a", "btn small", "Open workspace"); a.href = "#" + b.slug; col.append(a); }
       g.append(col);
     });
     c.append(g); root.append(c);

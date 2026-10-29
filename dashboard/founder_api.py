@@ -26,6 +26,7 @@ R_BIZ = re.compile(rf"^/api/founder/businesses/({SLUG})$")
 R_BIZ_ENT = re.compile(rf"^/api/founder/businesses/({SLUG})/{ENT}$")
 R_ENT = re.compile(rf"^/api/founder/{ENT}$")
 R_ENT_ID = re.compile(rf"^/api/founder/{ENT}/({ID})$")
+R_FB_TASK = re.compile(rf"^/api/founder/feedback-items/({ID})/to-task$")
 R_READING = re.compile(rf"^/api/founder/kpis/({ID})/readings$")
 
 
@@ -61,6 +62,9 @@ def handle(conn, owner, method, path, body=b""):
                 return _json(200, {ent: founder.list_rows(conn, ent, slug)})
             if method == "POST":
                 return _json(201, founder.create(conn, ent, {**_body(body), "business": slug}, owner))
+        m = R_FB_TASK.match(path)
+        if m and method == "POST":
+            return _json(200, founder.feedback_to_task(conn, m.group(1), owner))
         m = R_READING.match(path)
         if m and method == "POST":
             data = _body(body)

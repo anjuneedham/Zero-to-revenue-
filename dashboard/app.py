@@ -12,7 +12,7 @@ from pathlib import Path
 from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
-from core import actions, founder_dashboard, rates, scheduler
+from core import actions, founder, founder_dashboard, rates, scheduler, workspace
 from dashboard import api_data, founder_api
 from dashboard.mcp import handle_mcp
 from core import db
@@ -50,6 +50,7 @@ SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inj
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
 ACTION_RE = re.compile(r"^/api/actions/([A-Za-z0-9_]{1,80})/(approve|reject|submitted|sent|draft|send|submit-email)$")
+WORKSPACE_RE = re.compile(r"^/api/founder/workspace/([a-z][a-z0-9_-]{1,40})(/import-launch-plan)?$")
 PAY_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/verify$")
 PAYPAL_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/(request|verify)$")
 PAYPAL_LINK_RE = re.compile(r"^/api/payments/([A-Za-z0-9_]{1,80})/paypal/link$")
@@ -135,6 +136,18 @@ def handle(method, path, authz, conn, body: bytes = b""):
         return _json(401, {"error": "unauthorized"})
     if path == "/api/founder/dashboard" and method == "GET":
         return _json(200, founder_dashboard.dashboard(conn))
+    wm = WORKSPACE_RE.match(path)
+    if wm:
+        try:
+            if method == "GET" and not wm.group(2):
+                return _json(200, workspace.workspace(conn, wm.group(1)))
+            if method == "POST" and wm.group(2):
+                return _json(200, workspace.import_launch_plan(conn, wm.group(1), owner))
+        except founder.NotFound as e:
+            return _json(404, {"error": str(e)})
+        except founder.FounderError as e:
+            return _json(400, {"error": str(e)})
+        return _json(404, {"error": "not found"})
     fo = founder_api.handle(conn, owner, method, path, body)
     if fo:
         return fo
