@@ -2,6 +2,11 @@
 
 Last updated: [date]. By creating an account you agree to these terms. "We" means [company name], Jamaica. Contact: [email].
 
+**Acceptance at signup (app requirement).** The signup screen must show an unchecked box: "I am 18 or over and I agree to the
+Terms of Use and Privacy Policy" with both documents linked, and the Create account button stays disabled until it is ticked.
+Store, for each user: the terms version, the privacy version, and the date and time accepted. Sellers also tick the Seller Agreement
+before their first listing. When these documents change, ask users to accept the new version at next login.
+
 1. **What Agriloop is.** A platform that connects farmers ("Sellers") and buyers. We are an intermediary. We are not the seller,
    do not own, inspect or store the produce, and are not a party to a sale between a Seller and a buyer.
 2. **Accounts.** You must be 18 or over, give true information, keep your login private, and are responsible for activity on your account.

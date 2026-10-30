@@ -1,0 +1,158 @@
+<title>Agriloop Week One</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{
+  /* Layout: a vertical story in four bands - the week, Monday's call as a proportional strip of steps, what to bring, registration path. */
+  --bg:#F1F5F1; --surface:#FFFFFF; --ink:#15221A; --muted:#566860; --line:#D3DCD4;
+  --brand:#1D6B45; --brand-ink:#FFFFFF; --soft:#E3EFE7;
+  --warn-bg:#FFE27A; --warn-fg:#3A2D00; --info-bg:#DCE8FF; --info-fg:#102F66; --ok-bg:#D8EFE1; --ok-fg:#1B5A3A;
+  --display:'Bricolage Grotesque','Trebuchet MS',sans-serif; --body:'Source Sans 3','Segoe UI',sans-serif; --mono:'IBM Plex Mono',Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1712; --surface:#17231B; --ink:#E6EEE8; --muted:#9AB0A4; --line:#2B3C31;
+  --brand:#5FC28D; --brand-ink:#0B1A11; --soft:#1C2E23;
+  --warn-bg:#6B5400; --warn-fg:#FFF2C2; --info-bg:#1E3256; --info-fg:#CFE0FF; --ok-bg:#1D4A33; --ok-fg:#BDEBD0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1712; --surface:#17231B; --ink:#E6EEE8; --muted:#9AB0A4; --line:#2B3C31;
+  --brand:#5FC28D; --brand-ink:#0B1A11; --soft:#1C2E23;
+  --warn-bg:#6B5400; --warn-fg:#FFF2C2; --info-bg:#1E3256; --info-fg:#CFE0FF; --ok-bg:#1D4A33; --ok-fg:#BDEBD0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 64px}
+.wrap{max-width:960px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,5vw,44px)}
+h2{font-size:26px;margin-bottom:6px}
+h3{font-size:18px}
+.lede{color:var(--muted);max-width:62ch;margin:8px 0 0}
+.rule{margin:18px 0 8px;padding:12px 14px;border-radius:10px;background:var(--warn-bg);color:var(--warn-fg);font-weight:600}
+band,.band{display:block;margin-top:34px}
+.sub{color:var(--muted);margin:0 0 14px;max-width:66ch}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.pill.blocked{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ready{background:var(--ok-bg);color:var(--ok-fg)}
+.pill.you{background:var(--info-bg);color:var(--info-fg)}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
+.day.key{border:2px solid var(--brand)}
+.day .d{font-family:var(--mono);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.day h3{margin:4px 0 6px}
+.day p{margin:0 0 8px;font-size:15px}
+.strip{display:flex;gap:4px;margin:6px 0 14px;min-width:0}
+.seg{min-width:0;background:var(--brand);color:var(--brand-ink);padding:8px 8px 10px;border-radius:6px;font-size:13px;line-height:1.25}
+.seg b{display:block;font-family:var(--mono);font-size:12px;font-weight:500;opacity:.9}
+.steps{display:grid;gap:10px;counter-reset:s}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 56px;position:relative;min-width:0}
+.step::before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:12px;width:30px;height:30px;border-radius:50%;
+  background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-family:var(--mono);font-weight:500}
+.step h3{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.step h3 span{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:400}
+.step p{margin:4px 0 0;font-size:15px}
+.step em{font-style:normal;color:var(--muted)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.box h3{margin-bottom:8px}
+.box ul{margin:0;padding-left:1.2em}.box li{margin:5px 0}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:5px 0}
+.chk input{margin-top:5px;width:18px;height:18px;flex:none;accent-color:var(--brand)}
+.chk label{min-width:0}
+.chk input:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.reg{display:grid;gap:8px}
+.reg div{display:grid;grid-template-columns:90px 1fr;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.reg b{font-family:var(--mono);font-size:13px;color:var(--brand)}
+.reg span{min-width:0}
+footer{margin-top:30px;color:var(--muted);font-size:14px}
+@media (max-width:560px){.strip{flex-direction:column}.seg{width:100%!important}}
+</style>
+<div class="wrap">
+<h1>Agriloop Week One</h1>
+<p class="lede">From Friday 30 October to the first founding farmers. One partner, one app, one call on Monday 2 November.</p>
+<div class="rule">Payment rule for the whole month: no card payments and no money held by Agriloop until the legal review is finished. Orders are cash or invoice only.</div>
+
+<div class="band">
+<h2>The week at a glance</h2>
+<p class="sub">Build the weekend, talk Monday, then onboard and make content with her.</p>
+<div class="days">
+<div class="day"><div class="d">Fri 30 Oct</div><h3>Fix the data</h3><p>Real database instead of memory. Terms box on signup.</p><span class="pill blocked">Needs repo access</span></div>
+<div class="day"><div class="d">Sat 31 Oct</div><h3>Full order, on phones</h3><p>List, browse by parish, order, invoice. Test it yourself.</p><span class="pill blocked">Needs repo access</span></div>
+<div class="day"><div class="d">Sun 1 Nov</div><h3>Fill the drafts</h3><p>Brackets in the legal pack. Send the agreement to her.</p><span class="pill you">You</span></div>
+<div class="day key"><div class="d">Mon 2 Nov</div><h3>The call</h3><p>Agreement, demo, her first 5 farmers. 60 minutes.</p><span class="pill ready">Key day</span></div>
+<div class="day"><div class="d">Tue 3 - Thu 5</div><h3>Onboard 5</h3><p>You sit with each farmer while they list produce.</p><span class="pill you">You</span></div>
+<div class="day"><div class="d">Fri 6 - Sun 8</div><h3>First content</h3><p>3 short videos with hooks. First orders placed.</p><span class="pill you">Both</span></div>
+</div>
+</div>
+
+<div class="band">
+<h2>Monday's call, step by step</h2>
+<p class="sub">Widths below match the minutes. Keep the screen on this page.</p>
+<div class="strip" aria-hidden="true">
+<div class="seg" style="width:16.6%"><b>10</b>Vision</div>
+<div class="seg" style="width:25%"><b>15</b>Agreement</div>
+<div class="seg" style="width:16.6%"><b>10</b>Demo</div>
+<div class="seg" style="width:16.6%"><b>10</b>Content</div>
+<div class="seg" style="width:16.6%"><b>10</b>First 10</div>
+<div class="seg" style="width:8.4%"><b>5</b>Next</div>
+</div>
+<div class="steps">
+<div class="step"><h3>Why we are doing this <span>10 min</span></h3><p>Each says who the farmer is and what problem Agriloop fixes. Roles: you build, sell and onboard; she is the face, teaches and runs the community.</p><p><em>Outcome:</em> one shared sentence that describes Agriloop.</p></div>
+<div class="step"><h3>Walk through the agreement <span>15 min</span></h3><p>Open the Legal Pack. Decide together: how the 30% is calculated (platform fees after processing costs, or profit), vesting (suggested 24 months, 6-month cliff), and what happens if either leaves.</p><p><em>Outcome:</em> every decision in the founder agreement has an answer, ready to sign once the company exists.</p></div>
+<div class="step"><h3>Show the app <span>10 min</span></h3><p>She lists one product, you place an order from your phone, an invoice appears. Ask what confuses her.</p><p><em>Outcome:</em> three things to fix, ranked.</p></div>
+<div class="step"><h3>Content plan <span>10 min</span></h3><p>Agree on 3 videos a week. Hook ideas: price check, seedling to harvest, meet your parish farmer. Every video ends with one action: join through her link.</p><p><em>Outcome:</em> the first three video ideas and posting days.</p></div>
+<div class="step"><h3>Name the first 10 <span>10 min</span></h3><p>She names 5 farmers or growers she knows in St. Mary or nearby, you name 5. Decide who contacts whom and by when.</p><p><em>Outcome:</em> a list of 10 names with an owner for each.</p></div>
+<div class="step"><h3>Next actions <span>5 min</span></h3><p>Each person leaves with three tasks and a date. Book the next call.</p><p><em>Outcome:</em> a weekly rhythm: one call, one content day, one onboarding day.</p></div>
+</div>
+</div>
+
+<div class="band">
+<h2>What to get from her, and what to bring</h2>
+<div class="two">
+<div class="box"><h3>Ask her for</h3>
+<div class="chk"><input type="checkbox" id="a1"><label for="a1">Her other socials: Instagram, Facebook, YouTube, WhatsApp</label></div>
+<div class="chk"><input type="checkbox" id="a2"><label for="a2">Her best 3 TikToks and their views</label></div>
+<div class="chk"><input type="checkbox" id="a3"><label for="a3">Where her seed customers come from, and any WhatsApp or email list</label></div>
+<div class="chk"><input type="checkbox" id="a4"><label for="a4">Her full legal name and contact details for the agreement</label></div>
+<div class="chk"><input type="checkbox" id="a5"><label for="a5">Hours per week she can give</label></div>
+<div class="chk"><input type="checkbox" id="a6"><label for="a6">Five farmers she trusts</label></div>
+</div>
+<div class="box"><h3>Bring</h3>
+<div class="chk"><input type="checkbox" id="b1"><label for="b1">The Legal Pack with the brackets filled in</label></div>
+<div class="chk"><input type="checkbox" id="b2"><label for="b2">The app running on your phone, with 5 sample listings</label></div>
+<div class="chk"><input type="checkbox" id="b3"><label for="b3">Your 5 farmer names</label></div>
+<div class="chk"><input type="checkbox" id="b4"><label for="b4">The founding offer: free for 60 days, price locked in, direct WhatsApp access to you</label></div>
+<div class="chk"><input type="checkbox" id="b5"><label for="b5">Your registration plan and a company name shortlist</label></div>
+</div>
+</div>
+</div>
+
+<div class="band">
+<h2>How you know week one worked</h2>
+<div class="scroll"><table>
+<thead><tr><th>Measure</th><th>Target by Sun 8 Nov</th></tr></thead>
+<tbody>
+<tr><td>Agreement terms agreed by both of you</td><td>All decisions answered</td></tr>
+<tr><td>App test</td><td>You and she each complete one order on a phone</td></tr>
+<tr><td>Farmers onboarded</td><td>5 listing real produce</td></tr>
+<tr><td>Videos posted</td><td>3 with a join link</td></tr>
+<tr><td>First real orders</td><td>At least 3 cash or invoice orders</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="band">
+<h2>Registering the company (Jamaica)</h2>
+<p class="sub">Recommended: a private limited company. Check every fee and form with the Companies Office and Tax Administration before paying. Details are in the registration plan in the repo.</p>
+<div class="reg">
+<div><b>This week</b><span>Choose the company name, gather IDs, get two quotes: file it yourself or use an attorney or company service provider.</span></div>
+<div><b>By Nov 13</b><span>Reserve the name and file incorporation at the Companies Office. Receive the certificate.</span></div>
+<div><b>By Nov 20</b><span>Tax registration number, business bank account, sign the founder agreement, record the shares (she holds 10%, vesting).</span></div>
+<div><b>By Nov 30</b><span>Legal review complete. Only then consider card payments and fees.</span></div>
+<div><b>Later</b><span>Data controller registration if required, employer registrations when you hire, yearly filings.</span></div>
+</div>
+</div>
+
+<footer>Draft planning page. Not legal or tax advice. Dates are targets. Sources: <code>docs/master/ventures/agriloop/</code>.</footer>
+</div>

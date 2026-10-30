@@ -1,0 +1,224 @@
+<title>Agriloop Legal Pack</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{
+  /* Layout: sticky document tabs over a single reading column; each document opens with its own focus-point checklist. */
+  --bg:#F1F5F1; --surface:#FFFFFF; --ink:#15221A; --muted:#566860; --line:#D3DCD4;
+  --brand:#1D6B45; --brand-ink:#FFFFFF;
+  --fill-bg:#FFE27A; --fill-fg:#3A2D00; --dec-bg:#DCE8FF; --dec-fg:#102F66; --dec-line:#6C93D8;
+  --done-bg:#D8EFE1; --done-fg:#1B5A3A;
+  --display:'Bricolage Grotesque','Trebuchet MS',sans-serif; --body:'Source Sans 3','Segoe UI',sans-serif; --mono:'IBM Plex Mono',Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1712; --surface:#17231B; --ink:#E6EEE8; --muted:#9AB0A4; --line:#2B3C31;
+  --brand:#5FC28D; --brand-ink:#0B1A11;
+  --fill-bg:#6B5400; --fill-fg:#FFF2C2; --dec-bg:#1E3256; --dec-fg:#CFE0FF; --dec-line:#5C83C9;
+  --done-bg:#1D4A33; --done-fg:#BDEBD0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1712; --surface:#17231B; --ink:#E6EEE8; --muted:#9AB0A4; --line:#2B3C31;
+  --brand:#5FC28D; --brand-ink:#0B1A11;
+  --fill-bg:#6B5400; --fill-fg:#FFF2C2; --dec-bg:#1E3256; --dec-fg:#CFE0FF; --dec-line:#5C83C9;
+  --done-bg:#1D4A33; --done-fg:#BDEBD0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 64px}
+.wrap{max-width:860px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(28px,5vw,40px);margin:0 0 8px}
+h2{font-size:26px;margin:0}
+h3{font-size:19px;margin:26px 0 6px}
+.banner{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--fill-bg);color:var(--fill-fg);padding:4px 10px;border-radius:4px;margin-bottom:12px}
+.lede{color:var(--muted);max-width:62ch;margin:0 0 18px}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin:0 0 18px;font-size:15px}
+.legend span{display:flex;align-items:center;gap:8px}
+.pt{font-family:var(--mono);font-size:.82em;padding:1px 6px;border-radius:4px;font-style:normal;cursor:pointer;scroll-margin-top:120px}
+.pt.fill{background:var(--fill-bg);color:var(--fill-fg)}
+.pt.decide{background:var(--dec-bg);color:var(--dec-fg);box-shadow:inset 0 0 0 1px var(--dec-line)}
+.pt.done{background:var(--done-bg);color:var(--done-fg);box-shadow:none;text-decoration:line-through}
+.total{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:var(--brand);transition:width .25s}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0;margin-bottom:10px;
+  display:flex;gap:8px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav a{white-space:nowrap;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:15px;background:var(--surface)}
+nav a:focus-visible,.chk input:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+nav a b{font-family:var(--mono);font-weight:500;font-size:12px;margin-left:6px;color:var(--muted)}
+section.doc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px clamp(16px,3vw,28px);margin:18px 0;scroll-margin-top:70px}
+section.doc header p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.todo{border:1px dashed var(--line);border-radius:10px;padding:12px 14px;margin:16px 0}
+.todo h4{margin:0 0 8px;font-family:var(--display);font-size:16px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--line)}
+.chk:first-of-type{border-top:0}
+.chk input{margin-top:5px;width:18px;height:18px;flex:none;accent-color:var(--brand)}
+.chk label{min-width:0;overflow-wrap:anywhere}
+.chk a{font-size:13px;margin-left:8px;color:var(--muted)}
+.kind{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+.doc ol,.doc ul{padding-left:1.3em}.doc li{margin:6px 0}
+.none{color:var(--muted);font-size:15px;margin:0}
+footer{margin-top:28px;color:var(--muted);font-size:14px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+<div class="wrap">
+<span class="banner">Draft. Not legal advice.</span>
+<h1>Agriloop Legal Pack</h1>
+<p class="lede">Five drafts for the founding beta. Everything you must fill in or decide is highlighted. Tap a highlight, or tick it in the checklist, once you have dealt with it.</p>
+<div class="legend">
+<span><mark class="pt fill">[fill in]</mark> a fact only you know</span>
+<span><mark class="pt decide">[decide]</mark> a choice for you and your partner, or a point for the lawyer</span>
+</div>
+<div class="total"><strong id="count"></strong><div class="bar"><i></i></div></div>
+<nav aria-label="Documents"><a href="#doc1" data-doc="doc1">Business summary<b>0/5</b></a><a href="#doc2" data-doc="doc2">Founder agreement<b>0/18</b></a><a href="#doc3" data-doc="doc3">Terms of use<b>0/7</b></a><a href="#doc4" data-doc="doc4">Seller agreement<b>0/2</b></a><a href="#doc5" data-doc="doc5">Privacy policy<b>0/9</b></a></nav>
+<section class="doc" id="doc1"><header><h2>Business summary</h2><p>Give this to the lawyer first</p></header><div class="todo"><h4>What to update and check (5)</h4><div class="chk"><input type="checkbox" id="c-d1p1" data-pid="d1p1" data-doc="doc1"><label for="c-d1p1"><span class="kind">Fill in</span>name<a href="#d1p1">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d1p2" data-pid="d1p2" data-doc="doc1"><label for="c-d1p2"><span class="kind">Fill in</span>name<a href="#d1p2">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d1p3" data-pid="d1p3" data-doc="doc1"><label for="c-d1p3"><span class="kind">Fill in</span>registered? name / type<a href="#d1p3">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d1p4" data-pid="d1p4" data-doc="doc1"><label for="c-d1p4"><span class="kind">Fill in</span>WiPay / Fygaro / Lynk<a href="#d1p4">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d1p5" data-pid="d1p5" data-doc="doc1"><label for="c-d1p5"><span class="kind">Fill in</span>weekly<a href="#d1p5">see in text</a></label></div></div><p><strong>What it is.</strong> A web/Android marketplace connecting Jamaican farmers and the people who want their produce, filtered by parish and neighbouring parishes. Island-wide from launch.</p>
+<p><strong>People.</strong></p>
+<ul>
+<li>Founder/CEO: <mark class="pt fill" id="d1p1" data-pid="d1p1">[name]</mark>. Product, onboarding, demo sales calls.</li>
+<li>Founding partner: <mark class="pt fill" id="d1p2" data-pid="d1p2">[name]</mark>, St. Mary. Sells her own seeds; TikTok creator (1k+ followers). Face of the brand; education and community. Proposed: 30% profit share and 10% ownership. She is the ONLY partner besides the CEO.</li>
+<li>Entity: <mark class="pt fill" id="d1p3" data-pid="d1p3">[registered? name / type]</mark>. Not yet registered if blank.</li>
+</ul>
+<p><strong>Money flow.</strong></p>
+<ul>
+<li>Phase 1 (now): buyers pay farmers directly (cash/bank/Lynk). Agriloop issues invoices. No fee, no funds held.</li>
+<li>Phase 2: card payments via a local provider <mark class="pt fill" id="d1p4" data-pid="d1p4">[WiPay / Fygaro / Lynk]</mark>; Agriloop takes a fee; payout to farmers <mark class="pt fill" id="d1p5" data-pid="d1p5">[weekly]</mark>.</li>
+<li>Cash orders with an Agriloop invoice carry no fee.</li>
+</ul>
+<p><strong>Launch.</strong> Invite-only beta, 10 founding users, free for 60 days. Produce, seeds and plants only at launch.</p>
+<p><strong>Questions for counsel.</strong></p>
+<ol>
+<li>Entity type; how to document the creator's 10% (shares, vesting, leaver terms).
+</li>
+<li>How "profit" for the 30% share should be defined and paid; tax treatment.
+</li>
+<li>Does collecting and paying out farmers' money (Phase 2) need any licence or registration (BOJ or other)?
+</li>
+<li>Liability for produce quality or illness; sufficiency of the intermediary wording.
+</li>
+<li>Data Protection Act 2020: registration and consent wording.
+</li>
+<li>Anything about selling plants/seeds or agricultural produce that needs permits.
+</li>
+</ol></section><section class="doc" id="doc2"><header><h2>Founder agreement</h2><p>Share with your partner; fill in together</p></header><div class="todo"><h4>What to update and check (18)</h4><div class="chk"><input type="checkbox" id="c-d2p1" data-pid="d2p1" data-doc="doc2"><label for="c-d2p1"><span class="kind">Fill in</span>CEO name<a href="#d2p1">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p2" data-pid="d2p2" data-doc="doc2"><label for="c-d2p2"><span class="kind">Fill in</span>Partner name<a href="#d2p2">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p3" data-pid="d2p3" data-doc="doc2"><label for="c-d2p3"><span class="kind">Fill in</span>Agriloop entity name<a href="#d2p3">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p4" data-pid="d2p4" data-doc="doc2"><label for="c-d2p4"><span class="kind">Fill in</span> <a href="#d2p4">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p5" data-pid="d2p5" data-doc="doc2"><label for="c-d2p5"><span class="kind">Fill in</span>hours/week<a href="#d2p5">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p6" data-pid="d2p6" data-doc="doc2"><label for="c-d2p6"><span class="kind">Fill in</span>fully diluted at signing<a href="#d2p6">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p7" data-pid="d2p7" data-doc="doc2"><label for="c-d2p7"><span class="kind">Fill in</span>24<a href="#d2p7">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p8" data-pid="d2p8" data-doc="doc2"><label for="c-d2p8"><span class="kind">Fill in</span>6<a href="#d2p8">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p9" data-pid="d2p9" data-doc="doc2"><label for="c-d2p9"><span class="kind">Decide</span>Counsel to confirm.<a href="#d2p9">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p10" data-pid="d2p10" data-doc="doc2"><label for="c-d2p10"><span class="kind">Fill in</span> <a href="#d2p10">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p11" data-pid="d2p11" data-doc="doc2"><label for="c-d2p11"><span class="kind">Decide</span>Founders to choose the definition below; alternative: 30% of Net Profit.<a href="#d2p11">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p12" data-pid="d2p12" data-doc="doc2"><label for="c-d2p12"><span class="kind">Fill in</span>15<a href="#d2p12">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p13" data-pid="d2p13" data-doc="doc2"><label for="c-d2p13"><span class="kind">Fill in</span>contractor / shareholder<a href="#d2p13">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p14" data-pid="d2p14" data-doc="doc2"><label for="c-d2p14"><span class="kind">Fill in</span>12<a href="#d2p14">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p15" data-pid="d2p15" data-doc="doc2"><label for="c-d2p15"><span class="kind">Fill in</span> <a href="#d2p15">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p16" data-pid="d2p16" data-doc="doc2"><label for="c-d2p16"><span class="kind">Fill in</span>30<a href="#d2p16">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p17" data-pid="d2p17" data-doc="doc2"><label for="c-d2p17"><span class="kind">Decide</span>Founders to choose.<a href="#d2p17">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d2p18" data-pid="d2p18" data-doc="doc2"><label for="c-d2p18"><span class="kind">Fill in</span>14<a href="#d2p18">see in text</a></label></div></div><p>Between <strong><mark class="pt fill" id="d2p1" data-pid="d2p1">[CEO name]</mark></strong> ("CEO") and <strong><mark class="pt fill" id="d2p2" data-pid="d2p2">[Partner name]</mark></strong> ("Partner"), for <strong><mark class="pt fill" id="d2p3" data-pid="d2p3">[Agriloop entity name]</mark></strong> (the "Company"). Date: <mark class="pt fill" id="d2p4" data-pid="d2p4">[ ]</mark>.</p>
+<h3>1. Roles</h3>
+<ul>
+<li>CEO: product, technology, onboarding, demo and sales calls, finance and legal administration.</li>
+<li>Partner: brand face, content, education and community.</li>
+<li>Each works <mark class="pt fill" id="d2p5" data-pid="d2p5">[hours/week]</mark> and will not run a directly competing marketplace. Partner may continue to sell her own seeds. Each may keep other ventures that do not compete.</li>
+</ul>
+<h3>2. Ownership</h3>
+<ul>
+<li>Partner receives <strong>10%</strong> of the Company's shares <mark class="pt fill" id="d2p6" data-pid="d2p6">[fully diluted at signing]</mark>.</li>
+<li><strong>Vesting:</strong> <mark class="pt fill" id="d2p7" data-pid="d2p7">[24]</mark> months, <mark class="pt fill" id="d2p8" data-pid="d2p8">[6]</mark>-month cliff. Unvested shares return to the Company if Partner leaves. <mark class="pt decide" id="d2p9" data-pid="d2p9">[Counsel to confirm.]</mark></li>
+<li>CEO holds the remaining shares, subject to future investors and an option pool of <mark class="pt fill" id="d2p10" data-pid="d2p10">[ ]</mark>%.</li>
+</ul>
+<h3>3. Profit share (30%)</h3>
+<ul>
+<li>Partner is paid <strong>30% of Net Revenue</strong> each month. <mark class="pt decide" id="d2p11" data-pid="d2p11">[Founders to choose the definition below; alternative: 30% of Net Profit.]</mark></li>
+<li><strong>Net Revenue</strong> = platform fees actually received in cash in the month, minus payment-processor fees, refunds and chargebacks. Hosting and software costs are NOT deducted under this definition.</li>
+<li>Paid within <mark class="pt fill" id="d2p12" data-pid="d2p12">[15]</mark> days after month end with a one-page statement showing the calculation. Partner may view the underlying fee report on request.</li>
+<li>Starts when Net Revenue is first received. The 60-day free period earns nothing. Taxes are the Partner's responsibility as <mark class="pt fill" id="d2p13" data-pid="d2p13">[contractor / shareholder]</mark>; Company withholds only if the law requires it.</li>
+<li>Increases or reductions need a written amendment signed by both.</li>
+</ul>
+<h3>4. Brand, content and IP</h3>
+<ul>
+<li>Partner grants the Company a licence to use her name, image and content for Agriloop during the agreement and <mark class="pt fill" id="d2p14" data-pid="d2p14">[12]</mark> months after exit, for existing material only. She keeps ownership of her personal accounts and followers.</li>
+<li>Code, product and Agriloop trademarks belong to the Company. Partner's own seed business and its brand remain hers.</li>
+<li>Content must be truthful. No health or safety claims about produce that the Company has not approved.</li>
+</ul>
+<h3>5. Decisions</h3>
+<ul>
+<li>Day-to-day decisions: CEO. Needs both signatures: selling the Company, new share issuance beyond the option pool, changing this agreement, taking on debt above <mark class="pt fill" id="d2p15" data-pid="d2p15">[ ]</mark>.</li>
+</ul>
+<h3>6. Leaving</h3>
+<ul>
+<li>Either party may leave on <mark class="pt fill" id="d2p16" data-pid="d2p16">[30]</mark> days' notice. Vested shares are kept. Profit share ends [at exit / continues for 6 months on revenue from users she brought in]. <mark class="pt decide" id="d2p17" data-pid="d2p17">[Founders to choose.]</mark></li>
+<li>Company may remove the Partner for serious breach (fraud, harmful conduct, breach of Section 4) with <mark class="pt fill" id="d2p18" data-pid="d2p18">[14]</mark> days' notice to fix.</li>
+<li>On a sale, vested shares are paid out pro rata.</li>
+</ul>
+<h3>7. Confidentiality, disputes, law</h3>
+<p>Both keep business information confidential. Disputes: talk first, then mediation, then the Jamaican courts. Governing law: Jamaica.</p>
+<p>Signed: ____________ (CEO)  ____________ (Partner)  Date: ______</p></section><section class="doc" id="doc3"><header><h2>Terms of use</h2><p>Shown at signup</p></header><div class="todo"><h4>What to update and check (7)</h4><div class="chk"><input type="checkbox" id="c-d3p1" data-pid="d3p1" data-doc="doc3"><label for="c-d3p1"><span class="kind">Fill in</span>date<a href="#d3p1">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d3p2" data-pid="d3p2" data-doc="doc3"><label for="c-d3p2"><span class="kind">Fill in</span>company name<a href="#d3p2">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d3p3" data-pid="d3p3" data-doc="doc3"><label for="c-d3p3"><span class="kind">Fill in</span>email<a href="#d3p3">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d3p4" data-pid="d3p4" data-doc="doc3"><label for="c-d3p4"><span class="kind">Fill in</span>When card payments launch, these terms will be updated with fees, payouts and refunds.<a href="#d3p4">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d3p5" data-pid="d3p5" data-doc="doc3"><label for="c-d3p5"><span class="kind">Fill in</span>30<a href="#d3p5">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d3p6" data-pid="d3p6" data-doc="doc3"><label for="c-d3p6"><span class="kind">Fill in</span>email/in-app<a href="#d3p6">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d3p7" data-pid="d3p7" data-doc="doc3"><label for="c-d3p7"><span class="kind">Decide</span>Counsel to confirm limits.<a href="#d3p7">see in text</a></label></div></div><p>Last updated: <mark class="pt fill" id="d3p1" data-pid="d3p1">[date]</mark>. By creating an account you agree to these terms. "We" means <mark class="pt fill" id="d3p2" data-pid="d3p2">[company name]</mark>, Jamaica. Contact: <mark class="pt fill" id="d3p3" data-pid="d3p3">[email]</mark>.</p>
+<p><strong>Acceptance at signup (app requirement).</strong> The signup screen must show an unchecked box: "I am 18 or over and I agree to the Terms of Use and Privacy Policy" with both documents linked, and the Create account button stays disabled until it is ticked. Store, for each user: the terms version, the privacy version, and the date and time accepted. Sellers also tick the Seller Agreement before their first listing. When these documents change, ask users to accept the new version at next login.</p>
+<ol>
+<li><strong>What Agriloop is.</strong> A platform that connects farmers ("Sellers") and buyers. We are an intermediary. We are not the seller, do not own, inspect or store the produce, and are not a party to a sale between a Seller and a buyer.
+</li>
+<li><strong>Accounts.</strong> You must be 18 or over, give true information, keep your login private, and are responsible for activity on your account. Beta access is by invitation and may be changed or ended.
+</li>
+<li><strong>Allowed items.</strong> Fresh produce, seeds and plants grown in Jamaica. Meat, dairy, fish, processed or prepared foods, animals, pesticides, and anything illegal or unsafe are not allowed during the beta. We may remove any listing.
+</li>
+<li><strong>Seller responsibility.</strong> Sellers must describe items accurately, price honestly, deliver what they promised, and follow Jamaican food-safety, agricultural and tax rules. Quality, safety and delivery are the Seller's responsibility.
+</li>
+<li><strong>Buyer responsibility.</strong> Check what you buy, pay what was agreed, and treat Sellers respectfully.
+</li>
+<li><strong>Payments.</strong> In the beta, buyers and Sellers settle payment directly (cash, bank transfer or similar). We may produce an invoice as a record. We do not hold or guarantee payment. <mark class="pt fill" id="d3p4" data-pid="d3p4">[When card payments launch, these terms will be updated with fees, payouts and refunds.]</mark>
+</li>
+<li><strong>Fees.</strong> None during the beta. We will give <mark class="pt fill" id="d3p5" data-pid="d3p5">[30]</mark> days' notice before any fee.
+</li>
+<li><strong>Disputes.</strong> Try to resolve problems with the other party first. You can report a listing or user at <mark class="pt fill" id="d3p6" data-pid="d3p6">[email/in-app]</mark>. We may help, but we are not obliged to settle or refund any dispute.
+</li>
+<li><strong>Conduct.</strong> No fraud, harassment, fake reviews, spam, or sharing other people's details. We may suspend or remove accounts and listings.
+</li>
+<li><strong>Content.</strong> You keep your content but give us a licence to display it on Agriloop. You confirm you have the right to post it.
+</li>
+<li><strong>No warranties; limit of liability.</strong> The service is provided "as is". To the extent the law allows, we are not liable for the quality, safety or delivery of produce, for losses from transactions between users, or for indirect losses. <mark class="pt decide" id="d3p7" data-pid="d3p7">[Counsel to confirm limits.]</mark>
+</li>
+<li><strong>Changes and ending.</strong> We may change these terms with notice. You can close your account at any time.
+</li>
+<li><strong>Law.</strong> Governed by the laws of Jamaica. Disputes go to the Jamaican courts.
+</li>
+</ol></section><section class="doc" id="doc4"><header><h2>Seller agreement</h2><p>Shown before a first listing</p></header><div class="todo"><h4>What to update and check (2)</h4><div class="chk"><input type="checkbox" id="c-d4p1" data-pid="d4p1" data-doc="doc4"><label for="c-d4p1"><span class="kind">Fill in</span>Future fee: percentage on card payments only; cash orders with an Agriloop invoice carry no fee.<a href="#d4p1">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d4p2" data-pid="d4p2" data-doc="doc4"><label for="c-d4p2"><span class="kind">Decide</span>Counsel to confirm.<a href="#d4p2">see in text</a></label></div></div><p>Supplements the Terms of Use. By listing, you (the Seller) agree:</p>
+<ol>
+<li>You grow or lawfully obtain what you list and have the right to sell it.
+</li>
+<li>Listings state the item, quantity, unit, price, parish and available dates truthfully. Photos show your real produce.
+</li>
+<li>Produce is handled safely and is fit for human consumption (or, for seeds and plants, as described). You follow applicable Jamaican food-safety, agricultural and tax rules.
+</li>
+<li>You honour confirmed orders. If you cannot, tell the buyer promptly and cancel the order in the app.
+</li>
+<li>You set your own prices. In the beta there is no Agriloop fee. <mark class="pt fill" id="d4p1" data-pid="d4p1">[Future fee: percentage on card payments only; cash orders with an Agriloop invoice carry no fee.]</mark>
+</li>
+<li>You are an independent seller, not our employee or agent. You are responsible for your own taxes and licences.
+</li>
+<li>You agree we may share your name, parish and contact details with buyers who order from you.
+</li>
+<li>We may suspend listings that break these terms, receive repeated complaints, or put people at risk.
+</li>
+<li>You protect Agriloop from claims caused by your produce or your breach of these terms. <mark class="pt decide" id="d4p2" data-pid="d4p2">[Counsel to confirm.]</mark>
+</li>
+</ol></section><section class="doc" id="doc5"><header><h2>Privacy policy</h2><p>Shown at signup</p></header><div class="todo"><h4>What to update and check (9)</h4><div class="chk"><input type="checkbox" id="c-d5p1" data-pid="d5p1" data-doc="doc5"><label for="c-d5p1"><span class="kind">Fill in</span>date<a href="#d5p1">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p2" data-pid="d5p2" data-doc="doc5"><label for="c-d5p2"><span class="kind">Fill in</span>company name<a href="#d5p2">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p3" data-pid="d5p3" data-doc="doc5"><label for="c-d5p3"><span class="kind">Fill in</span>address<a href="#d5p3">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p4" data-pid="d5p4" data-doc="doc5"><label for="c-d5p4"><span class="kind">Fill in</span>email<a href="#d5p4">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p5" data-pid="d5p5" data-doc="doc5"><label for="c-d5p5"><span class="kind">Decide</span>counsel to confirm registration<a href="#d5p5">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p6" data-pid="d5p6" data-doc="doc5"><label for="c-d5p6"><span class="kind">Fill in</span>Vercel, Supabase<a href="#d5p6">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p7" data-pid="d5p7" data-doc="doc5"><label for="c-d5p7"><span class="kind">Fill in</span>24<a href="#d5p7">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p8" data-pid="d5p8" data-doc="doc5"><label for="c-d5p8"><span class="kind">Fill in</span>email<a href="#d5p8">see in text</a></label></div><div class="chk"><input type="checkbox" id="c-d5p9" data-pid="d5p9" data-doc="doc5"><label for="c-d5p9"><span class="kind">Fill in</span>email<a href="#d5p9">see in text</a></label></div></div><p>Last updated: <mark class="pt fill" id="d5p1" data-pid="d5p1">[date]</mark>. Controller: <mark class="pt fill" id="d5p2" data-pid="d5p2">[company name]</mark>, <mark class="pt fill" id="d5p3" data-pid="d5p3">[address]</mark>, <mark class="pt fill" id="d5p4" data-pid="d5p4">[email]</mark>. We follow Jamaica's Data Protection Act, 2020 <mark class="pt decide" id="d5p5" data-pid="d5p5">[counsel to confirm registration]</mark>.</p>
+<p><strong>What we collect.</strong> Name, phone number, email, parish, and optionally address and photo; listings, orders, messages and invoices; basic device and usage data.</p>
+<p><strong>Why.</strong> To run accounts, show listings by parish, process orders and invoices, keep the platform safe, and contact you about your orders. With your consent, to send news and offers. You can opt out at any time.</p>
+<p><strong>Who sees it.</strong> Sellers and buyers see what is needed to complete an order (name, parish, phone). Our service providers (hosting and database <mark class="pt fill" id="d5p6" data-pid="d5p6">[Vercel, Supabase]</mark>, and later payment providers) process data for us. We do not sell your data. We may disclose data if the law requires.</p>
+<p><strong>Where.</strong> Data is stored with our providers, which may be outside Jamaica. We choose providers with appropriate safeguards.</p>
+<p><strong>How long.</strong> While your account is active, then <mark class="pt fill" id="d5p7" data-pid="d5p7">[24]</mark> months for records and disputes, unless the law requires longer.</p>
+<p><strong>Security.</strong> Access controls, encrypted connections and limited staff access. No system is perfectly secure; tell us at <mark class="pt fill" id="d5p8" data-pid="d5p8">[email]</mark> if you suspect a problem.</p>
+<p><strong>Your rights.</strong> To see, correct or delete your data, to withdraw consent, and to complain to the Information Commissioner. Contact <mark class="pt fill" id="d5p9" data-pid="d5p9">[email]</mark>.</p>
+<p><strong>Children.</strong> Not for people under 18.</p>
+<p><strong>Changes.</strong> We will post changes here and notify you of important ones.</p></section>
+<footer>Launch rules these drafts assume: invite-only beta, free for 60 days, cash and invoice orders only, no card payments and no held funds until the legal review is finished (target: end of November). Source files: <code>docs/master/ventures/agriloop/legal/</code>. Rebuild with <code>scripts/visual_pack.py</code>.</footer>
+</div>
+<script>
+(function(){
+  var KEY='agriloop-legal-pack-v1',done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  var boxes=[].slice.call(document.querySelectorAll('.chk input'));
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function paint(){
+    var n=0;
+    boxes.forEach(function(b){
+      var id=b.dataset.pid,on=!!done[id];b.checked=on;if(on)n++;
+      [].slice.call(document.querySelectorAll('[data-pid="'+id+'"]')).forEach(function(m){if(m.tagName==='MARK')m.classList.toggle('done',on)});
+    });
+    document.getElementById('count').textContent=n+' of '+boxes.length+' focus points done';
+    document.querySelector('.bar i').style.width=(boxes.length?100*n/boxes.length:0)+'%';
+    [].slice.call(document.querySelectorAll('nav a')).forEach(function(a){
+      var d=a.dataset.doc,t=0,c=0;boxes.forEach(function(b){if(b.dataset.doc===d){t++;if(done[b.dataset.pid])c++}});
+      a.querySelector('b').textContent=c+'/'+t;
+    });
+  }
+  boxes.forEach(function(b){b.addEventListener('change',function(){done[b.dataset.pid]=b.checked;save();paint()})});
+  [].slice.call(document.querySelectorAll('mark.pt')).forEach(function(m){m.addEventListener('click',function(){done[m.dataset.pid]=!done[m.dataset.pid];save();paint()})});
+  paint();
+})();
+</script>
