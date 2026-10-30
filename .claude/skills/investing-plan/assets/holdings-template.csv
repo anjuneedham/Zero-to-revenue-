@@ -1,0 +1,2 @@
+account,asset,asset_class,currency,units,cost_basis_per_unit,current_price,price_date,target_weight_pct,notes
+EXAMPLE-brokerage,EXAMPLE-index-fund,equity_fund,USD,0,0,0,YYYY-MM-DD,0,Delete this example row; fill with real numbers only

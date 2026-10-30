@@ -1,0 +1,113 @@
+"""Hand-written registry metadata for vendored skills: name -> (one-line purpose, typical trigger).
+
+Edit here (not in the generated markdown) then run `python3 scripts/skills/build_docs.py`.
+"""
+
+GOAL_LABEL = {
+    "saas": "1 NOW: SaaS growth (Agriloop + BuildFlow)",
+    "eng": "1 NOW: Engineering (Next.js / Neon / Supabase)",
+    "fashion": "2 NEXT: Fashion / e-commerce",
+    "trading": "3 THEN: Trading bot",
+    "invest": "4 FINALLY: Investing / finance",
+    "sales": "Ongoing: Sales, offers and copy",
+    "docs": "Ongoing: Documents and ops",
+    "custom": "Custom (Jay-specific)",
+}
+
+CATEGORY_LABEL = {
+    "saas": "SaaS growth",
+    "eng": "Engineering",
+    "fashion": "Fashion / e-commerce",
+    "trading": "Trading",
+    "invest": "Investing / finance",
+    "sales": "Sales, offers, copy",
+    "docs": "Documents and ops",
+    "custom": "Custom",
+}
+
+META = {
+    # --- SaaS growth
+    "product-strategy": ("Builds a 9-section Product Strategy Canvas (vision, segments, trade-offs, moat).", "\"write a product strategy for BuildFlow\""),
+    "interview-script": ("Writes a customer-interview script with JTBD probing questions.", "\"prep my farmer / contractor interviews\""),
+    "summarize-interview": ("Turns an interview transcript into structured insights (JTBD, pains, quotes).", "\"summarise this call with a buyer\""),
+    "outcome-roadmap": ("Converts a feature list into an outcome-based roadmap.", "\"turn my backlog into a roadmap\""),
+    "beachhead-segment": ("Picks the first market segment to win before expanding.", "\"which customers do I target first?\""),
+    "pricing": ("Pricing, packaging and willingness-to-pay research for SaaS.", "\"how should I price BuildFlow?\""),
+    "onboarding": ("Post-signup onboarding and activation design.", "\"users sign up but never activate\""),
+    "churn-prevention": ("Cancel flows, save offers and dunning to cut churn.", "\"reduce cancellations\""),
+    "cold-email": ("B2B cold outbound: emails, follow-ups, deliverability.", "\"cold email to construction firms\""),
+    "prospecting": ("Finds and qualifies prospect lists with demand signals and compliance rules.", "\"find my first 20 buyers\""),
+    "sales-enablement": ("Demo scripts, one-pagers, objection handling, battlecards.", "\"prepare a demo / handle objections\""),
+    "customer-research": ("Plans, runs and synthesises customer research.", "\"what do farmers actually want?\""),
+    "cro": ("Landing/page conversion-rate optimisation.", "\"improve my landing page conversion\""),
+    "launch": ("Product / feature launch planning and QA checklist.", "\"plan the BuildFlow launch\""),
+    "startup-metrics-framework": ("MRR, churn, CAC, LTV, NRR and benchmarks for SaaS/marketplaces.", "\"what metrics should I track?\""),
+    "saas-metrics-coach": ("Diagnoses SaaS health from your numbers (quick ratio, unit economics).", "\"here are my MRR and churn numbers\""),
+    "partnerships-architect": ("Decides whether and how to take a partner deal, incl. rev-share modelling.", "\"health-professional partner wants revenue share\""),
+    "channel-economics": ("Compares direct vs partner-led channel economics and cost-to-serve.", "\"is the partner channel worth it?\""),
+    "customer-success-manager": ("Health scoring, churn-risk and expansion-opportunity analysis.", "\"which customers are at risk?\""),
+    # --- Engineering
+    "nextjs-app-router-patterns": ("Next.js App Router: server components, streaming, caching, parallel routes.", "\"build a Next.js page / route\""),
+    "neon-postgres": ("Neon Postgres: connections, branching, pooling, drivers, best practice.", "\"connect the app to Neon\""),
+    "supabase-postgres-best-practices": ("Postgres performance, schema and RLS guidance from Supabase.", "\"optimise Supabase / Postgres\""),
+    "sql-optimization-patterns": ("Query tuning, indexing and EXPLAIN analysis.", "\"this query is slow\""),
+    "postgresql-table-design": ("PostgreSQL schema and data-type design rules.", "\"design the database tables\""),
+    "tailwind-design-system": ("Tailwind CSS v4 design tokens and component systems.", "\"style with Tailwind / design system\""),
+    "auth-implementation-patterns": ("JWT, OAuth2, sessions, RBAC patterns.", "\"add login / roles\""),
+    "api-design-principles": ("REST/GraphQL API design, versioning, errors, pagination.", "\"design the API\""),
+    "tdd": ("Test-first red-green-refactor workflow.", "\"fix this bug test-first\""),
+    "systematic-debugging": ("Root-cause debugging process before proposing fixes.", "\"tests fail / something broke\""),
+    "code-review-and-quality": ("Multi-axis code review before merge.", "\"review this change\""),
+    "security-and-hardening": ("Input handling, auth, secrets and vuln hardening checklist.", "\"security-review this\""),
+    "ci-cd-and-automation": ("CI/CD pipelines, quality gates, deploy and rollback.", "\"set up CI\""),
+    "performance-optimization": ("Frontend, backend and DB performance profiling and fixes.", "\"site is slow\""),
+    "frontend-design": ("Distinctive, non-generic UI visual design direction.", "\"make the UI look professional\""),
+    # --- Fashion / e-commerce
+    "ads": ("Paid ads on Google/Meta/TikTok: structure, audit, budgets.", "\"run Meta ads for the brand\""),
+    "ad-creative": ("Ad creative, hooks and variant testing at scale.", "\"write ad hooks to test\""),
+    "sms": ("SMS / WhatsApp marketing flows and compliance.", "\"WhatsApp retention flow\""),
+    "emails": ("Email sequences: welcome, abandoned cart, win-back.", "\"set up email flows\""),
+    "social": ("Social content planning and short-form posts.", "\"plan this week's content\""),
+    "video": ("Short-form / product video planning and production.", "\"script a TikTok / Reel\""),
+    "influencer-marketing": ("Creator and ambassador outreach and deals.", "\"find UGC creators\""),
+    "competitor-profiling": ("Profiles competitors from their URLs (positioning, offers, gaps).", "\"research competing fashion brands\""),
+    "product-marketing": ("Product marketing context: audience, voice, positioning.", "\"define the brand voice\""),
+    # --- Trading
+    "backtest-expert": ("Stress-tests a strategy's backtest: friction, robustness, overfit checks.", "\"is this backtest trustworthy?\""),
+    "walk-forward-validation": ("Walk-forward / out-of-sample splits and overfit detection.", "\"validate out of sample\""),
+    "backtesting-frameworks": ("Builds backtests that avoid look-ahead and survivorship bias.", "\"build a backtest\""),
+    "risk-metrics-calculation": ("Sharpe, Sortino, drawdown, VaR/CVaR calculations.", "\"compute strategy statistics\""),
+    "position-sizer": ("Fixed-fractional, ATR and Kelly position sizing with constraints.", "\"how big should this position be?\""),
+    "mt5-robot-tester": ("Batch-runs the MT5 Strategy Tester (Windows) and screens EAs. Backtest only.", "\"batch-test my MT5 EAs\""),
+    "trade-journal": ("Structured trade log and behavioural review. Crypto-flavoured examples.", "\"log and review paper trades\""),
+    "strategy-framework": ("Template for defining a strategy: entries, exits, risk, criteria.", "\"write the strategy spec\""),
+    "kelly-criterion": ("Kelly / fractional-Kelly sizing from win-rate and payoff.", "\"what Kelly fraction?\""),
+    "risk-management": ("Portfolio risk controls, drawdown limits, circuit breakers (crypto-flavoured).", "\"set drawdown limits\""),
+    # --- Investing
+    "portfolio-analytics": ("Portfolio return, risk and risk-adjusted metrics with reports.", "\"how is my portfolio doing?\""),
+    "financial-analyst": ("Ratios, DCF, budget variance and forecasts.", "\"model this business / budget\""),
+    "startup-financial-modeling": ("3-5 year startup financial models and scenarios.", "\"build a revenue forecast\""),
+    "cfo-advisor": ("Runway, burn, unit economics and fundraising maths.", "\"how long is my runway?\""),
+    # --- Sales / offers / copy
+    "offers": ("Designs irresistible offers (Value Equation, guarantees, bundles).", "\"build me an offer\""),
+    "copywriting": ("Marketing copy for pages, ads and emails.", "\"write the landing page copy\""),
+    "copy-editing": ("Edits and tightens existing copy; removes AI tells.", "\"polish this copy\""),
+    "marketing-psychology": ("Behavioural principles for persuasion and conversion.", "\"why aren't people buying?\""),
+    "lead-magnets": ("Lead magnet ideas and packaging for list building.", "\"create a lead magnet\""),
+    "contract-and-proposal-writer": ("Freelance contracts and project proposals.", "\"write a client proposal\""),
+    "marketing-council": ("Simulated panel of marketing experts (incl. Hormozi) for a decision.", "\"get several expert views\""),
+    # --- Docs / ops
+    "pdf": ("Read, create and review PDFs with layout checks.", "\"make / read a PDF\""),
+    "deep-research": ("Disciplined multi-source research for a high-stakes decision.", "\"research this thoroughly\""),
+    "research-summarizer": ("Structured summaries of papers and reports with citations.", "\"summarise this report\""),
+    "senior-pm": ("Project plans, risk matrix, capacity and health dashboards.", "\"plan and track this project\""),
+    "seo-audit": ("Site SEO audit and prioritised fixes.", "\"audit my site's SEO\""),
+    "skill-creator": ("Create, test and improve skills (use to add new ones).", "\"turn this into a skill\""),
+    # --- Custom
+    "agriloop-growth": ("Customer discovery, pricing and outreach plan for Agriloop (Jamaica).", "\"get Agriloop's first customers\""),
+    "buildflow-growth": ("BuildFlow construction + health-professional versions, partner/rev-share pitch.", "\"BuildFlow go-to-market / partner pitch\""),
+    "fashion-launch": ("Fashion brand from research to first sale on a near-zero budget.", "\"launch the fashion brand\""),
+    "trading-lab": ("Research, backtest, paper trade and go/no-go gate before any real money.", "\"is my bot ready for real money?\""),
+    "investing-plan": ("Profit-allocation rules and tracking for ventures and bot profits.", "\"where should profits go?\""),
+    "hormozi-lens": ("Applies Value Equation, Grand Slam Offer, Core Four, CLOSER and LTV to any idea.", "\"stress-test this offer / pitch\""),
+}

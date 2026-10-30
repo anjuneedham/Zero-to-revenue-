@@ -1,0 +1,2 @@
+date,type,account,amount,currency,from_bucket,to_bucket,fee,note
+YYYY-MM-DD,EXAMPLE-contribution,EXAMPLE-brokerage,0,USD,investing,core,0,Types: contribution|withdrawal|dividend|fee|tax_set_aside|rebalance|bot_profit_sweep. Delete this row.
