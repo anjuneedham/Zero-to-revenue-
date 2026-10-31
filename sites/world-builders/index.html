@@ -312,11 +312,11 @@ footer a:hover{color:#fff}
 
 <section class="work" id="work"><div class="wrap">
  <div class="eyebrow">Our work</div>
- <h2>Jobs from the start, and the same jobs finished.</h2>
- <p class="sec-sub">These are our own sites. Use the buttons to see the early stages or the finished work. Tap any photo to make it bigger.</p>
+ <h2>The same jobs, start to finish.</h2>
+ <p class="sec-sub">These are our own sites, in the three stages we photograph every job: the start, the work in progress, and the finish. Tap any photo to make it bigger.</p>
  <div class="filters" id="flt" role="group" aria-label="Filter photos by phase"></div>
  <div class="gal" id="gal"></div>
- <p class="gal-note">We keep a folder like this for every client, in the same two parts, so you can look back at how your own house went up.</p>
+ <p class="gal-note">We keep a folder like this for every client, in these same three parts, so you can look back at how your own house went up.</p>
 </div></section>
 
 <section class="book" id="book"><div class="wrap">
@@ -456,29 +456,33 @@ var CFG={endpoint:'api/lead.php',whatsapp:'18765134962'};
 
 document.getElementById('yr').textContent=new Date().getFullYear();
 
-/* Photos are grouped the same way as the shared Drive folders:
-   "Photos of start process of work" and "Photos of finish work". */
+/* Grouped the same way as the shared Drive folders: "Photos of start process
+   of work", "Photos of working progress" and "Photos of finish work".
+   NOTE: two filenames are misleading and were inherited that way.
+   render-gable.jpg is in fact the cast concrete seating, and
+   concrete-seating.jpg is in fact the rendered wall with the sun medallion.
+   The captions below describe what each photo actually shows. */
 var GALLERY=[
  {src:'images/block-laying.jpg',w:524,h:567,c:'start',cap:'Block going up, with the steel tied in'},
+ {src:'images/roof-tile-install.jpg',w:1280,h:960,c:'progress',cap:'Tile going on while the block below is still bare'},
  {src:'images/home-tile-roof-finished.jpg',w:1280,h:960,c:'finish',cap:'Handed over: tile roof, rendered and painted'},
- {src:'images/blockwork-walls.jpg',w:1600,h:1200,c:'start',cap:'Walls up to window height'},
- {src:'images/roof-terracotta-aerial.jpg',w:1280,h:960,c:'finish',cap:'Terracotta tile, seen from above'},
- {src:'images/block-columns.jpg',w:1600,h:1200,c:'start',cap:'Columns and arches at the entrance, before render'},
+ {src:'images/blockwork-walls.jpg',w:1600,h:1200,c:'start',cap:'Walls up to window height, roof next'},
+ {src:'images/roof-framing-interior.jpg',w:900,h:1600,c:'progress',cap:'Roof timbers up, sheeting next'},
+ {src:'images/roof-terracotta-aerial.jpg',w:1280,h:960,c:'finish',cap:'That same tile roof finished, straight down from above'},
+ {src:'images/block-shell.jpg',w:1600,h:1200,c:'start',cap:'Shell closed in, openings left for windows and doors'},
+ {src:'images/render-wall-upper.jpg',w:1200,h:1600,c:'progress',cap:'Render going on the upper walls'},
  {src:'images/staircase-glass.jpg',w:900,h:1600,c:'finish',cap:'Timber treads and a glass balustrade'},
- {src:'images/roof-framing-interior.jpg',w:900,h:1600,c:'start',cap:'Roof timbers up, sheeting next'},
+ {src:'images/block-columns.jpg',w:1600,h:1200,c:'start',cap:'Columns and arches at the entrance, before any render'},
+ {src:'images/roof-blue-block-home.jpg',w:1280,h:960,c:'progress',cap:'Roof on early, so the block work stays dry'},
  {src:'images/home-dark-roof-aerial.jpg',w:1280,h:719,c:'finish',cap:'Two storeys finished under a dark roof'},
- {src:'images/block-shell.jpg',w:1600,h:1200,c:'start',cap:'Shell closed in, openings cut for windows and doors'},
- {src:'images/paved-walkway.jpg',w:1600,h:1200,c:'finish',cap:'Walkway paved and the timber steps set'},
- {src:'images/roof-tile-install.jpg',w:1280,h:960,c:'start',cap:'Tile going on while the block below is still bare'},
+ {src:'images/concrete-seating.jpg',w:900,h:1600,c:'progress',cap:'Decorative render worked into the wall before painting'},
  {src:'images/roof-metal-hip.jpg',w:1080,h:500,c:'finish',cap:'Hip roof in metal, clean line at the ridge'},
- {src:'images/render-wall-upper.jpg',w:1200,h:1600,c:'start',cap:'Render going on the upper walls'},
- {src:'images/render-gable.jpg',w:900,h:1600,c:'finish',cap:'Gable rendered with the feature window set in'},
- {src:'images/roof-blue-block-home.jpg',w:1280,h:960,c:'start',cap:'Roof on early, so the block work stays dry'},
- {src:'images/concrete-seating.jpg',w:900,h:1600,c:'finish',cap:'Concrete seating cast and finished outside'},
- {src:'images/roof-metal-multilevel.jpg',w:1280,h:960,c:'start',cap:'Metal sheeting across a multi-level roof'},
- {src:'images/roof-blue-multistorey.jpg',w:1280,h:719,c:'finish',cap:'Blue roof on a multi-storey, from the air'}
+ {src:'images/roof-metal-multilevel.jpg',w:1280,h:960,c:'progress',cap:'Metal sheeting across a multi-level roof'},
+ {src:'images/paved-walkway.jpg',w:1600,h:1200,c:'finish',cap:'Walkway paved and the timber steps set'},
+ {src:'images/roof-blue-multistorey.jpg',w:1280,h:719,c:'progress',cap:'Roof and render done, windows and the ground still to come'},
+ {src:'images/render-gable.jpg',w:900,h:1600,c:'finish',cap:'Concrete seating cast and finished on site'}
 ];
-var CATS=[['all','All photos'],['start','Starting phase'],['finish','Finishing phase']];
+var CATS=[['all','All photos'],['start','Starting phase'],['progress','Working progress'],['finish','Finishing phase']];
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
 var gal=document.getElementById('gal'),flt=document.getElementById('flt'),lb=document.getElementById('lb'),
