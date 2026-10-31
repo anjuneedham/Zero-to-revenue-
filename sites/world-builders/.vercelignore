@@ -1,0 +1,8 @@
+# Vercel previews serve this folder as a static site. The PHP backend only runs
+# on the Hostinger host, and Vercel would serve these files as readable source,
+# so keep the server-side code out of the preview deployment entirely.
+api/
+admin/
+database/
+docs/
+.htaccess

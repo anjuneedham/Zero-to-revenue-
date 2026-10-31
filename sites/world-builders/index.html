@@ -572,11 +572,13 @@ f.addEventListener('submit',function(e){e.preventDefault();
   body:JSON.stringify(d)}).then(function(r){done(r.ok)}).catch(function(){done(false)})}
  else done(false)});
 
-/* show the preview warning whenever the lead backend is not actually reachable */
-if(CFG.endpoint){fetch(CFG.endpoint,{method:'HEAD'}).then(function(r){
- if(!r.ok)document.getElementById('pvnote').style.display='block'}).catch(function(){
- document.getElementById('pvnote').style.display='block'})}
-else document.getElementById('pvnote').style.display='block';
+/* The PHP backend only runs on the live host. Anywhere else (a Vercel preview,
+   a file:// copy, a staging URL) the form cannot deliver, so say so up front
+   rather than probing: a static host answers 200 for lead.php and that tells
+   us nothing about whether a lead would actually arrive. */
+var LIVE=['worldbuildersconstruction.com','www.worldbuildersconstruction.com'];
+if(!CFG.endpoint||LIVE.indexOf(location.hostname)===-1){
+ document.getElementById('pvnote').style.display='block'}
 })();
 </script>
 </body>
