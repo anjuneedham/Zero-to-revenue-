@@ -66,7 +66,6 @@ h1{font-size:clamp(34px,4.8vw,52px)}
 .proof span:before{content:"";position:absolute;left:2px;top:8px;width:11px;height:6px;border-left:2.5px solid var(--blue);border-bottom:2.5px solid var(--blue);transform:rotate(-45deg)}
 .shot{position:relative}
 .shot img{display:block;width:100%;aspect-ratio:4/3;max-height:430px;object-fit:cover;border-radius:6px}
-.shot .cap{position:absolute;left:14px;bottom:14px;background:rgba(42,74,115,.82);color:#fff;padding:8px 14px;border-radius:3px;font-size:13px;font-weight:500}
 
 /* services */
 .services{background:#fff}
@@ -107,7 +106,6 @@ h1{font-size:clamp(34px,4.8vw,52px)}
 .gal figure button{display:block;width:100%;border:0;padding:0;background:none;cursor:zoom-in}
 .gal figure img{display:block;width:100%;height:auto;max-height:440px;object-fit:cover;transition:transform .5s}
 .gal figure:hover img{transform:scale(1.03)}
-.gal figcaption{position:absolute;left:0;bottom:0;right:0;padding:30px 14px 12px;background:linear-gradient(transparent,rgba(32,41,58,.72));color:#fff;font-size:13.5px;pointer-events:none}
 .gal-note{margin-top:16px;color:var(--mute);font-size:15px}
 
 /* lightbox */
@@ -227,8 +225,7 @@ footer a:hover{color:#fff}
   </div>
  </div>
  <div class="shot reveal">
-  <img src="images/site-team-house.jpg" alt="The World Builders team on site in Clarendon in front of a completed house" width="1080" height="810">
-  <div class="cap">Our team on site in Clarendon</div>
+  <img src="images/home-tile-roof-finished.jpg" alt="A completed two-storey house built by World Builders Construction" width="1280" height="960">
  </div>
 </div></section>
 
@@ -458,40 +455,38 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 
 /* Grouped the same way as the shared Drive folders: "Photos of start process
    of work", "Photos of working progress" and "Photos of finish work".
-   NOTE: two filenames are misleading and were inherited that way.
-   render-gable.jpg is in fact the cast concrete seating, and
-   concrete-seating.jpg is in fact the rendered wall with the sun medallion.
-   The captions below describe what each photo actually shows. */
+   No titles on the photos: we can group them by stage from what they show,
+   but we cannot caption the job, the place or the client from the file alone,
+   and two of these filenames describe the wrong picture (render-gable.jpg is
+   the cast concrete seating; concrete-seating.jpg is the rendered sun wall). */
 var GALLERY=[
- {src:'images/block-laying.jpg',w:524,h:567,c:'start',cap:'Block going up, with the steel tied in'},
- {src:'images/roof-tile-install.jpg',w:1280,h:960,c:'progress',cap:'Tile going on while the block below is still bare'},
- {src:'images/home-tile-roof-finished.jpg',w:1280,h:960,c:'finish',cap:'Handed over: tile roof, rendered and painted'},
- {src:'images/blockwork-walls.jpg',w:1600,h:1200,c:'start',cap:'Walls up to window height, roof next'},
- {src:'images/roof-framing-interior.jpg',w:900,h:1600,c:'progress',cap:'Roof timbers up, sheeting next'},
- {src:'images/roof-terracotta-aerial.jpg',w:1280,h:960,c:'finish',cap:'That same tile roof finished, straight down from above'},
- {src:'images/block-shell.jpg',w:1600,h:1200,c:'start',cap:'Shell closed in, openings left for windows and doors'},
- {src:'images/render-wall-upper.jpg',w:1200,h:1600,c:'progress',cap:'Render going on the upper walls'},
- {src:'images/staircase-glass.jpg',w:900,h:1600,c:'finish',cap:'Timber treads and a glass balustrade'},
- {src:'images/block-columns.jpg',w:1600,h:1200,c:'start',cap:'Columns and arches at the entrance, before any render'},
- {src:'images/roof-blue-block-home.jpg',w:1280,h:960,c:'progress',cap:'Roof on early, so the block work stays dry'},
- {src:'images/home-dark-roof-aerial.jpg',w:1280,h:719,c:'finish',cap:'Two storeys finished under a dark roof'},
- {src:'images/concrete-seating.jpg',w:900,h:1600,c:'progress',cap:'Decorative render worked into the wall before painting'},
- {src:'images/roof-metal-hip.jpg',w:1080,h:500,c:'finish',cap:'Hip roof in metal, clean line at the ridge'},
- {src:'images/roof-metal-multilevel.jpg',w:1280,h:960,c:'progress',cap:'Metal sheeting across a multi-level roof'},
- {src:'images/paved-walkway.jpg',w:1600,h:1200,c:'finish',cap:'Walkway paved and the timber steps set'},
- {src:'images/roof-blue-multistorey.jpg',w:1280,h:719,c:'progress',cap:'Roof and render done, windows and the ground still to come'},
- {src:'images/render-gable.jpg',w:900,h:1600,c:'finish',cap:'Concrete seating cast and finished on site'}
+ {src:'images/blockwork-walls.jpg',w:1600,h:1200,c:'start'},
+ {src:'images/roof-tile-install.jpg',w:1280,h:960,c:'progress'},
+ {src:'images/home-dark-roof-aerial.jpg',w:1280,h:719,c:'finish'},
+ {src:'images/block-shell.jpg',w:1600,h:1200,c:'start'},
+ {src:'images/roof-blue-block-home.jpg',w:1280,h:960,c:'progress'},
+ {src:'images/roof-terracotta-aerial.jpg',w:1280,h:960,c:'finish'},
+ {src:'images/block-columns.jpg',w:1600,h:1200,c:'start'},
+ {src:'images/render-wall-upper.jpg',w:1200,h:1600,c:'progress'},
+ {src:'images/staircase-glass.jpg',w:900,h:1600,c:'finish'},
+ {src:'images/roof-metal-multilevel.jpg',w:1280,h:960,c:'progress'},
+ {src:'images/paved-walkway.jpg',w:1600,h:1200,c:'finish'},
+ {src:'images/concrete-seating.jpg',w:900,h:1600,c:'progress'},
+ {src:'images/site-team-house.jpg',w:553,h:472,c:'finish'},
+ {src:'images/roof-metal-hip.jpg',w:1080,h:500,c:'progress'},
+ {src:'images/render-gable.jpg',w:900,h:1600,c:'finish'},
+ {src:'images/roof-blue-multistorey.jpg',w:1280,h:719,c:'progress'}
 ];
+var PHASE={start:'starting phase',progress:'work in progress',finish:'finishing phase'};
 var CATS=[['all','All photos'],['start','Starting phase'],['progress','Working progress'],['finish','Finishing phase']];
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
 var gal=document.getElementById('gal'),flt=document.getElementById('flt'),lb=document.getElementById('lb'),
     lbi=lb.querySelector('img'),lbp=lb.querySelector('p'),cur=0,vis=[],opener=null;
 
-gal.innerHTML=GALLERY.map(function(g,n){
- return '<figure data-c="'+g.c+'"><button type="button" data-n="'+n+'" aria-label="Enlarge photo: '+esc(g.cap)+'">'+
-  '<img loading="lazy" width="'+g.w+'" height="'+g.h+'" src="'+g.src+'" alt="'+esc(g.cap)+'"></button>'+
-  '<figcaption>'+esc(g.cap)+'</figcaption></figure>'}).join('');
+gal.innerHTML=GALLERY.map(function(g,n){var ph=PHASE[g.c];
+ return '<figure data-c="'+g.c+'"><button type="button" data-n="'+n+'" aria-label="Enlarge photo '+(n+1)+', '+ph+'">'+
+  '<img loading="lazy" width="'+g.w+'" height="'+g.h+'" src="'+g.src+'" alt="World Builders site, '+ph+'"></button></figure>'}).join('');
 flt.innerHTML=CATS.map(function(c,n){
  return '<button type="button" data-c="'+c[0]+'" aria-pressed="'+(n===0)+'">'+esc(c[1])+'</button>'}).join('');
 
@@ -503,7 +498,7 @@ flt.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)
 function visible(){return [].filter.call(gal.children,function(f){return !f.classList.contains('off')})
  .map(function(f){return +f.querySelector('button').dataset.n})}
 function lbShow(n){vis=visible();cur=(n+vis.length)%vis.length;var g=GALLERY[vis[cur]];
- lbi.src=g.src;lbi.alt=g.cap;lbp.textContent=g.cap+'  ('+(cur+1)+' / '+vis.length+')'}
+ lbi.src=g.src;lbi.alt='World Builders site, '+PHASE[g.c];lbp.textContent=(cur+1)+' / '+vis.length}
 function openLb(n){opener=document.activeElement;vis=visible();lbShow(vis.indexOf(n));
  lb.hidden=false;document.documentElement.style.overflow='hidden';lb.querySelector('.lbx').focus()}
 function closeLb(){lb.hidden=true;document.documentElement.style.overflow='';lbi.removeAttribute('src');if(opener)opener.focus()}
