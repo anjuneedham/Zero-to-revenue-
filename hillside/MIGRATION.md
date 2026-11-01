@@ -37,3 +37,13 @@ Define `window.HILLSIDE_REMOTE` before the main script runs:
 
 Data passed to `push` is plain. Encrypt it yourself first if the server should not read it.
 Any store works (Supabase, SQLite, a file). One row per day plus one profile row maps directly.
+
+## Android app
+`android/` is a small Android project that bundles `index.html` and shows it full-screen.
+- No network permission at all, screenshots and the recent-apps preview are blocked, cloud backup is off.
+- Build: set `ANDROID_HOME`, `HS_KEYSTORE`, `HS_STORE_PASSWORD`, then run `android/build.sh`
+  (needs JDK 17+, Android platform 34, build-tools 34.0.0, gradle).
+- Keep the signing key (`.jks`) and its password somewhere private and outside this repo.
+  Updates only install over an existing copy if signed with the same key. If the key is lost,
+  take a backup in the app, uninstall, install the new build, and restore.
+- The installed app and the website are separate: each keeps its own data on the device.

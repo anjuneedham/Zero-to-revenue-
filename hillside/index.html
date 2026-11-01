@@ -747,7 +747,7 @@ details.card[open] summary{margin-bottom:14px}
     function fallback(){$('#importBox').value=txt;$('#importBox').select();m.textContent='Copy the text in the box below and keep it somewhere safe.'}
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){m.textContent='Backup copied. Paste it somewhere safe.'},fallback)}else fallback();
   });
-  if(!window.claude){$('#dlBtn').hidden=false}
+  if(!window.claude&&!window.HILLSIDE_NATIVE){$('#dlBtn').hidden=false}
   $('#dlBtn').addEventListener('click',function(){
     var blob=new Blob([JSON.stringify(Object.assign(snapshotData(),{exportedAt:new Date().toISOString()}))],{type:'application/json'});
     var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='hillside-backup-'+today+'.json';
