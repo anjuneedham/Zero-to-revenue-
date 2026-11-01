@@ -277,6 +277,7 @@ details.card[open] summary{margin-bottom:14px}
     <div style="margin-top:12px;display:grid;gap:10px">
       <button type="button" id="changePin">Change PIN</button>
       <button type="button" id="exportBtn">Copy a backup of my data</button>
+      <button type="button" id="dlBtn" hidden>Download a backup file</button>
       <div><label for="importBox">Restore from a backup</label><textarea id="importBox" placeholder="Paste a backup here"></textarea></div>
       <button type="button" id="importBtn">Restore</button>
       <div class="note" id="backupMsg" role="status" style="margin-top:0"></div>
@@ -322,7 +323,7 @@ details.card[open] summary{margin-bottom:14px}
 
 <script>
 (function(){
-  var START='2026-11-01', END='2026-12-31', CRAVING_SECONDS=300, LS='hillside.v1', LKEY='hillside.lock';
+  var START='2026-11-01', END='2026-12-31', CRAVING_SECONDS=300, LS='hillside.v1', LKEY='hillside.lock', LS2='hillside.v2', FKEY='hillside.fail';
   function pad(n){return String(n).padStart(2,'0')}
   function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
   function parse(s){var p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2])}
@@ -339,13 +340,62 @@ details.card[open] summary{margin-bottom:14px}
   function norm(d){ if(d&&d.smokes==null) d.smokes=Math.max(d.grabba||0,d.weed||0); return d }
   function getDay(k){return Object.assign({},empty,days[k]||{})}
 
-  /* ---------- storage ---------- */
-  function saveLocal(){try{localStorage.setItem(LS,JSON.stringify({profile:profile,days:days}))}catch(e){}}
-  function loadLocal(){try{var r=JSON.parse(localStorage.getItem(LS)||'null');if(r){Object.assign(profile,r.profile||{});days=r.days||{};Object.keys(days).forEach(function(k){norm(days[k])})}}catch(e){}}
+  /* ---------- storage (encrypted at rest) ---------- */
+  var SCHEMA=2, ITER=600000, ckey=null, meta=null, wchain=Promise.resolve(), saveT=null;
+  var remote=window.HILLSIDE_REMOTE||null; /* optional sync adapter: {pull():Promise<{profile,days}>, push(key,data):Promise}. See MIGRATION.md */
+  var hasCrypto=!!(window.crypto&&crypto.subtle&&window.TextEncoder);
+  function ls(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function hex(b){return Array.prototype.map.call(new Uint8Array(b),function(x){var s=x.toString(16);return s.length<2?'0'+s:s}).join('')}
+  function unhex(s){var a=new Uint8Array(s.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(s.substr(i*2,2),16);return a}
+  function toB64(b){var a=new Uint8Array(b),s='';for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s)}
+  function fromB64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+  function deriveKey(pin,salt,iter){
+    return crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']).then(function(m){
+      return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:iter,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+    });
+  }
+  function snapshotData(){return {app:'hillside',schema:SCHEMA,profile:profile,days:days}}
+  function writeStore(){
+    if(!ckey||!meta) return Promise.resolve();
+    var k=ckey, m=meta;
+    wchain=wchain.then(function(){
+      var iv=crypto.getRandomValues(new Uint8Array(12));
+      return crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,new TextEncoder().encode(JSON.stringify(snapshotData()))).then(function(ct){
+        try{localStorage.setItem(LS2,JSON.stringify({v:2,salt:hex(m.salt),iter:m.iter,iv:hex(iv),ct:toB64(ct)}))}catch(e){}
+      });
+    }).catch(function(){});
+    return wchain;
+  }
+  function saveLocal(){ if(!ckey) return; clearTimeout(saveT); saveT=setTimeout(writeStore,200) }
+  function readStore(pin){
+    var rec=null; try{rec=JSON.parse(ls(LS2)||'null')}catch(e){}
+    if(!rec) return Promise.reject(new Error('none'));
+    var salt=unhex(rec.salt);
+    return deriveKey(pin,salt,rec.iter).then(function(k){
+      return crypto.subtle.decrypt({name:'AES-GCM',iv:unhex(rec.iv)},k,fromB64(rec.ct)).then(function(pt){
+        ckey=k; meta={salt:salt,iter:rec.iter};
+        return JSON.parse(new TextDecoder().decode(pt));
+      });
+    });
+  }
+  function newKey(pin){
+    var salt=crypto.getRandomValues(new Uint8Array(16));
+    return deriveKey(pin,salt,ITER).then(function(k){ckey=k;meta={salt:salt,iter:ITER};return writeStore()});
+  }
+  function mergeIn(d){
+    if(!d) return;
+    if(d.profile&&(d.profile.updated||0)>=(profile.updated||0)) Object.assign(profile,d.profile);
+    Object.keys(d.days||{}).forEach(function(k){var x=norm(d.days[k]); if(x&&(!days[k]||(x.updated||0)>(days[k].updated||0))) days[k]=x});
+  }
+  function pushRemote(dk){
+    if(!remote||!remote.push) return;
+    var data=dk==='profile'?profile:days[dk]; if(!data) return;
+    Promise.resolve(remote.push(dk,Object.assign({},data))).catch(function(){setSync('Saved on this device only')});
+  }
   var col=null, pending={}, timers={}, chain=Promise.resolve();
   function setSync(t){$('#sync').textContent=t}
   function persist(key){
-    saveLocal();
+    saveLocal(); pushRemote(key);
     if(!col){setSync('Saved on this device');return}
     pending[key]=(pending[key]||0)+1;
     setSync('Saving…');
@@ -532,72 +582,83 @@ details.card[open] summary{margin-bottom:14px}
   function bump(k,field,by){var d=getDay(k);var o={};o[field]=Math.max(0,Math.min(99,(d[field]||0)+by));patchDay(k,o)}
 
   /* ---------- PIN lock ---------- */
-  var mode='enter', buf='', first='', changing=false, fails=0, lockUntil=0;
-  function getLock(){try{return JSON.parse(localStorage.getItem(LKEY)||'null')}catch(e){return null}}
-  function toHex(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return pad2(x)}).join('')}
-  function pad2(x){var s=x.toString(16);return s.length<2?'0'+s:s}
-  function hashPin(pin,salt){
-    var s=salt+':'+pin;
-    if(window.crypto&&crypto.subtle&&window.TextEncoder) return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(toHex);
-    var h=7; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0;
-    return Promise.resolve('x'+h);
-  }
-  function randSalt(){
-    var a=new Uint8Array(12); if(window.crypto&&crypto.getRandomValues) crypto.getRandomValues(a); else for(var i=0;i<12;i++) a[i]=Math.floor(Math.random()*256);
-    return toHex(a);
-  }
+  var mode='enter', buf='', first='', changing=false, upgrading=false;
+  function bootMode(){ if(ls(LS2)) return 'enter'; if(ls(LKEY)||ls(LS)) return 'legacy'; return 'set1' }
   function isLocked(){return document.body.classList.contains('locked')}
+  function getFail(){try{return JSON.parse(ls(FKEY)||'{}')}catch(e){return {}}}
+  function lockWait(){return Math.max(0,Math.ceil(((getFail().until||0)-Date.now())/1000))}
+  function recordFail(){
+    var f=getFail(), n=(f.n||0)+1, secs=n>=8?3600:n>=5?300:n>=3?30:0;
+    try{localStorage.setItem(FKEY,JSON.stringify({n:n,until:Date.now()+secs*1000}))}catch(e){}
+    return secs;
+  }
+  function clearFails(){try{localStorage.removeItem(FKEY)}catch(e){}}
+  function waitText(s){return s>=60?Math.ceil(s/60)+' minutes':s+' seconds'}
+  function hashPin(pin,salt){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin)).then(hex)}
+  function verifyLegacy(pin){
+    var rec=null; try{rec=JSON.parse(ls(LKEY)||'null')}catch(e){}
+    if(!rec) return Promise.resolve(true);
+    return hashPin(pin,rec.salt).then(function(h){return h===rec.hash});
+  }
+  function loadLegacy(){try{var r=JSON.parse(ls(LS)||'null');if(r) mergeIn(r)}catch(e){}}
+  function clearLegacy(){try{localStorage.removeItem(LS);localStorage.removeItem(LKEY)}catch(e){}}
   function renderLock(msg){
-    var t={enter:'Enter your PIN',set1:'Choose a PIN, 4 to 6 digits',set2:'Enter it again to confirm'}[mode];
+    var t={enter:'Enter your PIN',legacy:'Enter your current PIN',set1:upgrading?'Choose a stronger PIN, 6 to 12 digits':'Choose a PIN, 6 to 12 digits',set2:'Enter it again to confirm'}[mode];
     $('#lockTitle').textContent=t;
     var dots=$('#dots'); dots.textContent='';
-    for(var i=0;i<Math.max(4,buf.length);i++){var d=document.createElement('i');if(i<buf.length)d.className='on';dots.appendChild(d)}
-    $('#lockMsg').textContent=msg||'';
-    $('#forgotBtn').hidden=(mode!=='enter');
+    for(var i=0;i<Math.max(6,buf.length);i++){var d=document.createElement('i');if(i<buf.length)d.className='on';dots.appendChild(d)}
+    $('#lockMsg').textContent=msg||(hasCrypto?'':'This browser cannot secure the app. Update Chrome.');
+    $('#forgotBtn').hidden=(mode!=='enter'&&mode!=='legacy');
     $('#cancelPin').hidden=!changing;
-    if(mode!=='enter') $('#forgotBox').hidden=true;
+    if(mode!=='enter'&&mode!=='legacy') $('#forgotBox').hidden=true;
   }
   function lockNow(){
     closeCraving(); closeSupport();
-    buf=''; first=''; changing=false; mode=getLock()?'enter':'set1';
+    var p=writeStore();
+    buf=''; first=''; changing=false; upgrading=false; mode=bootMode();
     document.body.classList.add('locked'); $('#forgotBox').hidden=true; renderLock('');
+    p.then(function(){ckey=null;meta=null;mode=bootMode();if(isLocked()) renderLock('')});
   }
   function unlock(){
-    document.body.classList.remove('locked'); buf=''; first=''; changing=false; fails=0;
+    document.body.classList.remove('locked'); buf=''; first=''; changing=false; upgrading=false;
     renderAll(); bumpIdle(); window.scrollTo(0,0);
+    if(remote&&remote.pull){remote.pull().then(function(d){mergeIn(d);saveLocal();renderAll()}).catch(function(){})}
+  }
+  function failed(){
+    var s=recordFail();
+    renderLock(s>0?'Too many tries. Wait '+waitText(s)+'.':'Wrong PIN.');
   }
   function submitPin(){
+    if(!hasCrypto){renderLock();return}
     if(mode==='set1'){
-      if(buf.length<4){renderLock('Use at least 4 digits.');return}
+      if(buf.length<6){buf='';renderLock('Use at least 6 digits.');return}
       first=buf; buf=''; mode='set2'; renderLock(''); return;
     }
     if(mode==='set2'){
       if(buf!==first){buf='';first='';mode='set1';renderLock('Those did not match. Start again.');return}
-      var salt=randSalt();
-      hashPin(buf,salt).then(function(h){
-        try{localStorage.setItem(LKEY,JSON.stringify({salt:salt,hash:h}))}catch(e){}
-        unlock();
-      });
+      var p=buf; buf=''; first='';
+      newKey(p).then(function(){clearLegacy();clearFails();unlock()}).catch(function(){mode='set1';renderLock('Could not secure this device. Try again.')});
       return;
     }
-    var now=Date.now();
-    if(now<lockUntil){renderLock('Wait '+Math.ceil((lockUntil-now)/1000)+' seconds.');buf='';return}
-    var rec=getLock(); if(!rec){mode='set1';renderLock('');return}
+    var w=lockWait();
+    if(w>0){buf='';renderLock('Wait '+waitText(w)+'.');return}
     var attempt=buf; buf='';
-    hashPin(attempt,rec.salt).then(function(h){
-      if(h===rec.hash){unlock();return}
-      fails++;
-      if(fails>=5){lockUntil=Date.now()+30000;fails=0;renderLock('Too many tries. Wait 30 seconds.')}
-      else renderLock('Wrong PIN.');
-    });
+    if(mode==='legacy'){
+      verifyLegacy(attempt).then(function(ok){
+        if(ok){loadLegacy();upgrading=true;mode='set1';clearFails();renderLock('Good. Now choose a stronger PIN.')}
+        else failed();
+      }).catch(failed);
+      return;
+    }
+    readStore(attempt).then(function(d){clearFails();mergeIn(d);unlock()}).catch(failed);
   }
   (function buildPad(){
-    var pad=$('#pad');
+    var padEl=$('#pad');
     ['1','2','3','4','5','6','7','8','9','⌫','0','OK'].forEach(function(k){
       var b=document.createElement('button'); b.type='button'; b.textContent=k; b.dataset.key=k;
       if(k==='OK') b.className='ok';
       if(k==='⌫') b.setAttribute('aria-label','Delete');
-      pad.appendChild(b);
+      padEl.appendChild(b);
     });
   })();
   $('#pad').addEventListener('click',function(e){
@@ -605,11 +666,11 @@ details.card[open] summary{margin-bottom:14px}
     var k=b.dataset.key;
     if(k==='OK'){submitPin();return}
     if(k==='⌫'){buf=buf.slice(0,-1);renderLock('');return}
-    if(buf.length<6){buf+=k;renderLock('')}
+    if(buf.length<12){buf+=k;renderLock('')}
   });
   document.addEventListener('keydown',function(e){
     if(!isLocked()) return;
-    if(/^[0-9]$/.test(e.key)&&buf.length<6){buf+=e.key;renderLock('')}
+    if(/^[0-9]$/.test(e.key)&&buf.length<12){buf+=e.key;renderLock('')}
     else if(e.key==='Backspace'){buf=buf.slice(0,-1);renderLock('')}
     else if(e.key==='Enter'){submitPin()}
   });
@@ -617,9 +678,9 @@ details.card[open] summary{margin-bottom:14px}
   $('#eraseBtn').addEventListener('click',function(){
     var b=$('#eraseBtn');
     if(b.textContent!=='Tap again to erase'){b.textContent='Tap again to erase';return}
-    try{localStorage.removeItem(LS);localStorage.removeItem(LKEY)}catch(e){}
+    try{localStorage.removeItem(LS);localStorage.removeItem(LS2);localStorage.removeItem(LKEY);localStorage.removeItem(FKEY)}catch(e){}
     days={}; profile={quitDate:'2026-11-08',maxPush:null,reasons:'',baseline:5,trusted:'',helpline:'',updated:0};
-    lockNow();
+    ckey=null; meta=null; lockNow();
   });
   $('#changePin').addEventListener('click',function(){
     buf='';first='';changing=true;mode='set1';document.body.classList.add('locked');renderLock('');
@@ -681,10 +742,17 @@ details.card[open] summary{margin-bottom:14px}
   $('#helpline').addEventListener('input',function(e){var v=e.target.value;clearTimeout(hlT);hlT=setTimeout(function(){patchProfile({helpline:v})},500)});
 
   $('#exportBtn').addEventListener('click',function(){
-    var txt=JSON.stringify({profile:profile,days:days});
+    var txt=JSON.stringify(Object.assign(snapshotData(),{exportedAt:new Date().toISOString()}));
     var m=$('#backupMsg');
     function fallback(){$('#importBox').value=txt;$('#importBox').select();m.textContent='Copy the text in the box below and keep it somewhere safe.'}
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){m.textContent='Backup copied. Paste it somewhere safe.'},fallback)}else fallback();
+  });
+  if(!window.claude){$('#dlBtn').hidden=false}
+  $('#dlBtn').addEventListener('click',function(){
+    var blob=new Blob([JSON.stringify(Object.assign(snapshotData(),{exportedAt:new Date().toISOString()}))],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='hillside-backup-'+today+'.json';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+    $('#backupMsg').textContent='Backup file saved. Keep it somewhere private.';
   });
   $('#importBtn').addEventListener('click',function(){
     var m=$('#backupMsg');
@@ -697,7 +765,7 @@ details.card[open] summary{margin-bottom:14px}
     }catch(err){m.textContent='That backup could not be read. Paste the whole text.'}
   });
 
-  loadLocal(); mode=getLock()?'enter':'set1'; renderLock(''); renderAll(); setSync('Saved on this device');
+  mode=bootMode(); renderLock(''); renderAll(); setSync('Saved on this device');
   startCloud();
 })();
 </script>
