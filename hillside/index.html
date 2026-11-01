@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B6E78">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hillside">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Hillside</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: PIN lock first, then one tall column for a tablet held upright. Streak, craving button, today, workout, history. */
+:root{
+  --bg:#EDF2F1; --surface:#FFFFFF; --ink:#11201E; --muted:#566865; --line:#D2DCDA;
+  --accent:#0B6E78; --accent-ink:#FFFFFF; --soft:#DDEBEA;
+  --good:#2F7D4B; --warn:#B4691A; --bad:#B3372F; --on-bad:#FFFFFF; --on-good:#FFFFFF;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1716; --surface:#15231F; --ink:#E6EFEC; --muted:#93A8A3; --line:#28403B;
+    --accent:#4FC3CE; --accent-ink:#06201F; --soft:#1B3330;
+    --good:#6CC48B; --warn:#E5A24D; --bad:#F08A80; --on-bad:#1b0b09; --on-good:#06190e; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1716; --surface:#15231F; --ink:#E6EFEC; --muted:#93A8A3; --line:#28403B;
+  --accent:#4FC3CE; --accent-ink:#06201F; --soft:#1B3330;
+  --good:#6CC48B; --warn:#E5A24D; --bad:#F08A80; --on-bad:#1b0b09; --on-good:#06190e; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.45 var(--body);
+  padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body.locked>:not(#lock){display:none!important}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px;min-width:0}
+h1,h2{font-family:var(--display);font-weight:700;margin:0;line-height:1.05;text-wrap:balance}
+h1{font-size:34px;letter-spacing:.01em}
+h2{font-size:26px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.top .right{display:flex;align-items:center;gap:10px}
+#sync{font-size:13px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card>h2+*{margin-top:12px}
+button{font:inherit;color:inherit;cursor:pointer;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:8px 16px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:48px}
+textarea{resize:vertical;min-height:84px}
+label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:6px}
+
+/* lock */
+#lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;overflow:auto;
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(20px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body:not(.locked) #lock{display:none}
+#lock .box2{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.glyph{width:64px;height:64px;border-radius:16px;background:var(--accent);display:grid;place-items:center}
+.glyph svg{width:40px;height:40px}
+.dots{display:flex;gap:12px;height:20px}
+.dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted)}
+.dots i.on{background:var(--accent);border-color:var(--accent)}
+#lockMsg{min-height:24px;color:var(--muted);font-size:15px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.pad button{min-height:64px;font-family:var(--display);font-size:30px;font-weight:600}
+.pad button.ok{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-size:22px}
+.linkbtn{border:0;background:none;color:var(--muted);font-size:14px;text-decoration:underline;min-height:44px}
+
+hr.sp{border:0;margin:0}
+/* hero */
+.hero{display:grid;gap:14px}
+.streak{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.streak .num{font-family:var(--display);font-weight:700;font-size:112px;line-height:.85;color:var(--accent)}
+.streak .unit{font-family:var(--display);font-weight:600;font-size:28px;line-height:1.1;padding-bottom:6px}
+.sub{color:var(--muted)}
+.bar{height:10px;border-radius:99px;background:var(--soft);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);width:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{background:var(--bg);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-family:var(--display);font-size:30px;line-height:1}
+.stat span{font-size:13px;color:var(--muted)}
+
+.craving{width:100%;min-height:76px;font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.02em;
+  background:var(--bad);border-color:var(--bad);color:var(--on-bad);border-radius:14px}
+
+/* check-in */
+.daynav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.daynav strong{font-family:var(--display);font-size:24px;text-align:center;flex:1}
+.daynav button{width:52px;padding:0;font-size:22px}
+.rows{display:grid;gap:12px;margin-top:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.row .name{font-weight:600}
+.row .hint{font-size:13px;color:var(--muted);display:block;font-weight:400}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:52px;padding:0;font-size:24px}
+.stepper output{min-width:44px;text-align:center;font-family:var(--display);font-weight:700;font-size:30px}
+.moods{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.moods button{padding:0;min-height:44px;font-weight:600}
+.moods button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toggle[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--on-good);font-weight:600}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+
+/* workout */
+.phase{display:inline-block;background:var(--soft);color:var(--accent);font-weight:600;font-size:14px;border-radius:99px;padding:3px 12px}
+ul.moves{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+ul.moves li{display:flex;justify-content:space-between;gap:12px;background:var(--bg);border-radius:10px;padding:12px 14px}
+ul.moves li b{font-family:var(--display);font-size:24px;line-height:1.1;white-space:nowrap}
+.note{font-size:15px;color:var(--muted);margin-top:12px}
+.inline{display:flex;gap:10px;align-items:end;margin-top:14px}
+.inline>div{flex:1;min-width:0}
+
+/* history */
+.hist{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;align-items:end}
+.col{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.col .n{font-weight:600;color:var(--ink);min-height:16px}
+.col .stack{width:100%;max-width:26px;height:88px;display:flex;flex-direction:column;justify-content:flex-end}
+.col .stack i{display:block;width:100%;background:var(--accent);border-radius:3px 3px 0 0}
+.col .dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--muted)}
+.col .dot.on{background:var(--good);border-color:var(--good)}
+.col.today{color:var(--accent);font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin-top:12px}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+
+details.card summary{font-family:var(--display);font-weight:700;font-size:26px;cursor:pointer;min-height:36px}
+details.card[open] summary{margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+
+/* overlays */
+#overlay,#supportOverlay{position:fixed;inset:0;z-index:50;background:var(--bg);overflow:auto;
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(32px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#overlay .inner,#supportOverlay .inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;align-items:stretch}
+.timer{font-family:var(--display);font-weight:700;font-size:96px;line-height:.9;text-align:center}
+.breathe{display:grid;place-items:center;height:210px}
+.breathe div{width:170px;height:170px;border-radius:50%;background:var(--soft);border:3px solid var(--accent);
+  display:grid;place-items:center;text-align:center;font-weight:600;animation:breathe 10s ease-in-out infinite}
+@keyframes breathe{0%{transform:scale(.62)}40%{transform:scale(1)}100%{transform:scale(.62)}}
+@media (prefers-reduced-motion: reduce){.breathe div{animation:none}}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.steps label{display:flex;gap:12px;align-items:center;margin:0;font-size:18px;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-height:56px}
+.steps input{width:26px;height:26px;min-height:0;flex:none;accent-color:var(--accent)}
+.why{white-space:pre-wrap;background:var(--soft);border-radius:10px;padding:14px}
+.box{background:var(--soft);border-radius:10px;padding:14px;overflow-wrap:anywhere}
+.box a{color:var(--accent);font-weight:600}
+.btns{display:grid;gap:10px}
+@media (max-width:420px){.streak .num{font-size:92px}.moods button{font-size:15px}}
+</style>
+
+<div id="lock" role="dialog" aria-modal="true" aria-label="Locked">
+  <div class="box2">
+    <div class="glyph" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M2 34 L15 14 L22 24 L27 17 L38 34 Z" fill="#fff" fill-opacity=".92"/></svg></div>
+    <h1>Hillside</h1>
+    <div id="lockTitle" class="sub">Enter your PIN</div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div id="lockMsg" role="status"></div>
+    <div class="pad" id="pad"></div>
+    <button class="linkbtn" id="forgotBtn" type="button">Forgot PIN?</button>
+    <button class="linkbtn" id="cancelPin" type="button" hidden>Cancel</button>
+    <div class="box" id="forgotBox" hidden>Resetting the PIN erases the log stored on this device.<br><button type="button" id="eraseBtn" style="margin-top:10px;width:100%">Erase and reset PIN</button></div>
+  </div>
+</div>
+<script>document.body.classList.add('locked')</script>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">1 Nov to 31 Dec</div>
+      <h1>Hillside</h1>
+    </div>
+    <div class="right"><span id="sync" role="status"></span><button type="button" data-act="lock-now" style="min-height:44px">Lock</button></div>
+  </header>
+
+  <section class="card hero" aria-label="Progress">
+    <div>
+      <div class="eyebrow" id="heroLabel"></div>
+      <div class="streak"><span class="num" id="heroNum">0</span><span class="unit" id="heroUnit"></span></div>
+      <div class="sub" id="heroSub"></div>
+      <div class="sub" id="avoidLine"></div>
+    </div>
+    <div>
+      <div class="bar" aria-hidden="true"><i id="progress"></i></div>
+      <div class="sub" id="daysLeft" style="margin-top:6px"></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="stBeaten">0</b><span>cravings beaten</span></div>
+      <div class="stat"><b id="stWork">0</b><span>workouts done</span></div>
+      <div class="stat"><b id="stClean">0</b><span>days with zero smokes</span></div>
+    </div>
+  </section>
+
+  <button class="craving" data-act="craving-open">I WANT ONE NOW</button>
+  <button data-act="support-open" style="width:100%;min-height:60px;font-size:18px;font-weight:600">I'm not okay right now</button>
+
+  <section class="card" aria-label="Check-in">
+    <div class="daynav">
+      <button data-act="prev" aria-label="Previous day">‹</button>
+      <strong id="dayLabel"></strong>
+      <button data-act="next" aria-label="Next day">›</button>
+    </div>
+    <div class="rows">
+      <div class="row"><div class="name">Low-energy day<span class="hint">shrinks today's workout to the minimum</span></div>
+        <button class="toggle" id="lowBtn" data-act="low" aria-pressed="false">Off</button></div>
+      <div class="row"><div class="name">Smokes<span class="hint">grabba and weed together count as one</span></div>
+        <div class="stepper"><button data-step="smokes" data-d="-1" aria-label="One less smoke">−</button><output id="v-smokes">0</output><button data-step="smokes" data-d="1" aria-label="One more smoke">+</button></div></div>
+      <div class="row"><div class="name">Cravings felt</div>
+        <div class="stepper"><button data-step="cravings" data-d="-1" aria-label="One less craving">−</button><output id="v-cravings">0</output><button data-step="cravings" data-d="1" aria-label="One more craving">+</button></div></div>
+      <div class="row"><div class="name">Cravings beaten</div>
+        <div class="stepper"><button data-step="beaten" data-d="-1" aria-label="One less beaten">−</button><output id="v-beaten">0</output><button data-step="beaten" data-d="1" aria-label="One more beaten">+</button></div></div>
+      <div>
+        <label>Mood, 1 low to 10 high</label>
+        <div class="moods" id="moods"></div>
+      </div>
+      <div class="row"><div class="name">Sleep<span class="hint">hours last night</span></div>
+        <div class="stepper"><button data-sleep="-0.5" aria-label="Less sleep">−</button><output id="v-sleep">–</output><button data-sleep="0.5" aria-label="More sleep">+</button></div></div>
+      <div class="row"><div class="name">Workout</div>
+        <button class="toggle" id="workoutBtn" data-act="workout" aria-pressed="false">Not done</button></div>
+      <div>
+        <label for="note">Hardest moment and what I did</label>
+        <textarea id="note" placeholder="After dinner, I walked up the hill instead."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Focus">
+    <div class="eyebrow">Today's one thing</div>
+    <h2>Agriloop or Buildflow</h2>
+    <div class="seg" role="group" aria-label="Project">
+      <button data-app="Agriloop" aria-pressed="false">Agriloop</button>
+      <button data-app="Buildflow" aria-pressed="false">Buildflow</button>
+      <button data-app="Other" aria-pressed="false">Other</button>
+    </div>
+    <div style="margin-top:12px"><label for="task">The one task, small enough to finish today</label><input id="task" type="text" placeholder="Write the intro for the first customer page"></div>
+    <button class="toggle" id="taskBtn" data-act="taskdone" aria-pressed="false" style="margin-top:12px;width:100%">Not done</button>
+    <div class="note">One finished task is a full day on a hard day. Anything extra is a bonus.</div>
+  </section>
+
+  <section class="card" aria-label="Workout">
+    <div class="eyebrow">Today's workout, standing only</div>
+    <h2 id="wTitle"></h2>
+    <div style="margin-top:8px"><span class="phase" id="wPhase"></span></div>
+    <ul class="moves" id="moves"></ul>
+    <div class="note" id="wWalk"></div>
+    <div class="inline">
+      <div><label for="maxPush">Most push-ups in one go</label><input id="maxPush" type="number" inputmode="numeric" min="0" max="200" placeholder="Test it, then enter"></div>
+    </div>
+    <div class="note" id="pushNote"></div>
+  </section>
+
+  <section class="card" aria-label="Last 14 days">
+    <h2>Last 14 days</h2>
+    <div class="hist" id="hist"></div>
+    <div class="legend"><span style="--c:var(--accent)">Smokes</span><span style="--c:var(--good)">Workout done</span></div>
+  </section>
+
+  <details class="card">
+    <summary>My plan and reasons</summary>
+    <div class="grid2">
+      <div><label for="quitDate">Quit date</label><input id="quitDate" type="date"></div>
+      <div><label for="baseline">Smokes a day before quitting</label><input id="baseline" type="number" inputmode="numeric" min="0" max="99"></div>
+    </div>
+    <div style="margin-top:12px">
+      <label for="reasons">My reasons for quitting</label>
+      <textarea id="reasons" placeholder="1.&#10;2.&#10;3."></textarea>
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <div><label for="trusted">A person I can reach (name and number)</label><input id="trusted" type="text" placeholder="Name, phone"></div>
+      <div><label for="helpline">A helpline I can call</label><input id="helpline" type="text" placeholder="Name and number"></div>
+    </div>
+    <p class="note">Grabba and weed go together for you, so this app counts them as one smoke and one quit date.</p>
+    <div style="margin-top:12px;display:grid;gap:10px">
+      <button type="button" id="changePin">Change PIN</button>
+      <button type="button" id="exportBtn">Copy a backup of my data</button>
+      <div><label for="importBox">Restore from a backup</label><textarea id="importBox" placeholder="Paste a backup here"></textarea></div>
+      <button type="button" id="importBtn">Restore</button>
+      <div class="note" id="backupMsg" role="status" style="margin-top:0"></div>
+    </div>
+  </details>
+</div>
+
+<div id="overlay" role="dialog" aria-modal="true" aria-label="Craving help" hidden>
+  <div class="inner">
+    <div class="eyebrow" style="text-align:center">This lasts 3 to 5 minutes. Ride it out.</div>
+    <div class="timer" id="timer">5:00</div>
+    <div class="breathe"><div id="breathLabel">Breathe in</div></div>
+    <ol class="steps">
+      <li><label><input type="checkbox"> Drink a full glass of water</label></li>
+      <li><label><input type="checkbox"> Breathe: in for 4, out for 6, five times</label></li>
+      <li><label><input type="checkbox"> <span id="moveStep">Do your push-ups and 15 squats</span></label></li>
+      <li><label><input type="checkbox"> Step outside and walk up the hill</label></li>
+    </ol>
+    <div class="why" id="whyBox"></div>
+    <div class="btns">
+      <button class="primary" data-act="beat" style="min-height:64px;font-size:20px">I beat it</button>
+      <button data-act="gave-in">I gave in. Log it.</button>
+      <button data-act="craving-close" id="closeCraving">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="supportOverlay" role="dialog" aria-modal="true" aria-label="Support" hidden>
+  <div class="inner">
+    <h2>You are not alone in this</h2>
+    <p>Hard moments pass, even when they feel permanent. Do one small thing at a time.</p>
+    <ol class="steps">
+      <li><label><input type="checkbox"> Sit or stand somewhere safe. Put both feet flat on the ground.</label></li>
+      <li><label><input type="checkbox"> Name 5 things you can see, 4 you can feel, 3 you can hear.</label></li>
+      <li><label><input type="checkbox"> Drink water. Breathe in for 4, out for 6, five times.</label></li>
+    </ol>
+    <div class="box"><b>Reach someone you trust</b><br><span id="trustedBox"></span></div>
+    <div class="box"><b>Helpline</b><br><span id="helpBox"></span><br><a href="https://findahelpline.com" target="_blank" rel="noopener">Find a helpline in your country</a></div>
+    <div class="box"><b>If you might hurt yourself or cannot stay safe</b><br>Call your local emergency number now, or go to the nearest person and tell them. Do not stay alone with it.</div>
+    <button data-act="support-close" id="closeSupport">Close</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var START='2026-11-01', END='2026-12-31', CRAVING_SECONDS=300, LS='hillside.v1', LKEY='hillside.lock';
+  function pad(n){return String(n).padStart(2,'0')}
+  function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function parse(s){var p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2])}
+  function addDays(s,n){var d=parse(s);d.setDate(d.getDate()+n);return ymd(d)}
+  function diff(a,b){return Math.round((parse(b)-parse(a))/864e5)}
+  var today=ymd(new Date());
+  function $(s){return document.querySelector(s)}
+  function fmtLong(k){return parse(k).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
+
+  var profile={quitDate:'2026-11-08',maxPush:null,reasons:'',baseline:5,trusted:'',helpline:'',updated:0};
+  var days={};
+  var view=today;
+  var empty={smokes:0,cravings:0,beaten:0,mood:null,sleep:null,workout:false,note:'',low:false,app:'',task:'',taskDone:false};
+  function norm(d){ if(d&&d.smokes==null) d.smokes=Math.max(d.grabba||0,d.weed||0); return d }
+  function getDay(k){return Object.assign({},empty,days[k]||{})}
+
+  /* ---------- storage ---------- */
+  function saveLocal(){try{localStorage.setItem(LS,JSON.stringify({profile:profile,days:days}))}catch(e){}}
+  function loadLocal(){try{var r=JSON.parse(localStorage.getItem(LS)||'null');if(r){Object.assign(profile,r.profile||{});days=r.days||{};Object.keys(days).forEach(function(k){norm(days[k])})}}catch(e){}}
+  var col=null, pending={}, timers={}, chain=Promise.resolve();
+  function setSync(t){$('#sync').textContent=t}
+  function persist(key){
+    saveLocal();
+    if(!col){setSync('Saved on this device');return}
+    pending[key]=(pending[key]||0)+1;
+    setSync('Saving…');
+    clearTimeout(timers[key]);
+    timers[key]=setTimeout(function(){
+      var data=key==='profile'?Object.assign({},profile):Object.assign({},days[key]);
+      var id=key==='profile'?'profile':'day-'+key;
+      var n=pending[key];
+      chain=chain.then(function(){return col.doc(id).set(data)}).then(function(){
+        pending[key]-=n; setSync('Saved');
+      }).catch(function(){pending[key]-=n; setSync('Saved on this device only')});
+    },600);
+  }
+  function patchDay(k,p){days[k]=Object.assign(getDay(k),p,{date:k,updated:Date.now()});persist(k)}
+  function patchProfile(p){Object.assign(profile,p,{updated:Date.now()});persist('profile')}
+
+  function applyDoc(key,d,first){
+    if(pending[key]>0) return;
+    var local=key==='profile'?profile:days[key];
+    if(!local||(d.updated||0)>=(local.updated||0)){
+      if(key==='profile') Object.assign(profile,d); else days[key]=norm(d);
+    } else if(first){persist(key)}
+  }
+  function startCloud(){
+    var w=window.claude;
+    if(!w||!w.use) return;
+    Promise.all([w.use('user'),w.use('db')]).then(function(r){
+      var user=r[0],db=r[1];
+      if(!user||!db) return null;
+      return user.id().then(function(id){return id?{db:db,id:id}:null});
+    }).then(function(r){
+      if(!r) return;
+      col=r.db.collection('data/users/'+r.id);
+      var first=true, seen={};
+      var t=setTimeout(function(){setSync('Cloud not reachable yet. Saving on this device.')},10000);
+      col.onSnapshot(function(snap){
+        if(!snap.metadata.fromCache){clearTimeout(t)}
+        snap.docs.forEach(function(ds){
+          var d=ds.data(); if(!d) return;
+          var key=ds.id==='profile'?'profile':ds.id.replace(/^day-/,'');
+          seen[key]=1; applyDoc(key,d,first);
+        });
+        if(first&&!snap.metadata.fromCache){
+          Object.keys(days).forEach(function(k){if(!seen[k]) persist(k)});
+          if(!seen.profile&&profile.updated) persist('profile');
+          first=false;
+        }
+        saveLocal(); renderAll();
+        if(!snap.metadata.hasPendingWrites&&!snap.metadata.fromCache) setSync('Saved');
+      },function(){col=null;setSync('Saved on this device only')});
+    }).catch(function(){});
+  }
+
+  /* ---------- logic ---------- */
+  function phaseOf(date){
+    var q=profile.quitDate; if(date<q) return 0;
+    var o=diff(q,date); if(o<14) return 1; if(o<33) return 2; return 3;
+  }
+  var PHASES=['Prep week','Quit and settle','Build','Lock it in'];
+  function pushSets(){var m=Number(profile.maxPush);return m>0?Math.max(5,Math.round(m*0.5)):8}
+  function plan(date){
+    var ph=phaseOf(date), P=pushSets(), dow=parse(date).getDay(), easy=(ph>=2&&(dow===0||dow===3));
+    var s=ph===3?1.1:1, r=function(n){return Math.round(n*s)};
+    var m=[],rounds=1,walk='';
+    if(ph===0){rounds=1;m=[['Squats',r(10)],['Push-ups',P],['Calf raises',r(15)]];walk='Walk for 10 minutes. Go uphill if you can.'}
+    if(ph===1){rounds=2;m=[['Squats',10],['Push-ups',P],['Calf raises',15],['Standing knee raises','10 each side'],['March or arm circles','1 minute']];walk='Hill walk for 15 to 20 minutes on 4 days this week.'}
+    if(ph===2||ph===3){rounds=3;m=[['Squats',r(15)],['Push-ups',ph===3?Math.round((P+2)*1.1):P+2],['Reverse lunges',r(8)+' each leg'],['Standing side bends',r(12)+' each side'],['Calf raises',r(20)],['Balance hold on one leg','20 seconds each side']];
+      walk=ph===2?'Hill walk for 30 minutes with 3 or 4 hard one-minute climbs.':'Hill walk for 40 minutes with steady climbs.'}
+    if(easy){return {ph:ph,easy:true,rounds:0,m:[],walk:'Easy day. Walk for 20 minutes at a comfortable pace and stretch your legs.'}}
+    return {ph:ph,easy:false,rounds:rounds,m:m,walk:walk};
+  }
+  function sinceLast(quit){
+    if(today<quit) return null;
+    var last=addDays(quit,-1);
+    Object.keys(days).forEach(function(k){if(k>=quit&&k<=today&&(days[k].smokes||0)>0&&k>last) last=k});
+    return diff(last,today);
+  }
+
+  /* ---------- render ---------- */
+  function renderHero(){
+    var q=profile.quitDate, g=sinceLast(q);
+    if(g===null){
+      var n=diff(today,q);
+      $('#heroLabel').textContent='Prep week';
+      $('#heroNum').textContent=n; $('#heroUnit').textContent=n===1?'day to quit day':'days to quit day';
+      $('#heroSub').textContent='Quit day is '+fmtLong(q)+'. Log every smoke until then.';
+    } else {
+      $('#heroLabel').textContent='Smoke-free streak';
+      $('#heroNum').textContent=g; $('#heroUnit').textContent=g===1?'day':'days';
+      $('#heroSub').textContent='Counted from what you log. Quit day was '+fmtLong(q)+'.';
+    }
+    var av='';
+    if(today>=q){var nd=diff(q,today)+1, exp=nd*(Number(profile.baseline)||0), act=0;
+      Object.keys(days).forEach(function(k){if(k>=q&&k<=today) act+=(days[k].smokes||0)});
+      av='Smokes avoided since quit day: '+Math.max(0,exp-act)+'.';}
+    $('#avoidLine').textContent=av;
+    var total=diff(START,END)+1, done=Math.min(total,Math.max(0,diff(START,today)+1));
+    $('#progress').style.width=(done/total*100)+'%';
+    var left=diff(today,END);
+    $('#daysLeft').textContent='Day '+done+' of '+total+'. '+(left>0?left+' days to 31 December.':'This is the last day.');
+    var beaten=0,work=0,zero=0;
+    Object.keys(days).forEach(function(k){var d=days[k];beaten+=d.beaten||0;if(d.workout)work++;if(k<=today&&(d.smokes||0)===0&&(d.mood!=null||d.workout||d.sleep!=null||d.cravings>0||d.note))zero++});
+    $('#stBeaten').textContent=beaten;$('#stWork').textContent=work;$('#stClean').textContent=zero;
+  }
+  function renderCheckin(){
+    var d=getDay(view);
+    $('#dayLabel').textContent=view===today?'Today, '+parse(view).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):fmtLong(view);
+    document.querySelector('[data-act="next"]').disabled=view>=today;
+    document.querySelector('[data-act="prev"]').disabled=view<=START;
+    ['smokes','cravings','beaten'].forEach(function(f){$('#v-'+f).textContent=d[f]});
+    $('#v-sleep').textContent=d.sleep==null?'–':d.sleep;
+    var mb=$('#moods').children;
+    for(var i=0;i<mb.length;i++) mb[i].setAttribute('aria-pressed',String(d.mood===i+1));
+    var wb=$('#workoutBtn'); wb.setAttribute('aria-pressed',String(!!d.workout)); wb.textContent=d.workout?'Done':'Not done';
+    if(document.activeElement!==$('#note')) $('#note').value=d.note||'';
+    var lb=$('#lowBtn'); lb.setAttribute('aria-pressed',String(!!d.low)); lb.textContent=d.low?'On':'Off';
+    document.querySelectorAll('[data-app]').forEach(function(b){b.setAttribute('aria-pressed',String(d.app===b.dataset.app))});
+    if(document.activeElement!==$('#task')) $('#task').value=d.task||'';
+    var tb=$('#taskBtn'); tb.setAttribute('aria-pressed',String(!!d.taskDone)); tb.textContent=d.taskDone?'Done. Well done.':'Not done';
+  }
+  function renderWorkout(){
+    var p=plan(view), ph=p.ph;
+    if(getDay(view).low){p={ph:ph,easy:true,low:true,rounds:0,m:[['Slow squats',10],['Slow breaths','1 minute']],walk:'This is a minimum day. Doing just this counts. Tick the workout and move on.'}}
+    $('#wTitle').textContent=p.low?'Minimum day':p.easy?'Easy day':(ph===0?'Light start':'Circuit, '+p.rounds+(p.rounds===1?' round':' rounds'));
+    $('#wPhase').textContent=PHASES[ph];
+    var ul=$('#moves'); ul.textContent='';
+    p.m.forEach(function(x){var li=document.createElement('li');var a=document.createElement('span');a.textContent=x[0];var b=document.createElement('b');b.textContent=x[1];li.appendChild(a);li.appendChild(b);ul.appendChild(li)});
+    $('#wWalk').textContent=p.walk;
+    if(document.activeElement!==$('#maxPush')) $('#maxPush').value=profile.maxPush==null?'':profile.maxPush;
+    $('#pushNote').textContent=profile.maxPush>0?'Your push-up sets are set to half your best, so you finish every round strong.':'Do as many clean push-ups as you can in one go, enter it, and the sets will fit you. Until then they use 8.';
+    $('#moveStep').textContent='Do '+pushSets()+' push-ups and 15 squats';
+  }
+  function renderHistory(){
+    var keys=[],i;
+    for(i=13;i>=0;i--) keys.push(addDays(today,-i));
+    var max=4; keys.forEach(function(k){max=Math.max(max,getDay(k).smokes)});
+    var h=$('#hist'); h.textContent='';
+    keys.forEach(function(k){
+      var d=getDay(k), dt=parse(k);
+      var c=document.createElement('div'); c.className='col'+(k===today?' today':'');
+      c.setAttribute('role','img');
+      c.setAttribute('aria-label',dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+': smokes '+d.smokes+', workout '+(d.workout?'done':'not done'));
+      var n=document.createElement('span');n.className='n';n.textContent=d.smokes||'';
+      var s=document.createElement('div');s.className='stack';
+      var g=document.createElement('i');g.style.height=(d.smokes/max*88)+'px';
+      s.appendChild(g);
+      var dot=document.createElement('span');dot.className='dot'+(d.workout?' on':'');
+      var l=document.createElement('span');l.textContent=dt.toLocaleDateString('en-GB',{weekday:'narrow'})+dt.getDate();
+      c.appendChild(n);c.appendChild(s);c.appendChild(dot);c.appendChild(l);h.appendChild(c);
+    });
+  }
+  function renderSettings(){
+    if(document.activeElement!==$('#quitDate')) $('#quitDate').value=profile.quitDate;
+    if(document.activeElement!==$('#reasons')) $('#reasons').value=profile.reasons||'';
+    if(document.activeElement!==$('#baseline')) $('#baseline').value=profile.baseline==null?'':profile.baseline;
+    if(document.activeElement!==$('#trusted')) $('#trusted').value=profile.trusted||'';
+    if(document.activeElement!==$('#helpline')) $('#helpline').value=profile.helpline||'';
+  }
+  function renderAll(){renderHero();renderCheckin();renderWorkout();renderHistory();renderSettings()}
+
+  /* ---------- craving + support overlays ---------- */
+  var cravingTimer=null, cravingStart=0;
+  function openCraving(){
+    var o=$('#overlay'); o.hidden=false;
+    document.querySelectorAll('#overlay input[type=checkbox]').forEach(function(c){c.checked=false});
+    $('#whyBox').textContent=profile.reasons?'Why I am doing this:\n'+profile.reasons:'Add your reasons under "My plan and reasons" and they will show here.';
+    cravingStart=Date.now(); tick();
+    clearInterval(cravingTimer); cravingTimer=setInterval(tick,250);
+    $('#closeCraving').focus();
+  }
+  function closeCraving(){$('#overlay').hidden=true;clearInterval(cravingTimer)}
+  function tick(){
+    var el=(Date.now()-cravingStart)/1000, left=Math.max(0,CRAVING_SECONDS-Math.floor(el));
+    $('#timer').textContent=Math.floor(left/60)+':'+pad(left%60);
+    $('#breathLabel').textContent=left===0?'You rode it out':((el%10)<4?'Breathe in':'Breathe out');
+  }
+  function openSupport(){
+    $('#trustedBox').textContent=profile.trusted||'Add a person under "My plan and reasons" so they show up here.';
+    $('#helpBox').textContent=profile.helpline||'Add a helpline number under "My plan and reasons".';
+    document.querySelectorAll('#supportOverlay input[type=checkbox]').forEach(function(c){c.checked=false});
+    $('#supportOverlay').hidden=false; $('#closeSupport').focus();
+  }
+  function closeSupport(){$('#supportOverlay').hidden=true}
+  function bump(k,field,by){var d=getDay(k);var o={};o[field]=Math.max(0,Math.min(99,(d[field]||0)+by));patchDay(k,o)}
+
+  /* ---------- PIN lock ---------- */
+  var mode='enter', buf='', first='', changing=false, fails=0, lockUntil=0;
+  function getLock(){try{return JSON.parse(localStorage.getItem(LKEY)||'null')}catch(e){return null}}
+  function toHex(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return pad2(x)}).join('')}
+  function pad2(x){var s=x.toString(16);return s.length<2?'0'+s:s}
+  function hashPin(pin,salt){
+    var s=salt+':'+pin;
+    if(window.crypto&&crypto.subtle&&window.TextEncoder) return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(toHex);
+    var h=7; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0;
+    return Promise.resolve('x'+h);
+  }
+  function randSalt(){
+    var a=new Uint8Array(12); if(window.crypto&&crypto.getRandomValues) crypto.getRandomValues(a); else for(var i=0;i<12;i++) a[i]=Math.floor(Math.random()*256);
+    return toHex(a);
+  }
+  function isLocked(){return document.body.classList.contains('locked')}
+  function renderLock(msg){
+    var t={enter:'Enter your PIN',set1:'Choose a PIN, 4 to 6 digits',set2:'Enter it again to confirm'}[mode];
+    $('#lockTitle').textContent=t;
+    var dots=$('#dots'); dots.textContent='';
+    for(var i=0;i<Math.max(4,buf.length);i++){var d=document.createElement('i');if(i<buf.length)d.className='on';dots.appendChild(d)}
+    $('#lockMsg').textContent=msg||'';
+    $('#forgotBtn').hidden=(mode!=='enter');
+    $('#cancelPin').hidden=!changing;
+    if(mode!=='enter') $('#forgotBox').hidden=true;
+  }
+  function lockNow(){
+    closeCraving(); closeSupport();
+    buf=''; first=''; changing=false; mode=getLock()?'enter':'set1';
+    document.body.classList.add('locked'); $('#forgotBox').hidden=true; renderLock('');
+  }
+  function unlock(){
+    document.body.classList.remove('locked'); buf=''; first=''; changing=false; fails=0;
+    renderAll(); bumpIdle(); window.scrollTo(0,0);
+  }
+  function submitPin(){
+    if(mode==='set1'){
+      if(buf.length<4){renderLock('Use at least 4 digits.');return}
+      first=buf; buf=''; mode='set2'; renderLock(''); return;
+    }
+    if(mode==='set2'){
+      if(buf!==first){buf='';first='';mode='set1';renderLock('Those did not match. Start again.');return}
+      var salt=randSalt();
+      hashPin(buf,salt).then(function(h){
+        try{localStorage.setItem(LKEY,JSON.stringify({salt:salt,hash:h}))}catch(e){}
+        unlock();
+      });
+      return;
+    }
+    var now=Date.now();
+    if(now<lockUntil){renderLock('Wait '+Math.ceil((lockUntil-now)/1000)+' seconds.');buf='';return}
+    var rec=getLock(); if(!rec){mode='set1';renderLock('');return}
+    var attempt=buf; buf='';
+    hashPin(attempt,rec.salt).then(function(h){
+      if(h===rec.hash){unlock();return}
+      fails++;
+      if(fails>=5){lockUntil=Date.now()+30000;fails=0;renderLock('Too many tries. Wait 30 seconds.')}
+      else renderLock('Wrong PIN.');
+    });
+  }
+  (function buildPad(){
+    var pad=$('#pad');
+    ['1','2','3','4','5','6','7','8','9','⌫','0','OK'].forEach(function(k){
+      var b=document.createElement('button'); b.type='button'; b.textContent=k; b.dataset.key=k;
+      if(k==='OK') b.className='ok';
+      if(k==='⌫') b.setAttribute('aria-label','Delete');
+      pad.appendChild(b);
+    });
+  })();
+  $('#pad').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    var k=b.dataset.key;
+    if(k==='OK'){submitPin();return}
+    if(k==='⌫'){buf=buf.slice(0,-1);renderLock('');return}
+    if(buf.length<6){buf+=k;renderLock('')}
+  });
+  document.addEventListener('keydown',function(e){
+    if(!isLocked()) return;
+    if(/^[0-9]$/.test(e.key)&&buf.length<6){buf+=e.key;renderLock('')}
+    else if(e.key==='Backspace'){buf=buf.slice(0,-1);renderLock('')}
+    else if(e.key==='Enter'){submitPin()}
+  });
+  $('#forgotBtn').addEventListener('click',function(){$('#forgotBox').hidden=false;$('#eraseBtn').textContent='Erase and reset PIN'});
+  $('#eraseBtn').addEventListener('click',function(){
+    var b=$('#eraseBtn');
+    if(b.textContent!=='Tap again to erase'){b.textContent='Tap again to erase';return}
+    try{localStorage.removeItem(LS);localStorage.removeItem(LKEY)}catch(e){}
+    days={}; profile={quitDate:'2026-11-08',maxPush:null,reasons:'',baseline:5,trusted:'',helpline:'',updated:0};
+    lockNow();
+  });
+  $('#changePin').addEventListener('click',function(){
+    buf='';first='';changing=true;mode='set1';document.body.classList.add('locked');renderLock('');
+  });
+  $('#cancelPin').addEventListener('click',function(){unlock()});
+
+  var idleT=null, hiddenAt=0;
+  function overlayOpen(){return !$('#overlay').hidden||!$('#supportOverlay').hidden}
+  function bumpIdle(){
+    clearTimeout(idleT); if(isLocked()) return;
+    idleT=setTimeout(function(){if(overlayOpen()){bumpIdle();return}lockNow()},120000);
+  }
+  ['pointerdown','keydown','scroll','touchstart'].forEach(function(ev){document.addEventListener(ev,bumpIdle,{passive:true})});
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){hiddenAt=Date.now()}
+    else if(hiddenAt&&Date.now()-hiddenAt>15000&&!isLocked()){lockNow()}
+  });
+
+  /* ---------- events ---------- */
+  var mh=$('#moods');
+  for(var i=1;i<=10;i++){var b=document.createElement('button');b.textContent=i;b.dataset.mood=i;b.setAttribute('aria-pressed','false');mh.appendChild(b)}
+
+  document.addEventListener('click',function(e){
+    if(isLocked()) return;
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.dataset.step){bump(view,t.dataset.step,Number(t.dataset.d));renderAll();return}
+    if(t.dataset.sleep){var d=getDay(view),v=d.sleep==null?7:d.sleep+Number(t.dataset.sleep);patchDay(view,{sleep:Math.max(0,Math.min(14,v))});renderAll();return}
+    if(t.dataset.mood){var cur=getDay(view).mood,n=Number(t.dataset.mood);patchDay(view,{mood:cur===n?null:n});renderAll();return}
+    if(t.dataset.app){var ca=getDay(view).app;patchDay(view,{app:ca===t.dataset.app?'':t.dataset.app});renderAll();return}
+    switch(t.dataset.act){
+      case 'lock-now':lockNow();break;
+      case 'prev':if(view>START){view=addDays(view,-1);renderAll()}break;
+      case 'next':if(view<today){view=addDays(view,1);renderAll()}break;
+      case 'workout':patchDay(view,{workout:!getDay(view).workout});renderAll();break;
+      case 'low':patchDay(view,{low:!getDay(view).low});renderAll();break;
+      case 'taskdone':patchDay(view,{taskDone:!getDay(view).taskDone});renderAll();break;
+      case 'craving-open':openCraving();break;
+      case 'craving-close':closeCraving();break;
+      case 'support-open':openSupport();break;
+      case 'support-close':closeSupport();break;
+      case 'beat':view=today;bump(today,'cravings',1);bump(today,'beaten',1);renderAll();closeCraving();break;
+      case 'gave-in':view=today;bump(today,'cravings',1);renderAll();closeCraving();document.querySelector('[aria-label="Check-in"]').scrollIntoView({behavior:'smooth'});break;
+    }
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!isLocked()){if(!$('#overlay').hidden) closeCraving(); if(!$('#supportOverlay').hidden) closeSupport()}});
+
+  var noteT=null;
+  $('#note').addEventListener('input',function(e){
+    var v=e.target.value, k=view; clearTimeout(noteT);
+    noteT=setTimeout(function(){patchDay(k,{note:v});renderHero()},500);
+  });
+  $('#maxPush').addEventListener('change',function(e){var v=parseInt(e.target.value,10);patchProfile({maxPush:v>0?v:null});renderAll()});
+  $('#quitDate').addEventListener('change',function(e){if(e.target.value){patchProfile({quitDate:e.target.value});renderAll()}});
+  var rT=null,tkT=null,trT=null,hlT=null;
+  $('#reasons').addEventListener('input',function(e){var v=e.target.value;clearTimeout(rT);rT=setTimeout(function(){patchProfile({reasons:v})},500)});
+  $('#task').addEventListener('input',function(e){var v=e.target.value,k=view;clearTimeout(tkT);tkT=setTimeout(function(){patchDay(k,{task:v})},500)});
+  $('#baseline').addEventListener('change',function(e){var v=parseInt(e.target.value,10);patchProfile({baseline:v>=0?v:5});renderAll()});
+  $('#trusted').addEventListener('input',function(e){var v=e.target.value;clearTimeout(trT);trT=setTimeout(function(){patchProfile({trusted:v})},500)});
+  $('#helpline').addEventListener('input',function(e){var v=e.target.value;clearTimeout(hlT);hlT=setTimeout(function(){patchProfile({helpline:v})},500)});
+
+  $('#exportBtn').addEventListener('click',function(){
+    var txt=JSON.stringify({profile:profile,days:days});
+    var m=$('#backupMsg');
+    function fallback(){$('#importBox').value=txt;$('#importBox').select();m.textContent='Copy the text in the box below and keep it somewhere safe.'}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){m.textContent='Backup copied. Paste it somewhere safe.'},fallback)}else fallback();
+  });
+  $('#importBtn').addEventListener('click',function(){
+    var m=$('#backupMsg');
+    try{
+      var r=JSON.parse($('#importBox').value);
+      if(!r||typeof r!=='object'||!r.days) throw new Error('x');
+      Object.assign(profile,r.profile||{},{updated:Date.now()});
+      Object.keys(r.days).forEach(function(k){days[k]=norm(r.days[k]);if(days[k]) days[k].updated=Date.now();persist(k)});
+      persist('profile'); renderAll(); $('#importBox').value=''; m.textContent='Restored.';
+    }catch(err){m.textContent='That backup could not be read. Paste the whole text.'}
+  });
+
+  loadLocal(); mode=getLock()?'enter':'set1'; renderLock(''); renderAll(); setSync('Saved on this device');
+  startCloud();
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) { window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(function(){}); }
+</script>
+</body>
+</html>
