@@ -1,0 +1,16 @@
+{
+  "name": "wubb-adventure",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Wow! Wubb Adventure - web + Android (Capacitor)",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "python3 -m http.server 8080",
+    "android:sync": "npm run build && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  }
+}

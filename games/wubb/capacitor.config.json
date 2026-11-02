@@ -1,0 +1,6 @@
+{
+  "appId": "com.zerotorevenue.wubb",
+  "appName": "Wow! Wubb Adventure",
+  "webDir": "www",
+  "android": { "backgroundColor": "#1b2340" }
+}
