@@ -1,0 +1,348 @@
+{
+ "name": "episode_001",
+ "format": "horizontal",
+ "scenes": [
+  {
+   "id": "VO_001_HOOK",
+   "seconds": 47.62,
+   "narration": "scratch",
+   "clips": 6,
+   "starts_at": 0.0
+  },
+  {
+   "id": "VO_002_BACKGROUND",
+   "seconds": 73.75,
+   "narration": "scratch",
+   "clips": 4,
+   "starts_at": 47.62
+  },
+  {
+   "id": "VO_003_BUSINESS",
+   "seconds": 59.3,
+   "narration": "scratch",
+   "clips": 4,
+   "starts_at": 121.37
+  },
+  {
+   "id": "VO_004_SOFTWARE",
+   "seconds": 127.3,
+   "narration": "scratch",
+   "clips": 8,
+   "starts_at": 180.67
+  },
+  {
+   "id": "VO_005_EXECUTION",
+   "seconds": 101.68,
+   "narration": "scratch",
+   "clips": 6,
+   "starts_at": 307.97
+  },
+  {
+   "id": "VO_006_OPPORTUNITY",
+   "seconds": 81.84,
+   "narration": "scratch",
+   "clips": 4,
+   "starts_at": 409.65
+  },
+  {
+   "id": "VO_007_CLOSING",
+   "seconds": 79.33,
+   "narration": "scratch",
+   "clips": 4,
+   "starts_at": 491.48
+  }
+ ],
+ "clips": [
+  {
+   "scene": "VO_001_HOOK",
+   "shot": "A05",
+   "kind": "clip",
+   "seconds": 7.33,
+   "source": "EP001_A05_today-populated_v01.webm"
+  },
+  {
+   "scene": "VO_001_HOOK",
+   "shot": "B06",
+   "kind": "slate",
+   "seconds": 7.33,
+   "source": null
+  },
+  {
+   "scene": "VO_001_HOOK",
+   "shot": "B02",
+   "kind": "slate",
+   "seconds": 10.99,
+   "source": null
+  },
+  {
+   "scene": "VO_001_HOOK",
+   "shot": "A09",
+   "kind": "clip",
+   "seconds": 7.33,
+   "source": "EP001_A09_pipeline-populated_v01.webm"
+  },
+  {
+   "scene": "VO_001_HOOK",
+   "shot": "A03",
+   "kind": "clip",
+   "seconds": 7.33,
+   "source": "EP001_A03_playbook-run_v01.webm"
+  },
+  {
+   "scene": "VO_001_HOOK",
+   "shot": "A07",
+   "kind": "clip",
+   "seconds": 7.33,
+   "source": "EP001_A07_insights_v01.webm"
+  },
+  {
+   "scene": "VO_002_BACKGROUND",
+   "shot": "B06",
+   "kind": "slate",
+   "seconds": 22.13,
+   "source": null
+  },
+  {
+   "scene": "VO_002_BACKGROUND",
+   "shot": "B08",
+   "kind": "slate",
+   "seconds": 22.13,
+   "source": null
+  },
+  {
+   "scene": "VO_002_BACKGROUND",
+   "shot": "B07",
+   "kind": "slate",
+   "seconds": 14.75,
+   "source": null
+  },
+  {
+   "scene": "VO_002_BACKGROUND",
+   "shot": "B03",
+   "kind": "slate",
+   "seconds": 14.75,
+   "source": null
+  },
+  {
+   "scene": "VO_003_BUSINESS",
+   "shot": "B01",
+   "kind": "slate",
+   "seconds": 17.79,
+   "source": null
+  },
+  {
+   "scene": "VO_003_BUSINESS",
+   "shot": "B04",
+   "kind": "slate",
+   "seconds": 17.79,
+   "source": null
+  },
+  {
+   "scene": "VO_003_BUSINESS",
+   "shot": "A09",
+   "kind": "clip",
+   "seconds": 11.86,
+   "source": "EP001_A09_pipeline-populated_v01.webm"
+  },
+  {
+   "scene": "VO_003_BUSINESS",
+   "shot": "B05",
+   "kind": "slate",
+   "seconds": 11.86,
+   "source": null
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A01",
+   "kind": "clip",
+   "seconds": 7.07,
+   "source": "EP001_A01_today-empty_v01.webm"
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A05",
+   "kind": "clip",
+   "seconds": 21.22,
+   "source": "EP001_A05_today-populated_v01.webm"
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A09",
+   "kind": "clip",
+   "seconds": 14.14,
+   "source": "EP001_A09_pipeline-populated_v01.webm"
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A03",
+   "kind": "clip",
+   "seconds": 14.14,
+   "source": "EP001_A03_playbook-run_v01.webm"
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A08",
+   "kind": "clip",
+   "seconds": 14.14,
+   "source": "EP001_A08_playbook-editor_v01.webm"
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A06",
+   "kind": "clip",
+   "seconds": 21.22,
+   "source": "EP001_A06_timeline-playback_v01.webm"
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A07",
+   "kind": "clip",
+   "seconds": 21.22,
+   "source": "EP001_A07_insights_v01.webm"
+  },
+  {
+   "scene": "VO_004_SOFTWARE",
+   "shot": "A11",
+   "kind": "clip",
+   "seconds": 14.14,
+   "source": "EP001_A11_e2e-test-run_v01.webm"
+  },
+  {
+   "scene": "VO_005_EXECUTION",
+   "shot": "B03",
+   "kind": "slate",
+   "seconds": 15.64,
+   "source": null
+  },
+  {
+   "scene": "VO_005_EXECUTION",
+   "shot": "A03",
+   "kind": "clip",
+   "seconds": 15.64,
+   "source": "EP001_A03_playbook-run_v01.webm"
+  },
+  {
+   "scene": "VO_005_EXECUTION",
+   "shot": "B02",
+   "kind": "slate",
+   "seconds": 23.46,
+   "source": null
+  },
+  {
+   "scene": "VO_005_EXECUTION",
+   "shot": "B04",
+   "kind": "slate",
+   "seconds": 15.64,
+   "source": null
+  },
+  {
+   "scene": "VO_005_EXECUTION",
+   "shot": "A04",
+   "kind": "clip",
+   "seconds": 23.46,
+   "source": "EP001_A04_log-outreach-followup_v01.webm"
+  },
+  {
+   "scene": "VO_005_EXECUTION",
+   "shot": "B05",
+   "kind": "slate",
+   "seconds": 7.82,
+   "source": null
+  },
+  {
+   "scene": "VO_006_OPPORTUNITY",
+   "shot": "A08",
+   "kind": "clip",
+   "seconds": 27.28,
+   "source": "EP001_A08_playbook-editor_v01.webm"
+  },
+  {
+   "scene": "VO_006_OPPORTUNITY",
+   "shot": "A09",
+   "kind": "clip",
+   "seconds": 18.19,
+   "source": "EP001_A09_pipeline-populated_v01.webm"
+  },
+  {
+   "scene": "VO_006_OPPORTUNITY",
+   "shot": "B07",
+   "kind": "slate",
+   "seconds": 18.19,
+   "source": null
+  },
+  {
+   "scene": "VO_006_OPPORTUNITY",
+   "shot": "A07",
+   "kind": "clip",
+   "seconds": 18.19,
+   "source": "EP001_A07_insights_v01.webm"
+  },
+  {
+   "scene": "VO_007_CLOSING",
+   "shot": "B06",
+   "kind": "slate",
+   "seconds": 21.64,
+   "source": null
+  },
+  {
+   "scene": "VO_007_CLOSING",
+   "shot": "B03",
+   "kind": "slate",
+   "seconds": 21.64,
+   "source": null
+  },
+  {
+   "scene": "VO_007_CLOSING",
+   "shot": "A05",
+   "kind": "clip",
+   "seconds": 21.64,
+   "source": "EP001_A05_today-populated_v01.webm"
+  },
+  {
+   "scene": "VO_007_CLOSING",
+   "shot": "B07",
+   "kind": "slate",
+   "seconds": 14.42,
+   "source": null
+  }
+ ],
+ "missing_clips": [
+  "B01",
+  "B02",
+  "B03",
+  "B04",
+  "B05",
+  "B06",
+  "B07",
+  "B08"
+ ],
+ "optional_skipped": [
+  "C01"
+ ],
+ "narration_not_final": [
+  "VO_001_HOOK (scratch)",
+  "VO_002_BACKGROUND (scratch)",
+  "VO_003_BUSINESS (scratch)",
+  "VO_004_SOFTWARE (scratch)",
+  "VO_005_EXECUTION (scratch)",
+  "VO_006_OPPORTUNITY (scratch)",
+  "VO_007_CLOSING (scratch)"
+ ],
+ "overlays_skipped_unconfirmed": [
+  "Over 100 'qualified' opportunities.  Verified revenue at the time: $0."
+ ],
+ "proof_text": null,
+ "music": null,
+ "output": "exports/EPISODE_001_long_PROOF.mp4",
+ "status": "NOT FINAL (assembly proof)",
+ "reasons": [
+  "8 footage gap(s)",
+  "scratch narration",
+  "12 script placeholder(s)"
+ ],
+ "total_seconds": 570.81,
+ "captions": "captions/EPISODE_001_long_scratch.srt",
+ "captions_timing": "estimated from text length, not forced-aligned",
+ "burned_captions": true,
+ "placeholders_in_script": 12
+}

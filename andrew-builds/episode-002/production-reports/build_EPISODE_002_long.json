@@ -1,0 +1,44 @@
+{
+ "name": "episode_002",
+ "format": "horizontal",
+ "scenes": [
+  {
+   "id": "VO_001_HOOK",
+   "seconds": 5.5,
+   "narration": "missing",
+   "clips": 1,
+   "starts_at": 0.0
+  }
+ ],
+ "clips": [
+  {
+   "scene": "VO_001_HOOK",
+   "shot": "A01",
+   "kind": "slate",
+   "seconds": 5.5,
+   "source": null
+  }
+ ],
+ "missing_clips": [
+  "A01"
+ ],
+ "optional_skipped": [],
+ "narration_not_final": [
+  "VO_001_HOOK (missing)"
+ ],
+ "overlays_skipped_unconfirmed": [],
+ "proof_text": null,
+ "music": null,
+ "output": "exports/EPISODE_002_long_PROOF.mp4",
+ "status": "NOT FINAL (assembly proof)",
+ "reasons": [
+  "1 footage gap(s)",
+  "narration not recorded",
+  "1 script placeholder(s)"
+ ],
+ "total_seconds": 5.5,
+ "captions": "captions/EPISODE_002_long.srt",
+ "captions_timing": "estimated from text length, not forced-aligned",
+ "burned_captions": true,
+ "placeholders_in_script": 1
+}

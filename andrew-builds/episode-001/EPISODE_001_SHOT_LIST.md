@@ -4,7 +4,7 @@
 
 | Group | Meaning | Count |
 |---|---|---|
-| **A** | I (Claude) capture this, from the real app, on clearly fictional DEMO data. **Already captured** (see Asset Register) | 12 |
+| **A** | I (Claude) capture this, from the real app, on clearly fictional DEMO data. **Already captured** (see Asset Register) | 18 |
 | **B** | **You** must capture this (your real data, your camera, your own apps) | 9 |
 | **C** | Needs a real-world event. Never stage it | 3 |
 
@@ -233,6 +233,108 @@ Naming: `EP001_<shot>_<slug>_<YYYYMMDD>_v<nn>.<ext>`. Put B/C files in `screen-r
 | **Can Claude capture it?** | yes, captured |
 | **File name** | `EP001_A12_portrait-empty-then-add_<YYYYMMDD>_v<nn>.<ext>` |
 | **Timeline position** | Short 1 opening |
+
+### Shot 25 · `A13` · portrait-pipeline
+
+| | |
+|---|---|
+| **Scene** | Shorts 2, 3 |
+| **Narrative purpose** | Pipeline stages, legible at vertical size. |
+| **Application** | Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440) |
+| **Page** | #pipeline (demo data, portrait) |
+| **Actions to perform** | 1. Pause on stage chips; 2. Tap Contacted, Closed, Active; 3. Open one prospect |
+| **Must be visible** | Stage chips with counts; Prospect rows |
+| **Must be hidden** | Fictional names only; DEMO DATA label burned in |
+| **Orientation / size** | portrait 810x1440 |
+| **Recommended length** | 20-30s |
+| **Can Claude capture it?** | yes, captured |
+| **File name** | `EP001_A13_portrait-pipeline_<YYYYMMDD>_v<nn>.<ext>` |
+| **Timeline position** | Short 2 beat 3 |
+
+### Shot 26 · `A14` · portrait-timeline-playback
+
+| | |
+|---|---|
+| **Scene** | Short 2 |
+| **Narrative purpose** | Timeline playback at vertical size. |
+| **Application** | Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440) |
+| **Page** | #prospect/<id> Playback (portrait) |
+| **Actions to perform** | 1. Scroll to Playback; 2. Next x3; 3. Play |
+| **Must be visible** | Stage track; Event details |
+| **Must be hidden** | Fictional names only; DEMO DATA label burned in |
+| **Orientation / size** | portrait 810x1440 |
+| **Recommended length** | 20-30s |
+| **Can Claude capture it?** | yes, captured |
+| **File name** | `EP001_A14_portrait-timeline-playback_<YYYYMMDD>_v<nn>.<ext>` |
+| **Timeline position** | Short 2 beat 4 |
+
+### Shot 27 · `A15` · portrait-insights
+
+| | |
+|---|---|
+| **Scene** | Short 2 |
+| **Narrative purpose** | Honest reporting at vertical size. |
+| **Application** | Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440) |
+| **Page** | #insights (portrait) |
+| **Actions to perform** | 1. Scroll the counts; 2. Pause on 'too few to read' |
+| **Must be visible** | Counts and notes |
+| **Must be hidden** | Fictional names only; DEMO DATA label burned in |
+| **Orientation / size** | portrait 810x1440 |
+| **Recommended length** | 20-30s |
+| **Can Claude capture it?** | yes, captured |
+| **File name** | `EP001_A15_portrait-insights_<YYYYMMDD>_v<nn>.<ext>` |
+| **Timeline position** | Short 2 beat 5 |
+
+### Shot 28 · `A16` · portrait-playbook-editor
+
+| | |
+|---|---|
+| **Scene** | Short 3 |
+| **Narrative purpose** | Editable playbooks at vertical size. |
+| **Application** | Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440) |
+| **Page** | #playbook/<id> (portrait) |
+| **Actions to perform** | 1. Duplicate; 2. Add a step; 3. Save new version |
+| **Must be visible** | Step editor; Version 2 |
+| **Must be hidden** | Fictional names only; DEMO DATA label burned in |
+| **Orientation / size** | portrait 810x1440 |
+| **Recommended length** | 20-30s |
+| **Can Claude capture it?** | yes, captured |
+| **File name** | `EP001_A16_portrait-playbook-editor_<YYYYMMDD>_v<nn>.<ext>` |
+| **Timeline position** | Short 3 beat 3 |
+
+### Shot 29 · `A17` · portrait-log-outreach
+
+| | |
+|---|---|
+| **Scene** | Short 1 |
+| **Narrative purpose** | Log a message and a follow-up, at vertical size. |
+| **Application** | Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440) |
+| **Page** | #prospect/<id> Log message sent (portrait) |
+| **Actions to perform** | 1. Log message sent; 2. Fill channel, approach, text; 3. Record sent |
+| **Must be visible** | Form fields; Follow-up scheduled in the timeline |
+| **Must be hidden** | Fictional names only; DEMO DATA label burned in |
+| **Orientation / size** | portrait 810x1440 |
+| **Recommended length** | 20-30s |
+| **Can Claude capture it?** | yes, captured |
+| **File name** | `EP001_A17_portrait-log-outreach_<YYYYMMDD>_v<nn>.<ext>` |
+| **Timeline position** | Short 1 beat 4 |
+
+### Shot 30 · `A18` · portrait-prospect-create-edit
+
+| | |
+|---|---|
+| **Scene** | Short 1 |
+| **Narrative purpose** | Create a prospect with just a name, then add details, at vertical size. |
+| **Application** | Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440) |
+| **Page** | #pipeline then #prospect/<id> (portrait) |
+| **Actions to perform** | 1. Add a fictional business; 2. Edit industry, location, source; 3. Save |
+| **Must be visible** | Add form; Details form |
+| **Must be hidden** | Fictional names only; DEMO DATA label burned in |
+| **Orientation / size** | portrait 810x1440 |
+| **Recommended length** | 20-30s |
+| **Can Claude capture it?** | yes, captured |
+| **File name** | `EP001_A18_portrait-prospect-create-edit_<YYYYMMDD>_v<nn>.<ext>` |
+| **Timeline position** | Short 1 beat 3 |
 
 
 ## B. Footage you must capture

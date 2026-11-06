@@ -618,6 +618,160 @@
    "timeline": "Episode 002+",
    "n": 24,
    "file_pattern": "EP001_C03_first-payment_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A13",
+   "cat": "A",
+   "slug": "portrait-pipeline",
+   "scene": "Shorts 2, 3",
+   "purpose": "Pipeline stages, legible at vertical size.",
+   "app": "Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440)",
+   "page": "#pipeline (demo data, portrait)",
+   "actions": [
+    "Pause on stage chips",
+    "Tap Contacted, Closed, Active",
+    "Open one prospect"
+   ],
+   "visible": [
+    "Stage chips with counts",
+    "Prospect rows"
+   ],
+   "hidden": [
+    "Fictional names only; DEMO DATA label burned in"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "20-30s",
+   "timeline": "Short 2 beat 3",
+   "n": 25,
+   "file_pattern": "EP001_A13_portrait-pipeline_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A14",
+   "cat": "A",
+   "slug": "portrait-timeline-playback",
+   "scene": "Short 2",
+   "purpose": "Timeline playback at vertical size.",
+   "app": "Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440)",
+   "page": "#prospect/<id> Playback (portrait)",
+   "actions": [
+    "Scroll to Playback",
+    "Next x3",
+    "Play"
+   ],
+   "visible": [
+    "Stage track",
+    "Event details"
+   ],
+   "hidden": [
+    "Fictional names only; DEMO DATA label burned in"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "20-30s",
+   "timeline": "Short 2 beat 4",
+   "n": 26,
+   "file_pattern": "EP001_A14_portrait-timeline-playback_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A15",
+   "cat": "A",
+   "slug": "portrait-insights",
+   "scene": "Short 2",
+   "purpose": "Honest reporting at vertical size.",
+   "app": "Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440)",
+   "page": "#insights (portrait)",
+   "actions": [
+    "Scroll the counts",
+    "Pause on 'too few to read'"
+   ],
+   "visible": [
+    "Counts and notes"
+   ],
+   "hidden": [
+    "Fictional names only; DEMO DATA label burned in"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "20-30s",
+   "timeline": "Short 2 beat 5",
+   "n": 27,
+   "file_pattern": "EP001_A15_portrait-insights_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A16",
+   "cat": "A",
+   "slug": "portrait-playbook-editor",
+   "scene": "Short 3",
+   "purpose": "Editable playbooks at vertical size.",
+   "app": "Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440)",
+   "page": "#playbook/<id> (portrait)",
+   "actions": [
+    "Duplicate",
+    "Add a step",
+    "Save new version"
+   ],
+   "visible": [
+    "Step editor",
+    "Version 2"
+   ],
+   "hidden": [
+    "Fictional names only; DEMO DATA label burned in"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "20-30s",
+   "timeline": "Short 3 beat 3",
+   "n": 28,
+   "file_pattern": "EP001_A16_portrait-playbook-editor_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A17",
+   "cat": "A",
+   "slug": "portrait-log-outreach",
+   "scene": "Short 1",
+   "purpose": "Log a message and a follow-up, at vertical size.",
+   "app": "Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440)",
+   "page": "#prospect/<id> Log message sent (portrait)",
+   "actions": [
+    "Log message sent",
+    "Fill channel, approach, text",
+    "Record sent"
+   ],
+   "visible": [
+    "Form fields",
+    "Follow-up scheduled in the timeline"
+   ],
+   "hidden": [
+    "Fictional names only; DEMO DATA label burned in"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "20-30s",
+   "timeline": "Short 1 beat 4",
+   "n": 29,
+   "file_pattern": "EP001_A17_portrait-log-outreach_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A18",
+   "cat": "A",
+   "slug": "portrait-prospect-create-edit",
+   "scene": "Short 1",
+   "purpose": "Create a prospect with just a name, then add details, at vertical size.",
+   "app": "Zero-to-Revenue web app, run locally, phone/tablet-portrait layout (810x1440)",
+   "page": "#pipeline then #prospect/<id> (portrait)",
+   "actions": [
+    "Add a fictional business",
+    "Edit industry, location, source",
+    "Save"
+   ],
+   "visible": [
+    "Add form",
+    "Details form"
+   ],
+   "hidden": [
+    "Fictional names only; DEMO DATA label burned in"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "20-30s",
+   "timeline": "Short 1 beat 3",
+   "n": 30,
+   "file_pattern": "EP001_A18_portrait-prospect-create-edit_<YYYYMMDD>_v<nn>.<ext>"
   }
  ]
 }

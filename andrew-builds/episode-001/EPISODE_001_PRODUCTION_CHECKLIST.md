@@ -13,7 +13,7 @@ Nothing is marked COMPLETED AND VERIFIED unless it was actually done and checked
 | 5 | Script | READY FOR REVIEW | All words written; 1,497 own words; placeholders remain by design |
 | 6 | Recording plan | READY FOR REVIEW | EPISODE_001_SHOT_LIST.md, scripts/VOICEOVER_RECORDING_GUIDE.md |
 | 7 | Voiceover | WAITING FOR MY INPUT | 7 episode files + 3 short files to record (names in the guide). Robot guide tracks exist for timing tests only |
-| 8 | Footage | IN PROGRESS | A (12 clips): captured · B (9 clips): WAITING FOR MY INPUT · C (3): WAITING FOR A REAL EVENT |
+| 8 | Footage | IN PROGRESS | A (18 clips): captured · B (9 clips): WAITING FOR MY INPUT · C (3): WAITING FOR A REAL EVENT |
 | 9 | Assembly | IN PROGRESS | Proof builds work end to end (see EXPORT_REPORT). Final needs your VO + B footage |
 | 10 | Editing | IN PROGRESS | Style config, overlays, transitions done; music not chosen |
 | 11 | Captions | IN PROGRESS | SRT/ASS generated with estimated timing; replace with a transcript of your real recording |

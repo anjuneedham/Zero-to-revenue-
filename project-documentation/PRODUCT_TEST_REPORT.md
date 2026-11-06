@@ -6,8 +6,8 @@ clearly labelled test data. Nothing was run against production. Each result belo
 ## Summary
 | | Count |
 |---|---|
-| Unit/API tests (new, `tests/unit/test_sales.py`) | 24 run, 24 passed |
-| Existing suite, whole repo | 260 run, 259 passed, **1 failed (pre-existing, unrelated)** |
+| Unit/API tests (new, `tests/unit/test_sales.py`) | 25 run, 25 passed |
+| Whole repo suite | 261 run, 260 passed, **1 failed (pre-existing, unrelated)** (baseline before this work: 236 run, 235 passed, same 1 failure) |
 | Browser journey (`tests/e2e/journey.js`, Chromium via Playwright) | 25 run, 25 passed |
 | Migration 007 on a database already holding leads | passed, idempotent (applied once, second run applied nothing) |
 
@@ -52,6 +52,10 @@ playbook edits; progress persists; completing all steps completes the run and su
 progress; empty states; due/overdue; configurable targets (0 = off, bad values rejected); back-filled work does not count toward today; daily review is a
 recorded event; **no percentages below n=30 and no hypotheses below 5 prospects**; timezone setting.
 A mutation check was run: loosening the sample threshold made the relevant test fail, then the code was restored.
+
+**Defects found by testing and fixed during this work:** (1) recording a meeting as *held* left its *booked* task open and overdue (found while seeding demo data; fixed, test added); (2) legacy leads with status SENT would have appeared as stage "identified" (migration now maps legacy status to a stage and logs a labelled system event, no contact date claimed); (3) empty form-error rows added dead space and half-width tables clipped (CSS fixed).
+
+**A caveat on my own process:** the first browser run and the first demo-footage capture ran against a server process that had not picked up the latest code (my reset script's `pkill` pattern did not match). Both were rerun after the script was fixed, and all results in this report are from the rerun on current code.
 
 **Persistence after refresh:** passed (E14). **Mobile/tablet layout:** passed for no horizontal overflow on Today, Pipeline, Playbooks, a playbook
 editor and Insights at 1280x800, 800x1280 and 390x844 **in emulated Chromium viewports**.

@@ -20,24 +20,24 @@
   },
   {
    "scene": "S2",
-   "shot": "A09",
+   "shot": "A13",
    "kind": "clip",
    "seconds": 9.81,
-   "source": "EP001_A09_pipeline-populated_v01.webm"
+   "source": "EP001_A13_portrait-pipeline_v01.webm"
   },
   {
    "scene": "S2",
-   "shot": "A06",
+   "shot": "A14",
    "kind": "clip",
    "seconds": 9.81,
-   "source": "EP001_A06_timeline-playback_v01.webm"
+   "source": "EP001_A14_portrait-timeline-playback_v01.webm"
   },
   {
    "scene": "S2",
-   "shot": "A07",
+   "shot": "A15",
    "kind": "clip",
    "seconds": 6.54,
-   "source": "EP001_A07_insights_v01.webm"
+   "source": "EP001_A15_portrait-insights_v01.webm"
   }
  ],
  "missing_clips": [],

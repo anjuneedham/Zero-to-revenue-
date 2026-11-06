@@ -107,5 +107,59 @@
   "burned_label": false,
   "label": "AUTOMATED TEST RUN · made-up data",
   "captured": "2026-11-06T21:20:03.357Z"
+ },
+ "A13": {
+  "file": "EP001_A13_portrait-pipeline_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 24.4,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:35:41.980Z"
+ },
+ "A14": {
+  "file": "EP001_A14_portrait-timeline-playback_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 25.2,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:36:07.764Z"
+ },
+ "A15": {
+  "file": "EP001_A15_portrait-insights_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 18.9,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:36:27.649Z"
+ },
+ "A16": {
+  "file": "EP001_A16_portrait-playbook-editor_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 24.3,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:36:52.701Z"
+ },
+ "A17": {
+  "file": "EP001_A17_portrait-log-outreach_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 24.4,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:37:17.587Z"
+ },
+ "A18": {
+  "file": "EP001_A18_portrait-prospect-create-edit_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 18.9,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:37:37.209Z"
  }
 }

@@ -56,12 +56,12 @@
   {
    "check": "captions: valid SRT, ordered, no overlaps, within runtime",
    "result": "PASS",
-   "detail": "20 cues"
+   "detail": "21 cues"
   },
   {
    "check": "captions readable: <= 22 chars/s, <= 26 chars/line",
    "result": "PASS",
-   "detail": "max 14.2 chars/s, longest line 25"
+   "detail": "max 14.1 chars/s, longest line 24"
   }
  ],
  "verdict": "NOT FINAL",

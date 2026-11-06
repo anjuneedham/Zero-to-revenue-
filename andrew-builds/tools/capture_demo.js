@@ -6,6 +6,7 @@
 const { chromium } = require("playwright");
 const fs = require("fs"), path = require("path"), { execSync } = require("child_process");
 const BASE = process.env.BASE || "http://127.0.0.1:8099", TOKEN_FILE = process.env.TOKEN_FILE, RESET = process.env.RESET_CMD, OUT = process.env.OUT;
+const ONLY = process.env.ONLY ? new Set(process.env.ONLY.split(",")) : null; // e.g. ONLY=A13,A14 re-records just those
 const TEST_VIDEO = process.env.TEST_VIDEO; // optional: the journey.js recording to register as A11
 if (!OUT || !TOKEN_FILE || !RESET) { console.error("set OUT, TOKEN_FILE, RESET_CMD"); process.exit(2); }
 fs.mkdirSync(OUT, { recursive: true });
@@ -31,6 +32,7 @@ const INIT = tok => { try { localStorage.setItem("z2r_token", tok); } catch (e) 
 };
 
 async function clip(id, slug, vp, fn) {
+  if (ONLY && !ONLY.has(id)) return;
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: vp, recordVideo: { dir: path.join(OUT, "_raw"), size: vp } });
   await ctx.addInitScript(INIT, token());
@@ -166,6 +168,47 @@ const L = { width: 1600, height: 1000 }, P = { width: 810, height: 1440 };
   });
   await clip("A10", "tablet-portrait-today", P, async h => {
     h.mark(); await h.pause(3000); await h.scroll(1000, 8, 600); await h.pause(2500); await h.scroll(900, 8, 600); await h.pause(2500);
+  });
+  // ---- portrait versions (phone/tablet-portrait layout) so vertical videos stay legible ----
+  await clip("A13", "portrait-pipeline", P, async h => {
+    await h.go("pipeline"); h.mark(); await h.pause(2800); await h.scroll(450, 4, 450); await h.pause(1200);
+    await h.click(h.page.getByRole("button", { name: /^Contacted \(/ })); await h.pause(2200);
+    await h.click(h.page.getByRole("button", { name: /^Closed \(/ })); await h.pause(2200);
+    await h.click(h.page.getByRole("button", { name: /^Active \(/ })); await h.pause(1800);
+    await h.click(h.page.getByText("DEMO Island Roofing").first()); await h.pause(3000);
+  });
+  await clip("A14", "portrait-timeline-playback", P, async h => {
+    await h.go("prospect/" + a); h.mark(); await h.pause(2200);
+    const play = h.page.locator("section.card", { hasText: "Step through the recorded events" }); await play.scrollIntoViewIfNeeded(); await h.pause(1500);
+    for (let i = 0; i < 3; i++) { await h.click(play.getByRole("button", { name: "Next" })); await h.pause(1500); }
+    await h.click(play.getByRole("button", { name: "Play" })); await h.pause(8000);
+  });
+  await clip("A15", "portrait-insights", P, async h => {
+    await h.go("insights"); h.mark(); await h.pause(3000); await h.scroll(900, 7, 550); await h.pause(2800); await h.scroll(900, 7, 550); await h.pause(2800);
+  });
+  await clip("A16", "portrait-playbook-editor", P, async h => {
+    await h.go("playbooks"); h.mark(); await h.pause(2500); await h.scroll(500, 4, 500);
+    await h.click(h.page.locator(".item", { hasText: "E. Follow-up" }).first()); await h.pause(2500);
+    await h.click(h.page.getByRole("button", { name: "Duplicate" })); await h.pause(2500);
+    await h.click(h.page.getByRole("button", { name: "Add step" }));
+    const t = h.page.getByLabel(/^Step \d+ title/); const n = await t.count(); await h.type(t.nth(n - 1), "Call them instead"); await h.pause(800);
+    await h.click(h.page.getByRole("button", { name: "Save new version" })); await h.pause(3000);
+  });
+  await clip("A17", "portrait-log-outreach", P, async h => {
+    await h.go("prospect/" + c); h.mark(); await h.pause(2000);
+    await h.click(h.btn("Log message sent")); const pn = h.page.locator(".panelhold");
+    await pn.getByLabel("Channel").selectOption("email"); await h.pause(700);
+    await h.type(pn.getByLabel("Approach label"), "quote-page idea");
+    await h.type(pn.getByLabel("What you sent"), "Hi, noticed your site has photos but no quote form. Would a simple one help?");
+    await h.pause(700); await h.click(pn.getByRole("button", { name: "Record sent" })); await h.pause(2500); await h.scroll(900, 6, 450); await h.pause(2200);
+  });
+  await clip("A18", "portrait-prospect-create-edit", P, async h => {
+    await h.go("pipeline"); h.mark(); await h.pause(1800);
+    await h.type(h.page.getByLabel("Business name").first(), "DEMO Harbour Tiling 3");
+    await h.click(h.page.getByRole("button", { name: "Add prospect" }).first()); await h.pause(2200);
+    const det = h.page.locator("section.card", { hasText: "Edit anything" });
+    await h.type(det.getByLabel("Industry"), "tiling"); await h.type(det.getByLabel("Location"), "Kingston"); await h.type(det.getByLabel("Source"), "referral");
+    await h.click(det.getByRole("button", { name: "Save details" })); await h.pause(2500);
   });
   if (TEST_VIDEO && fs.existsSync(TEST_VIDEO)) {
     const name = "EP001_A11_e2e-test-run_v01.webm"; fs.copyFileSync(TEST_VIDEO, path.join(OUT, name));

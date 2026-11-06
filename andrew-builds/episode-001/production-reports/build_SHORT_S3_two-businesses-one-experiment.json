@@ -20,17 +20,17 @@
   },
   {
    "scene": "S3",
-   "shot": "A09",
+   "shot": "A13",
    "kind": "clip",
    "seconds": 11.13,
-   "source": "EP001_A09_pipeline-populated_v01.webm"
+   "source": "EP001_A13_portrait-pipeline_v01.webm"
   },
   {
    "scene": "S3",
-   "shot": "A08",
+   "shot": "A16",
    "kind": "clip",
    "seconds": 11.13,
-   "source": "EP001_A08_playbook-editor_v01.webm"
+   "source": "EP001_A16_portrait-playbook-editor_v01.webm"
   },
   {
    "scene": "S3",

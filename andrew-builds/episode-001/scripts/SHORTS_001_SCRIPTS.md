@@ -29,13 +29,13 @@ Brand: Andrew Builds. Format 9:16 (1080x1920), 20-45 seconds. Generated from `ed
 |---|---|---|---|
 | 0-3s | Today screen, empty state. Big text lands on the first word. | A12 | I STARTED BEFORE I WAS READY |
 | 3-9s | Quick cut: you sending or about to send a real message (recipient hidden). | B02 | Waiting = learning nothing |
-| 9-18s | Add a prospect on the tablet; the playbook list. | A02 | The tool came second |
-| 18-27s | Follow-up date being set on a prospect. | A04 | A to-do. A follow-up date. A record. |
+| 9-18s | Add a prospect on the tablet; the playbook list. | A18 | The tool came second |
+| 18-27s | Follow-up date being set on a prospect. | A17 | A to-do. A follow-up date. A record. |
 | 27-34s | You to camera or desk shot; end card. | B06 | ANDREW BUILDS |
 
 **5. On-screen text:** I STARTED BEFORE I WAS READY · Waiting = learning nothing · The tool came second · A to-do. A follow-up date. A record. · ANDREW BUILDS
 
-**6. Screen recording requirements:** A12, A02 and A04 (captured by me, DEMO DATA). B02 and B06 are yours: a real first message being written/sent (recipient and message hidden) and a desk shot. If B02 does not exist yet, the edit uses a slate.
+**6. Screen recording requirements:** A12, A18 and A17 (captured by me, DEMO DATA). B02 and B06 are yours: a real first message being written/sent (recipient and message hidden) and a desk shot. If B02 does not exist yet, the edit uses a slate.
 
 **7. Captions:** Burn-in, 2 lines max, 5-6 words a line, white on dark rounded box, highlight colour on the key word of each line. Safe zone: keep captions between 18% and 70% of the height so the app UI does not cover them.
 
@@ -76,13 +76,13 @@ Brand: Andrew Builds. Format 9:16 (1080x1920), 20-45 seconds. Generated from `ed
 |---|---|---|---|
 | 0-3s | Phone-width Today screen with a few follow-ups due. Hook text over it. | A10 | WHO DO I FOLLOW UP WITH? |
 | 3-10s | Scroll slowly through follow-ups due / who replied. | A10 | Follow-ups due |
-| 10-19s | Pipeline list with stage chips. | A09 | Every business has a stage |
-| 19-28s | Timeline playback stepping forward. | A06 | Step through the history |
-| 28-35s | Insights counts. | A07 | It records. It doesn't guess. |
+| 10-19s | Pipeline list with stage chips. | A13 | Every business has a stage |
+| 19-28s | Timeline playback stepping forward. | A14 | Step through the history |
+| 28-35s | Insights counts. | A15 | It records. It doesn't guess. |
 
 **5. On-screen text:** WHO DO I FOLLOW UP WITH? · Follow-ups due · Every business has a stage · Step through the history · It records. It doesn't guess.
 
-**6. Screen recording requirements:** A10, A09, A06, A07 (all captured by me from the real app, DEMO DATA label burned in). Replace with your real screens (B03, B05) once your real data is in; blur every name.
+**6. Screen recording requirements:** A10, A13, A14, A15 (all captured by me from the real app, DEMO DATA label burned in). Replace with your real screens (B03, B05) once your real data is in; blur every name.
 
 **7. Captions:** Same style as S1. Highlight 'follow-up', 'stage' and 'history' as they are spoken.
 
@@ -121,14 +121,14 @@ Brand: Andrew Builds. Format 9:16 (1080x1920), 20-45 seconds. Generated from `ed
 | Time | Visual | Shot | On-screen text |
 |---|---|---|---|
 | 0-3s | Split screen: left, outreach (message composer, hidden recipient); right, the app. | B04 | ONE EXPERIMENT. TWO BUSINESSES. |
-| 3-11s | Business one: pipeline with stages. | A09 | 1. Win paying customers |
-| 11-19s | Business two: playbook editor / product. | A08 | 2. Build a tool others could use |
+| 3-11s | Business one: pipeline with stages. | A13 | 1. Win paying customers |
+| 11-19s | Business two: playbook editor / product. | A16 | 2. Build a tool others could use |
 | 19-27s | Plain card: the honest status. | (text card) | Users of the software: 1 (me) |
 | 27-35s | Desk shot / end card. | B06 | ANDREW BUILDS |
 
 **5. On-screen text:** ONE EXPERIMENT. TWO BUSINESSES. · 1. Win paying customers · 2. Build a tool others could use · Users of the software: 1 (me) · ANDREW BUILDS
 
-**6. Screen recording requirements:** A09 and A08 (captured by me, DEMO DATA). B04 (your real log form, recipient hidden) and B06 (desk) are yours.
+**6. Screen recording requirements:** A13 and A16 (captured by me, DEMO DATA). B04 (your real log form, recipient hidden) and B06 (desk) are yours.
 
 **7. Captions:** Same style as S1. Keep 'Users of the software: 1 (me)' as an overlay so the claim stays honest.
 

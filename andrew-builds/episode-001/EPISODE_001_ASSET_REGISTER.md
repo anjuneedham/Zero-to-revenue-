@@ -30,6 +30,12 @@ Media files are **git-ignored** (large and regenerable). This register and the c
 | C01 | first-reply | C | - | - | - | WAITING FOR A REAL EVENT |
 | C02 | first-call-or-meeting | C | - | - | - | WAITING FOR A REAL EVENT |
 | C03 | first-payment | C | - | - | - | WAITING FOR A REAL EVENT |
+| A13 | portrait-pipeline | A | EP001_A13_portrait-pipeline_v01.webm | 24.4s | 1.3 MB | CAPTURED (demo data) |
+| A14 | portrait-timeline-playback | A | EP001_A14_portrait-timeline-playback_v01.webm | 25.2s | 1.8 MB | CAPTURED (demo data) |
+| A15 | portrait-insights | A | EP001_A15_portrait-insights_v01.webm | 18.9s | 2.0 MB | CAPTURED (demo data) |
+| A16 | portrait-playbook-editor | A | EP001_A16_portrait-playbook-editor_v01.webm | 24.3s | 1.8 MB | CAPTURED (demo data) |
+| A17 | portrait-log-outreach | A | EP001_A17_portrait-log-outreach_v01.webm | 24.4s | 1.5 MB | CAPTURED (demo data) |
+| A18 | portrait-prospect-create-edit | A | EP001_A18_portrait-prospect-create-edit_v01.webm | 18.9s | 1.2 MB | CAPTURED (demo data) |
 
 A = captured by Claude from the real app on DEMO data · B = you capture · C = needs a real event. All A clips carry a burned-in DEMO DATA label (A11 is labelled AUTOMATED TEST RUN in the edit).
 

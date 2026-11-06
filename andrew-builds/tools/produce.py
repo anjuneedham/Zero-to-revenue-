@@ -181,14 +181,22 @@ def chunk_words(text, max_chars, max_lines):
     return cards
 
 
+def fit_card(card, max_chars, max_lines):
+    """Return one or more cards, each of which wraps to at most max_lines lines of at most max_chars characters."""
+    if len(textwrap.wrap(card, max_chars)) <= max_lines or len(card.split()) < 2:
+        return [card]
+    w = card.split()
+    half = len(w) // 2
+    return fit_card(" ".join(w[:half]), max_chars, max_lines) + fit_card(" ".join(w[half:]), max_chars, max_lines)
+
+
 def wrap_card(card, max_chars, max_lines):
-    lines = textwrap.wrap(card, max_chars) or [card]
-    return lines[:max_lines] if len(lines) <= max_lines else textwrap.wrap(card, max(max_chars, len(card) // max_lines + 4))[:max_lines]
+    return textwrap.wrap(card, max_chars) or [card]
 
 
 def srt_time(t):
-    t = max(0, t)
-    return f"{int(t // 3600):02}:{int(t % 3600 // 60):02}:{int(t % 60):02},{int(round((t % 1) * 1000)) % 1000:03}"
+    ms = int(round(max(0, t) * 1000))  # carry rounding into seconds: 534.9996 must become 535,000, not 534,000
+    return f"{ms // 3600000:02}:{ms // 60000 % 60:02}:{ms // 1000 % 60:02},{ms % 1000:03}"
 
 
 def ass_time(t):
@@ -209,7 +217,7 @@ def caption_cues(pr, scene_text, t0, vo_len, lead, tail, placeholder_gap_s):
             items.append(("gap", placeholder_gap_s))
         else:
             for card in chunk_words(re.sub(r"\s+", " ", s).strip(), mc, ml):
-                items.append(("card", card))
+                items.extend(("card", c) for c in fit_card(card, mc, ml))
     weights = [max(8, len(v)) if k == "card" else placeholder_gap_s * 14 for k, v in items]
     span = max(0.1, vo_len - lead - tail)
     cues, t, total = [], t0 + lead, sum(weights) or 1

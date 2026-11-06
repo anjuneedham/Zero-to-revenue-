@@ -24,13 +24,13 @@
     {
      "t": "9-18",
      "visual": "Add a prospect on the tablet; the playbook list.",
-     "shot": "A02",
+     "shot": "A18",
      "text": "The tool came second"
     },
     {
      "t": "18-27",
      "visual": "Follow-up date being set on a prospect.",
-     "shot": "A04",
+     "shot": "A17",
      "text": "A to-do. A follow-up date. A record."
     },
     {
@@ -50,11 +50,11 @@
      "weight": 2
     },
     {
-     "shot": "A02",
+     "shot": "A18",
      "weight": 3
     },
     {
-     "shot": "A04",
+     "shot": "A17",
      "weight": 3
     },
     {
@@ -84,7 +84,7 @@
     "A to-do. A follow-up date. A record.",
     "ANDREW BUILDS"
    ],
-   "screen_recording_requirements": "A12, A02 and A04 (captured by me, DEMO DATA). B02 and B06 are yours: a real first message being written/sent (recipient and message hidden) and a desk shot. If B02 does not exist yet, the edit uses a slate.",
+   "screen_recording_requirements": "A12, A18 and A17 (captured by me, DEMO DATA). B02 and B06 are yours: a real first message being written/sent (recipient and message hidden) and a desk shot. If B02 does not exist yet, the edit uses a slate.",
    "captions": "Burn-in, 2 lines max, 5-6 words a line, white on dark rounded box, highlight colour on the key word of each line. Safe zone: keep captions between 18% and 70% of the height so the app UI does not cover them.",
    "editing": "Cut every 2-4 seconds. First 1.5 seconds: the hook text on screen with the first spoken words. No music for the first line, a low bed after. Duck music 12 dB under the voice. Keep the DEMO DATA label visible on every captured product clip.",
    "cta": "Follow for the next step.",
@@ -116,19 +116,19 @@
     {
      "t": "10-19",
      "visual": "Pipeline list with stage chips.",
-     "shot": "A09",
+     "shot": "A13",
      "text": "Every business has a stage"
     },
     {
      "t": "19-28",
      "visual": "Timeline playback stepping forward.",
-     "shot": "A06",
+     "shot": "A14",
      "text": "Step through the history"
     },
     {
      "t": "28-35",
      "visual": "Insights counts.",
-     "shot": "A07",
+     "shot": "A15",
      "text": "It records. It doesn't guess."
     }
    ],
@@ -138,15 +138,15 @@
      "weight": 4
     },
     {
-     "shot": "A09",
+     "shot": "A13",
      "weight": 3
     },
     {
-     "shot": "A06",
+     "shot": "A14",
      "weight": 3
     },
     {
-     "shot": "A07",
+     "shot": "A15",
      "weight": 2
     }
    ],
@@ -171,7 +171,7 @@
     "Step through the history",
     "It records. It doesn't guess."
    ],
-   "screen_recording_requirements": "A10, A09, A06, A07 (all captured by me from the real app, DEMO DATA label burned in). Replace with your real screens (B03, B05) once your real data is in; blur every name.",
+   "screen_recording_requirements": "A10, A13, A14, A15 (all captured by me from the real app, DEMO DATA label burned in). Replace with your real screens (B03, B05) once your real data is in; blur every name.",
    "captions": "Same style as S1. Highlight 'follow-up', 'stage' and 'history' as they are spoken.",
    "editing": "Open on the product, not on you. Vertical layout: headline in the top third, screen in the middle, captions below. For landscape clips use a blurred copy as the background. Scroll recordings may be played at 1x only.",
    "cta": "Follow to see if it works.",
@@ -197,13 +197,13 @@
     {
      "t": "3-11",
      "visual": "Business one: pipeline with stages.",
-     "shot": "A09",
+     "shot": "A13",
      "text": "1. Win paying customers"
     },
     {
      "t": "11-19",
      "visual": "Business two: playbook editor / product.",
-     "shot": "A08",
+     "shot": "A16",
      "text": "2. Build a tool others could use"
     },
     {
@@ -225,11 +225,11 @@
      "weight": 2
     },
     {
-     "shot": "A09",
+     "shot": "A13",
      "weight": 3
     },
     {
-     "shot": "A08",
+     "shot": "A16",
      "weight": 3
     },
     {
@@ -277,7 +277,7 @@
     "Users of the software: 1 (me)",
     "ANDREW BUILDS"
    ],
-   "screen_recording_requirements": "A09 and A08 (captured by me, DEMO DATA). B04 (your real log form, recipient hidden) and B06 (desk) are yours.",
+   "screen_recording_requirements": "A13 and A16 (captured by me, DEMO DATA). B04 (your real log form, recipient hidden) and B06 (desk) are yours.",
    "captions": "Same style as S1. Keep 'Users of the software: 1 (me)' as an overlay so the claim stays honest.",
    "editing": "Number the two businesses on screen as they are spoken. Do not show any revenue figure unless Treasury has verified it. Hold the 'one user' card for the whole sentence.",
    "cta": "Follow to watch it work (or not).",
