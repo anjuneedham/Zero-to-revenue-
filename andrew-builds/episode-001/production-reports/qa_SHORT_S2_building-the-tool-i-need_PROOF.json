@@ -1,0 +1,79 @@
+{
+ "file": "episode-001/exports/SHORT_S2_building-the-tool-i-need_PROOF.mp4",
+ "kind": "short",
+ "duration_s": 39.2,
+ "checks": [
+  {
+   "check": "video stream present, H.264, yuv420p",
+   "result": "PASS",
+   "detail": "h264 yuv420p"
+  },
+  {
+   "check": "resolution/aspect ratio",
+   "result": "PASS",
+   "detail": "1080x1920 (want 1080x1920, 9:16)"
+  },
+  {
+   "check": "frame rate 30",
+   "result": "PASS",
+   "detail": "30.00"
+  },
+  {
+   "check": "audio stream present (AAC, 48 kHz, stereo)",
+   "result": "PASS",
+   "detail": "aac 48000 2ch"
+  },
+  {
+   "check": "duration 20-45 s (short)",
+   "result": "PASS",
+   "detail": "39.2s = 0:39"
+  },
+  {
+   "check": "faststart / container OK",
+   "result": "PASS",
+   "detail": "decoded end to end with no errors"
+  },
+  {
+   "check": "integrated loudness within -16 LUFS +/- 2",
+   "result": "PASS",
+   "detail": "-16.3 LUFS, LRA 1.6"
+  },
+  {
+   "check": "true peak <= -1 dBFS (no clipping)",
+   "result": "PASS",
+   "detail": "-1.4 dBFS"
+  },
+  {
+   "check": "silence <= 35% of runtime",
+   "result": "PASS",
+   "detail": "0.0s silent (0%), gaps >=4s: []"
+  },
+  {
+   "check": "no black or blank segment >= 1 s",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "check": "captions: valid SRT, ordered, no overlaps, within runtime",
+   "result": "PASS",
+   "detail": "20 cues"
+  },
+  {
+   "check": "captions readable: <= 22 chars/s, <= 26 chars/line",
+   "result": "PASS",
+   "detail": "max 14.2 chars/s, longest line 25"
+  }
+ ],
+ "verdict": "NOT FINAL",
+ "not_final_because": [
+  "scratch narration"
+ ],
+ "contact_sheet": "production-reports/contact_SHORT_S2_building-the-tool-i-need_PROOF.png",
+ "human_review_required": [
+  "Watch the whole video once with sound (automation cannot judge pacing, clarity or taste).",
+  "Read every frame that contains a screen recording: no names, emails, phone numbers or credentials visible.",
+  "Confirm every spoken claim is true on the day you publish (revenue, counts, status).",
+  "Check captions against the real narration; timing is estimated until you replace the SRT with a transcript of your recording.",
+  "Check the music (if any) never masks the voice."
+ ]
+}

@@ -1,0 +1,377 @@
+{
+ "title": "I'm Building a Business From Scratch (And Building the Software to Run It)",
+ "alt_title": "Can I Build a Business Using Software I'm Building Myself?",
+ "channel": "Andrew Builds",
+ "episode": 1,
+ "words_per_second": 2.5,
+ "paragraph_pause_s": 0.6,
+ "placeholder_words": 10,
+ "scenes": [
+  {
+   "id": "VO_001_HOOK",
+   "file": "VO_001_HOOK.wav",
+   "scene": "Scene 1 - Cold open",
+   "plan": "0:00-0:40",
+   "purpose": "Hook the viewer with the premise: starting now, with two experiments in one. Show real work immediately.",
+   "tone": "Direct, quiet confidence. A little curious. Not hyped.",
+   "pace": "Medium-fast on the questions, slower on 'Episode one.'",
+   "emphasis": "'just started', 'second experiment', 'two businesses'",
+   "pauses": "1 beat after 'What if I just started?'; 1 beat after 'second experiment hiding inside the first.'",
+   "voiceover": "What if I stopped waiting for the perfect idea? The perfect software. The perfect moment.\n\nWhat if I just started?\n\nI already have. I've begun reaching out to businesses, [FILL: how many, in a short phrase, e.g. \"a few dozen\"] so far, and I'm trying to turn those conversations into paying customers.\n\nBut there's a second experiment hiding inside the first.\n\nI'm also building the software I use to run all of it. The pipeline. The follow-ups. The playbooks. Every step I take, tracked in a tool that I'm writing while I use it.\n\nIf it works, I could end up with two businesses out of one experiment. If it doesn't, you'll get to watch me find out why.\n\nI'm Andrew. This is the Bootstrapper Experiment. Episode one.",
+   "visuals": "Fast, silent-feeling montage cut to the voice: the Today screen, the pipeline, a playbook running, the real outreach moment, desk and tablet. End on a title card.",
+   "screen_recording": "A05, A09, A03 (captured). B02 and B06 (yours). Use real outreach footage first if you have it.",
+   "editing_notes": "Cut on the sentence breaks, not faster. No music for the first two lines, then bring the bed in under 'I already have.' Title card 'BOOTSTRAPPER EXPERIMENT / EPISODE 001' for the final 3 seconds.",
+   "transition": "Hard cut to a calmer, slower shot of you at your desk for the background scene.",
+   "clips": [
+    {
+     "shot": "A05",
+     "weight": 2
+    },
+    {
+     "shot": "B06",
+     "weight": 2
+    },
+    {
+     "shot": "B02",
+     "weight": 3
+    },
+    {
+     "shot": "A09",
+     "weight": 2
+    },
+    {
+     "shot": "A03",
+     "weight": 2
+    },
+    {
+     "shot": "A07",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "BOOTSTRAPPER EXPERIMENT",
+     "sub": "EPISODE 001",
+     "at": 0.84,
+     "dur": 0.16,
+     "kind": "full"
+    }
+   ]
+  },
+  {
+   "id": "VO_002_BACKGROUND",
+   "file": "VO_002_BACKGROUND.wav",
+   "scene": "Scene 2 - The background",
+   "plan": "0:40-2:00",
+   "purpose": "Say who you are and why you're doing this, briefly, and set honest stakes.",
+   "tone": "Conversational, like telling a friend. Plain and a little self-aware.",
+   "pace": "Relaxed. Slow down on the zero.",
+   "emphasis": "'Zero.' 'it isn't.' 'Including the bad ones.'",
+   "pauses": "2 beats after 'Zero.'; 1 beat after 'it isn't.'",
+   "voiceover": "Quick background, and I'll keep it short.\n\nI've spent years in sales and customer service. I've run my own businesses, and I've helped other people run theirs. [FILL: one sentence in your own words about your marketing, growth or business-development work.] These days, a lot of what I do is use AI to build websites, funnels and small apps that solve a specific problem.\n\nHere's what I've learned from all of that. Building is the easy part now. The hard part is the thing nobody films: getting the first people to say yes.\n\nI'm not saying that to sound clever. I can get a working page or app live much faster than I used to. Getting someone to care about it hasn't got any faster at all.\n\nAbout two weeks ago I built a system that went out and found opportunities for me. It found over a hundred that it called qualified. Verified revenue from that system, at the time? Zero.\n\nThose two numbers, side by side, taught me more than any course. A big list looks like progress. It isn't.\n\nSo I'm doing this differently. [FILL: why you want to bootstrap, in your own words. For example: no investors, no safety net, a preference for proof over pitch decks. Only say what's true for you.]\n\nAnd I'm doing it in public, because a story with only the wins in it isn't useful to anyone. You'll see the numbers. Including the bad ones.",
+   "visuals": "You to camera or at your desk if you have it. Otherwise slow B-roll of your workspace and the tablet, then the Treasury/verified-revenue screen for the 'zero' line.",
+   "screen_recording": "B06, B07 (yours). B08 dev environment (yours). Optional: your own Treasury page showing $0 verified, only if still true on the recording day.",
+   "editing_notes": "Let this breathe. No cut faster than ~4 seconds. A single lower-third on the first sentence ('Sales - Customer service - Own businesses'). On 'Zero.' hold on a plain frame, then music out.",
+   "transition": "Dip to black for 0.3s, then into the pipeline screen.",
+   "clips": [
+    {
+     "shot": "B06",
+     "weight": 3
+    },
+    {
+     "shot": "B08",
+     "weight": 3
+    },
+    {
+     "shot": "B07",
+     "weight": 2
+    },
+    {
+     "shot": "B03",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "Sales  ·  Customer service  ·  Own businesses",
+     "at": 0.05,
+     "dur": 0.16,
+     "kind": "lower",
+     "needs_confirm": false
+    },
+    {
+     "text": "Over 100 'qualified' opportunities.  Verified revenue at the time: $0.",
+     "at": 0.62,
+     "dur": 0.2,
+     "kind": "lower",
+     "needs_confirm": true
+    }
+   ]
+  },
+  {
+   "id": "VO_003_BUSINESS",
+   "file": "VO_003_BUSINESS.wav",
+   "scene": "Scene 3 - The business",
+   "plan": "2:00-3:30",
+   "purpose": "Say exactly what you're selling, to whom, how you're finding them, and the real status.",
+   "tone": "Matter-of-fact. Specific. No selling.",
+   "pace": "Steady. Slow down on the status line.",
+   "emphasis": "'Ten or fifteen honest ones.' the real status line",
+   "pauses": "1 beat before the status line.",
+   "voiceover": "So what's the actual business?\n\n[FILL: the offer in one plain sentence. Options in the project notes: a contractor-focused app called BuildFlow, done-for-you website and funnel setup, or a monthly growth-plan retainer. Say only what you are really selling.]\n\nThe customers are [FILL: who exactly. The notes point to small trades and contracting businesses in Jamaica. Confirm or correct this.]\n\nHow do I find them? Not the way I first tried. I tested a proper business-contact database, and it simply doesn't cover small local trades. So I'm starting where the real conversations are: businesses I can see, people I know, and people I can be introduced to.\n\nThe plan from the start was simple. Pick a small group of real contacts, send a real message to each, and watch what happens. Not a thousand emails. Ten or fifteen honest ones.\n\nI know ten or fifteen conversations won't prove a business. They're a first sample. What they will tell me is whether people answer at all, which words get a reply, and where I get stuck. Right now that's worth more than a big list.\n\n[FILL: the real status in one or two sentences. How many you've contacted, how many replied, whether anyone has agreed to a call. If the answer is \"no replies yet,\" say exactly that.]\n\nI want to be clear about one thing. As I record this, [FILL: your verified revenue, or \"I haven't made a dollar from this yet\"]. When that changes, you'll see the proof, not just the claim.",
+   "visuals": "Your real pipeline (names blurred), the real message composer (recipient hidden), then the Insights counts.",
+   "screen_recording": "B01 and B04 (yours, after you back-fill). A09 as a stand-in only if clearly labelled DEMO DATA.",
+   "editing_notes": "Blur or crop every name, number and handle. On the status line, cut to the plain counts (no zoom-ins, no graphics that make a small number look big).",
+   "transition": "Slide from the pipeline list into the Today screen.",
+   "clips": [
+    {
+     "shot": "B01",
+     "weight": 3
+    },
+    {
+     "shot": "B04",
+     "weight": 3
+    },
+    {
+     "shot": "A09",
+     "weight": 2
+    },
+    {
+     "shot": "B05",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "Warm outreach: real people, real messages",
+     "at": 0.55,
+     "dur": 0.18,
+     "kind": "lower",
+     "needs_confirm": false
+    }
+   ]
+  },
+  {
+   "id": "VO_004_SOFTWARE",
+   "file": "VO_004_SOFTWARE.wav",
+   "scene": "Scene 4 - The software",
+   "plan": "3:30-5:30",
+   "purpose": "Show the product honestly: the problem, what it does, what it deliberately does not do.",
+   "tone": "Enthusiastic but grounded. Like showing a friend something you built.",
+   "pace": "Medium. Pause so the screen can be read.",
+   "emphasis": "'remembering', 'one of six', 'it doesn't pretend to be smart'",
+   "pauses": "1 beat after each playbook example; 2 beats after 'Nothing gets quietly rewritten.'",
+   "voiceover": "Now the software, because this is where it gets interesting.\n\nWhen you do outreach, the work isn't just sending messages. It's remembering. Who did I contact? What did I say? Did they reply? When should I follow up? Which message actually worked?\n\nIf that lives in your head, or scattered across notes and chats, you can't learn anything from it. You just repeat yourself and hope.\n\nSo I'm building the tool I wish I had. It has a Today screen that tells me what to do first: who's due for a follow-up, who replied, and who's going nowhere. It has a pipeline, so every business sits at a clear stage, from just found, to customer, or lost. And it has playbooks.\n\nEvery task has a priority and a due date, and every task points back to the business it belongs to. So Today isn't a wall of notes. It's a short list I can actually finish. I set daily targets, like five prospects researched and five first messages, and I can change them whenever they stop making sense.\n\nA playbook is a set of steps for one job. Researching a prospect. Writing a first message. Following up. Handling an objection. There are twelve to start with, and they're fully editable, because my offer won't be your offer.\n\nEverything I do gets logged. Open any business and you can step through its history, event by event, to see exactly what happened. Nothing gets quietly rewritten.\n\nAnd the reports are deliberately honest. If I've sent six messages and one got a reply, it shows one of six. Not seventeen percent. Six isn't enough to say anything.\n\nWhat it doesn't do: it doesn't send messages for me, and it doesn't pretend to be smart. There's no AI judge in there. It records what I do, and it shows me what I recorded.\n\nI've tested the whole journey, from first note to closed deal, in a browser, on made-up businesses. [FILL: if true by recording day, say \"Now it's being used on my real ones.\"]",
+   "visuals": "Screen recordings of the actual product, in the order of the narration: Today, pipeline, playbooks, timeline playback, insights. Every demo clip carries a DEMO DATA label burned in.",
+   "screen_recording": "A01, A05, A09, A03, A08, A06, A07, A11 (all captured by me, DEMO DATA).",
+   "editing_notes": "One highlight box per shot, on the thing being named (e.g. the follow-up list when you say 'due for a follow-up'). Keep the DEMO DATA label visible. Do not speed up the playback clip.",
+   "transition": "Quick dissolve from the insights table to a close-up of your hands on the tablet.",
+   "clips": [
+    {
+     "shot": "A01",
+     "weight": 1
+    },
+    {
+     "shot": "A05",
+     "weight": 3
+    },
+    {
+     "shot": "A09",
+     "weight": 2
+    },
+    {
+     "shot": "A03",
+     "weight": 2
+    },
+    {
+     "shot": "A08",
+     "weight": 2
+    },
+    {
+     "shot": "A06",
+     "weight": 3
+    },
+    {
+     "shot": "A07",
+     "weight": 3
+    },
+    {
+     "shot": "A11",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "DEMO DATA: fictional businesses",
+     "at": 0.02,
+     "dur": 0.9,
+     "kind": "tag",
+     "needs_confirm": false
+    },
+    {
+     "text": "12 playbooks, all editable",
+     "at": 0.38,
+     "dur": 0.12,
+     "kind": "lower",
+     "needs_confirm": false
+    },
+    {
+     "text": "1 of 6, not 17%",
+     "at": 0.66,
+     "dur": 0.12,
+     "kind": "lower",
+     "needs_confirm": false
+    }
+   ]
+  },
+  {
+   "id": "VO_005_EXECUTION",
+   "file": "VO_005_EXECUTION.wav",
+   "scene": "Scene 5 - Real execution",
+   "plan": "5:30-7:30",
+   "purpose": "Contrast planning with doing. Show an actual working session, including the uncomfortable moment.",
+   "tone": "Honest, a bit vulnerable on the 'press send' line. Practical elsewhere.",
+   "pace": "Slower and warmer on the press-send moment.",
+   "emphasis": "'pressing send', 'a follow-up date', 'turn effort into evidence'",
+   "pauses": "2 beats before 'pressing send.'",
+   "voiceover": "Planning is comfortable. Execution is where it gets real.\n\nHere's how a working session goes now.\n\nI open the Today screen. It shows what's due. I pick a business and start with research. Ten minutes, no more. I write down one specific thing I noticed about them, something true and relevant. That's what keeps the message from sounding like everyone else's.\n\nThen I decide whether they're worth contacting. Qualified, maybe, or no. Writing no down is a win. It saves me time.\n\nI'm trying to be strict about this. A business I like the idea of isn't the same as a business that actually has the problem I solve.\n\nIf it's a yes, I follow the first-message playbook. One channel. One short message. One small question. I give the approach a name, so I can compare it with the others later.\n\nThen comes the part that's genuinely uncomfortable: pressing send. [RECORD: in one or two sentences, what that moment feels like for you. Only say this if you've actually done it.]\n\nAfter I send it, I log it, and I set a follow-up date before I close the form. That small habit is the whole system. A message with no follow-up date is a message I'll forget.\n\n[FILL: one real example with the name removed. What you sent, and what happened. If nothing happened yet, say what you did next.]\n\nAnd when someone replies, I record it, and the tool moves them forward. A meeting. A proposal. A yes or a no. Each step gets a date.\n\nThe numbers that matter right now aren't revenue. They're simpler. How many real messages went out. How many follow-ups I actually did. How many people replied.\n\nNone of this is clever. That's the point. It's a way to turn effort into evidence.",
+   "visuals": "Real footage wherever possible: your Today screen on a real morning, the real research notes (blurred), the playbook ticking, the log form after a real send, the follow-up appearing on Today.",
+   "screen_recording": "B03, B02, B04 (yours). A03, A04 (captured by me, DEMO DATA). C01 only if a real reply has arrived (optional).",
+   "editing_notes": "Cut to real footage on 'pressing send' and hold. Keep the screen readable for at least 3 seconds per step. Use full-screen text only for 'A follow-up date.'",
+   "transition": "Fade the tablet footage down; hold a plain frame for half a second before the product-opportunity scene.",
+   "clips": [
+    {
+     "shot": "B03",
+     "weight": 2
+    },
+    {
+     "shot": "A03",
+     "weight": 2
+    },
+    {
+     "shot": "B02",
+     "weight": 3
+    },
+    {
+     "shot": "B04",
+     "weight": 2
+    },
+    {
+     "shot": "A04",
+     "weight": 3
+    },
+    {
+     "shot": "C01",
+     "weight": 1,
+     "optional": true
+    },
+    {
+     "shot": "B05",
+     "weight": 1
+    }
+   ],
+   "overlays": [
+    {
+     "text": "Planning is comfortable.\nExecution is where it gets real.",
+     "at": 0.0,
+     "dur": 0.08,
+     "kind": "full"
+    },
+    {
+     "text": "No follow-up date = forgotten message",
+     "at": 0.55,
+     "dur": 0.14,
+     "kind": "lower",
+     "needs_confirm": false
+    }
+   ]
+  },
+  {
+   "id": "VO_006_OPPORTUNITY",
+   "file": "VO_006_OPPORTUNITY.wav",
+   "scene": "Scene 6 - The product opportunity",
+   "plan": "7:30-9:00",
+   "purpose": "Explain the second business honestly, with no product-market-fit claim.",
+   "tone": "Thoughtful. Careful with claims.",
+   "pace": "Measured. Slow down on 'exactly one user.'",
+   "emphasis": "'exactly one user: me', 'earn its place'",
+   "pauses": "2 beats after 'I haven't proven anything.'",
+   "voiceover": "Here's the bigger question. Could this software be a product?\n\nI think there's a version of it that could help other people. Freelancers. Small agencies. Anyone building a business through outreach who needs a way to know what to do today, and what worked last week.\n\nBut I want to be careful. Right now I have exactly one user: me. Zero customers for the software. I'm not claiming anybody wants it. I haven't proven anything.\n\nWhat I do have is an advantage. I'm building it from a problem I'm living in real time. Every feature exists because I either needed it, or found out I didn't.\n\nA tool like this would have to be simple enough that one person can use it in ten minutes a day, and solid enough that a small team could share it later. That's the target. I'm a long way from knowing if I've hit it.\n\nSo here's the rule. The software has to earn its place in my own week first. If I keep using it when I'm busy, and it keeps showing me things I would have missed, that's a signal. If I stop opening it, that's a signal too, and I'll tell you.\n\nOnly then does it make sense to ask whether someone else would pay for it.\n\nTwo businesses, one experiment. But the second one only exists if the first one works.",
+   "visuals": "Calm product footage (playbook editor, duplicate a playbook for a different offer), then a plain text card of the rule.",
+   "screen_recording": "A08, A06 (captured, demo). B07 (yours).",
+   "editing_notes": "Full-screen text: 'The software has to earn its place in my own week first.' Keep it on screen for the whole sentence.",
+   "transition": "Slow push into the final scene's desk shot.",
+   "clips": [
+    {
+     "shot": "A08",
+     "weight": 3
+    },
+    {
+     "shot": "A09",
+     "weight": 2
+    },
+    {
+     "shot": "B07",
+     "weight": 2
+    },
+    {
+     "shot": "A07",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "The software has to earn its place\nin my own week first.",
+     "at": 0.62,
+     "dur": 0.2,
+     "kind": "full",
+     "needs_confirm": false
+    }
+   ]
+  },
+  {
+   "id": "VO_007_CLOSING",
+   "file": "VO_007_CLOSING.wav",
+   "scene": "Scene 7 - The journey ahead",
+   "plan": "9:00-11:30",
+   "purpose": "State the challenge and the unknowns, explain why you're documenting, and invite people to follow.",
+   "tone": "Warm, honest, forward-looking. Not salesy.",
+   "pace": "Unhurried. Slow on the last two lines.",
+   "emphasis": "'I'd rather say that out loud', 'start with what you have'",
+   "pauses": "2 beats after 'pretend I've got it figured out.'; 1 beat before 'Let's see what happens.'",
+   "voiceover": "So what happens next?\n\nHere's the challenge. [FILL: your real goal for the next stretch, in your own words. The project notes mention a stretch target of ten thousand dollars in November, described there as a target, not a forecast. Say it only if it is still true, and say it that way.]\n\nHere's what I don't know yet. Whether my offer is the right one. Whether my price is right. Whether the people I'm contacting will answer at all. And whether this software is something I'll still be using in a month.\n\nI'd rather say that out loud than pretend I've got it figured out.\n\nWhy film it? Because there's a version of starting that nobody shows you. Not the polished launch. The Tuesday where you send a message and hear nothing. The small change that finally works. The numbers going up slowly, or not at all.\n\nIf you're thinking about starting something, I want you to see that you can start with what you have. I'm not starting with a big budget. I'm starting with a plan, a tool I'm building, and a list of real people.\n\nIn the next episode, [FILL: what you'll show next. Suggested: the first real results from the outreach, whatever they turn out to be.]\n\nYou can expect a long episode like this regularly, with shorter clips in between, built from whatever I actually did that day. If a week is quiet, I'll tell you it was quiet.\n\nIf you want to watch whether this works, or watch it fall apart, subscribe and follow along. I'll show you every step.\n\nI'm Andrew. This is the Bootstrapper Experiment. Let's see what happens.",
+   "visuals": "You at your desk, or the tablet showing the Today screen at the start of a new day. End on the title card and the subscribe prompt.",
+   "screen_recording": "B03, B06 (yours). A05 (captured, demo) as a quiet backdrop for the closing lines.",
+   "editing_notes": "Music swells slightly on the invitation, then drops out for the last line so the voice finishes alone. End card for 6 seconds.",
+   "transition": "End card.",
+   "clips": [
+    {
+     "shot": "B06",
+     "weight": 3
+    },
+    {
+     "shot": "B03",
+     "weight": 3
+    },
+    {
+     "shot": "A05",
+     "weight": 3
+    },
+    {
+     "shot": "B07",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "Follow the experiment",
+     "sub": "Episode 002 is next",
+     "at": 0.88,
+     "dur": 0.12,
+     "kind": "full",
+     "needs_confirm": false
+    }
+   ]
+  }
+ ]
+}

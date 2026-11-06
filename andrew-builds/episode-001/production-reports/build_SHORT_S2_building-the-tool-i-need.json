@@ -1,0 +1,61 @@
+{
+ "name": "short_S2",
+ "format": "vertical",
+ "scenes": [
+  {
+   "id": "S2",
+   "seconds": 39.24,
+   "narration": "scratch",
+   "clips": 4,
+   "starts_at": 0.0
+  }
+ ],
+ "clips": [
+  {
+   "scene": "S2",
+   "shot": "A10",
+   "kind": "clip",
+   "seconds": 13.08,
+   "source": "EP001_A10_tablet-portrait-today_v01.webm"
+  },
+  {
+   "scene": "S2",
+   "shot": "A09",
+   "kind": "clip",
+   "seconds": 9.81,
+   "source": "EP001_A09_pipeline-populated_v01.webm"
+  },
+  {
+   "scene": "S2",
+   "shot": "A06",
+   "kind": "clip",
+   "seconds": 9.81,
+   "source": "EP001_A06_timeline-playback_v01.webm"
+  },
+  {
+   "scene": "S2",
+   "shot": "A07",
+   "kind": "clip",
+   "seconds": 6.54,
+   "source": "EP001_A07_insights_v01.webm"
+  }
+ ],
+ "missing_clips": [],
+ "optional_skipped": [],
+ "narration_not_final": [
+  "S2 (scratch)"
+ ],
+ "overlays_skipped_unconfirmed": [],
+ "proof_text": null,
+ "music": null,
+ "output": "exports/SHORT_S2_building-the-tool-i-need_PROOF.mp4",
+ "status": "NOT FINAL (assembly proof)",
+ "reasons": [
+  "scratch narration"
+ ],
+ "total_seconds": 39.24,
+ "captions": "captions/SHORT_S2_building-the-tool-i-need_scratch.srt",
+ "captions_timing": "estimated from text length, not forced-aligned",
+ "burned_captions": true,
+ "placeholders_in_script": 0
+}

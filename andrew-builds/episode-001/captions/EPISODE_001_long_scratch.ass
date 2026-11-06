@@ -1,0 +1,215 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Cap,Inter,46,&H00FFFFFF,&H00FFFFFF,&H601A0F0A,&H601A0F0A,1,0,0,0,100,100,0,0,3,14,0,2,60,60,70,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.40,0:00:03.47,Cap,,0,0,0,,What if I stopped waiting for the perfect\Nidea?
+Dialogue: 0,0:00:03.56,0:00:04.94,Cap,,0,0,0,,The perfect software.
+Dialogue: 0,0:00:04.98,0:00:06.22,Cap,,0,0,0,,The perfect moment.
+Dialogue: 0,0:00:06.26,0:00:07.76,Cap,,0,0,0,,What if I just started?
+Dialogue: 0,0:00:07.81,0:00:08.79,Cap,,0,0,0,,I already have.
+Dialogue: 0,0:00:08.82,0:00:11.31,Cap,,0,0,0,,I've begun reaching out to businesses,
+Dialogue: 0,0:00:15.16,0:00:19.93,Cap,,0,0,0,,so far, and I'm trying to turn those\Nconversations into paying customers.
+Dialogue: 0,0:00:20.08,0:00:23.74,Cap,,0,0,0,,But there's a second {\c&H1EB0F2&}experiment{\c&HFFFFFF&} hiding\Ninside the first.
+Dialogue: 0,0:00:23.86,0:00:27.39,Cap,,0,0,0,,I'm also building the software I use to\Nrun all of it.
+Dialogue: 0,0:00:27.50,0:00:28.35,Cap,,0,0,0,,The {\c&H1EB0F2&}pipeline.{\c&HFFFFFF&}
+Dialogue: 0,0:00:28.37,0:00:29.36,Cap,,0,0,0,,The follow-ups.
+Dialogue: 0,0:00:29.39,0:00:30.30,Cap,,0,0,0,,The {\c&H1EB0F2&}playbooks.{\c&HFFFFFF&}
+Dialogue: 0,0:00:30.33,0:00:34.84,Cap,,0,0,0,,Every step I take, tracked in a tool that\NI'm writing while I use it.
+Dialogue: 0,0:00:34.98,0:00:39.56,Cap,,0,0,0,,If it works, I could end up with two\Nbusinesses out of one {\c&H1EB0F2&}experiment.{\c&HFFFFFF&}
+Dialogue: 0,0:00:39.70,0:00:43.04,Cap,,0,0,0,,If it doesn't, you'll get to watch me find\Nout why.
+Dialogue: 0,0:00:43.14,0:00:43.86,Cap,,0,0,0,,I'm Andrew.
+Dialogue: 0,0:00:43.88,0:00:46.24,Cap,,0,0,0,,This is the Bootstrapper {\c&H1EB0F2&}Experiment.{\c&HFFFFFF&}
+Dialogue: 0,0:00:46.31,0:00:47.09,Cap,,0,0,0,,Episode one.
+Dialogue: 0,0:00:48.02,0:00:50.53,Cap,,0,0,0,,Quick background, and I'll keep it short.
+Dialogue: 0,0:00:50.61,0:00:53.49,Cap,,0,0,0,,I've spent years in sales and customer\Nservice.
+Dialogue: 0,0:00:53.58,0:00:57.75,Cap,,0,0,0,,I've run my own businesses, and I've\Nhelped other people run theirs.
+Dialogue: 0,0:01:01.42,0:01:05.04,Cap,,0,0,0,,These days, a lot of what I do is use AI\Nto build websites,
+Dialogue: 0,0:01:05.16,0:01:08.41,Cap,,0,0,0,,funnels and small apps that solve a\Nspecific problem.
+Dialogue: 0,0:01:08.51,0:01:11.08,Cap,,0,0,0,,Here's what I've learned from all of that.
+Dialogue: 0,0:01:11.16,0:01:13.00,Cap,,0,0,0,,Building is the easy part now.
+Dialogue: 0,0:01:13.06,0:01:17.78,Cap,,0,0,0,,The hard part is the thing nobody films:\Ngetting the first people to say yes.
+Dialogue: 0,0:01:17.93,0:01:20.14,Cap,,0,0,0,,I'm not saying that to sound clever.
+Dialogue: 0,0:01:20.21,0:01:24.13,Cap,,0,0,0,,I can get a working page or app live much\Nfaster than I used to.
+Dialogue: 0,0:01:24.25,0:01:28.06,Cap,,0,0,0,,Getting someone to care about it hasn't\Ngot any faster at all.
+Dialogue: 0,0:01:28.17,0:01:32.96,Cap,,0,0,0,,About two weeks ago I built a system that\Nwent out and found opportunities for
+Dialogue: 0,0:01:33.11,0:01:33.60,Cap,,0,0,0,,me.
+Dialogue: 0,0:01:33.61,0:01:36.62,Cap,,0,0,0,,It found over a hundred that it called\Nqualified.
+Dialogue: 0,0:01:36.71,0:01:39.59,Cap,,0,0,0,,Verified revenue from that system, at the\Ntime?
+Dialogue: 0,0:01:39.68,0:01:40.17,Cap,,0,0,0,,{\c&H1EB0F2&}Zero.{\c&HFFFFFF&}
+Dialogue: 0,0:01:40.19,0:01:44.12,Cap,,0,0,0,,Those two numbers, side by side, taught me\Nmore than any course.
+Dialogue: 0,0:01:44.24,0:01:46.14,Cap,,0,0,0,,A big list looks like progress.
+Dialogue: 0,0:01:46.20,0:01:46.75,Cap,,0,0,0,,It isn't.
+Dialogue: 0,0:01:46.77,0:01:48.61,Cap,,0,0,0,,So I'm doing this differently.
+Dialogue: 0,0:01:52.20,0:01:57.17,Cap,,0,0,0,,And I'm doing it in public, because a story\Nwith only the wins in it isn't useful
+Dialogue: 0,0:01:57.33,0:01:57.94,Cap,,0,0,0,,to anyone.
+Dialogue: 0,0:01:57.96,0:01:59.37,Cap,,0,0,0,,You'll see the numbers.
+Dialogue: 0,0:01:59.41,0:02:00.82,Cap,,0,0,0,,Including the bad ones.
+Dialogue: 0,0:02:01.77,0:02:03.39,Cap,,0,0,0,,So what's the actual business?
+Dialogue: 0,0:02:06.57,0:02:07.48,Cap,,0,0,0,,The customers are
+Dialogue: 0,0:02:10.64,0:02:11.66,Cap,,0,0,0,,How do I find them?
+Dialogue: 0,0:02:11.70,0:02:13.10,Cap,,0,0,0,,Not the way I first tried.
+Dialogue: 0,0:02:13.15,0:02:17.37,Cap,,0,0,0,,I tested a proper business-contact\Ndatabase, and it simply doesn't cover small
+Dialogue: 0,0:02:17.50,0:02:18.20,Cap,,0,0,0,,local trades.
+Dialogue: 0,0:02:18.22,0:02:22.06,Cap,,0,0,0,,So I'm starting where the real\Nconversations are: businesses I can see,
+Dialogue: 0,0:02:22.18,0:02:24.83,Cap,,0,0,0,,people I know, and people I can be\Nintroduced to.
+Dialogue: 0,0:02:24.92,0:02:26.81,Cap,,0,0,0,,The plan from the start was simple.
+Dialogue: 0,0:02:26.87,0:02:30.38,Cap,,0,0,0,,Pick a small group of real contacts, send\Na real message to each,
+Dialogue: 0,0:02:30.49,0:02:31.74,Cap,,0,0,0,,and watch what happens.
+Dialogue: 0,0:02:31.78,0:02:32.97,Cap,,0,0,0,,Not a thousand emails.
+Dialogue: 0,0:02:33.00,0:02:34.46,Cap,,0,0,0,,Ten or fifteen honest ones.
+Dialogue: 0,0:02:34.51,0:02:37.70,Cap,,0,0,0,,I know ten or fifteen conversations won't\Nprove a business.
+Dialogue: 0,0:02:37.80,0:02:39.04,Cap,,0,0,0,,They're a first sample.
+Dialogue: 0,0:02:39.08,0:02:42.06,Cap,,0,0,0,,What they will tell me is whether people\Nanswer at all,
+Dialogue: 0,0:02:42.15,0:02:44.69,Cap,,0,0,0,,which words get a reply, and where I get\Nstuck.
+Dialogue: 0,0:02:44.77,0:02:47.15,Cap,,0,0,0,,Right now that's worth more than a big\Nlist.
+Dialogue: 0,0:02:50.35,0:02:52.24,Cap,,0,0,0,,I want to be clear about one thing.
+Dialogue: 0,0:02:52.30,0:02:53.22,Cap,,0,0,0,,As I record this,
+Dialogue: 0,0:02:56.37,0:02:56.81,Cap,,0,0,0,,.
+Dialogue: 0,0:02:56.82,0:03:00.06,Cap,,0,0,0,,When that changes, you'll see the proof,\Nnot just the claim.
+Dialogue: 0,0:03:01.06,0:03:05.14,Cap,,0,0,0,,Now the software, because this is where it\Ngets interesting.
+Dialogue: 0,0:03:05.27,0:03:09.27,Cap,,0,0,0,,When you do outreach, the work isn't just\Nsending messages.
+Dialogue: 0,0:03:09.40,0:03:10.55,Cap,,0,0,0,,It's remembering.
+Dialogue: 0,0:03:10.59,0:03:11.81,Cap,,0,0,0,,Who did I contact?
+Dialogue: 0,0:03:11.85,0:03:12.87,Cap,,0,0,0,,What did I say?
+Dialogue: 0,0:03:12.90,0:03:13.92,Cap,,0,0,0,,Did they reply?
+Dialogue: 0,0:03:13.95,0:03:15.58,Cap,,0,0,0,,When should I follow up?
+Dialogue: 0,0:03:15.63,0:03:17.67,Cap,,0,0,0,,Which message actually worked?
+Dialogue: 0,0:03:17.73,0:03:22.08,Cap,,0,0,0,,If that lives in your head, or scattered\Nacross notes and chats,
+Dialogue: 0,0:03:22.21,0:03:24.45,Cap,,0,0,0,,you can't learn anything from it.
+Dialogue: 0,0:03:24.52,0:03:26.83,Cap,,0,0,0,,You just repeat yourself and hope.
+Dialogue: 0,0:03:26.90,0:03:29.49,Cap,,0,0,0,,So I'm building the tool I wish I had.
+Dialogue: 0,0:03:29.57,0:03:33.17,Cap,,0,0,0,,It has a Today screen that tells me what\Nto do first:
+Dialogue: 0,0:03:33.28,0:03:37.62,Cap,,0,0,0,,who's due for a follow-up, who replied,\Nand who's going nowhere.
+Dialogue: 0,0:03:37.76,0:03:41.77,Cap,,0,0,0,,It has a {\c&H1EB0F2&}pipeline,{\c&HFFFFFF&} so every business sits\Nat a clear stage,
+Dialogue: 0,0:03:41.89,0:03:44.47,Cap,,0,0,0,,from just found, to customer, or lost.
+Dialogue: 0,0:03:44.55,0:03:45.98,Cap,,0,0,0,,And it has {\c&H1EB0F2&}playbooks.{\c&HFFFFFF&}
+Dialogue: 0,0:03:46.02,0:03:51.73,Cap,,0,0,0,,Every task has a priority and a due date,\Nand every task points back to the business
+Dialogue: 0,0:03:51.90,0:03:52.86,Cap,,0,0,0,,it belongs to.
+Dialogue: 0,0:03:52.88,0:03:54.99,Cap,,0,0,0,,So Today isn't a wall of notes.
+Dialogue: 0,0:03:55.06,0:03:57.77,Cap,,0,0,0,,It's a short list I can actually finish.
+Dialogue: 0,0:03:57.86,0:04:03.02,Cap,,0,0,0,,I set daily targets, like five prospects\Nresearched and five first messages,
+Dialogue: 0,0:04:03.18,0:04:06.85,Cap,,0,0,0,,and I can change them whenever they stop\Nmaking sense.
+Dialogue: 0,0:04:06.96,0:04:09.75,Cap,,0,0,0,,A {\c&H1EB0F2&}playbook{\c&HFFFFFF&} is a set of steps for one job.
+Dialogue: 0,0:04:09.83,0:04:11.39,Cap,,0,0,0,,Researching a prospect.
+Dialogue: 0,0:04:11.44,0:04:13.07,Cap,,0,0,0,,Writing a first message.
+Dialogue: 0,0:04:13.12,0:04:14.01,Cap,,0,0,0,,Following up.
+Dialogue: 0,0:04:14.03,0:04:15.53,Cap,,0,0,0,,Handling an objection.
+Dialogue: 0,0:04:15.57,0:04:19.58,Cap,,0,0,0,,There are twelve to start with, and\Nthey're fully editable,
+Dialogue: 0,0:04:19.70,0:04:22.22,Cap,,0,0,0,,because my offer won't be your offer.
+Dialogue: 0,0:04:22.30,0:04:24.20,Cap,,0,0,0,,Everything I do gets logged.
+Dialogue: 0,0:04:24.26,0:04:27.99,Cap,,0,0,0,,Open any business and you can step through\Nits history,
+Dialogue: 0,0:04:28.11,0:04:31.16,Cap,,0,0,0,,event by event, to see exactly what\Nhappened.
+Dialogue: 0,0:04:31.26,0:04:33.37,Cap,,0,0,0,,Nothing gets quietly rewritten.
+Dialogue: 0,0:04:33.43,0:04:36.15,Cap,,0,0,0,,And the reports are deliberately honest.
+Dialogue: 0,0:04:36.23,0:04:40.78,Cap,,0,0,0,,If I've sent six messages and one got a\Nreply, it shows one of six.
+Dialogue: 0,0:04:40.92,0:04:42.42,Cap,,0,0,0,,Not seventeen percent.
+Dialogue: 0,0:04:42.46,0:04:44.71,Cap,,0,0,0,,Six isn't enough to say anything.
+Dialogue: 0,0:04:44.77,0:04:48.31,Cap,,0,0,0,,What it doesn't do: it doesn't send\Nmessages for me,
+Dialogue: 0,0:04:48.42,0:04:50.79,Cap,,0,0,0,,and it doesn't pretend to be smart.
+Dialogue: 0,0:04:50.87,0:04:52.84,Cap,,0,0,0,,There's no AI judge in there.
+Dialogue: 0,0:04:52.90,0:04:56.57,Cap,,0,0,0,,It records what I do, and it shows me what\NI recorded.
+Dialogue: 0,0:04:56.68,0:05:00.89,Cap,,0,0,0,,I've tested the whole journey, from first\Nnote to closed deal,
+Dialogue: 0,0:05:01.02,0:05:03.47,Cap,,0,0,0,,in a browser, on made-up businesses.
+Dialogue: 0,0:05:08.36,0:05:09.95,Cap,,0,0,0,,Planning is comfortable.
+Dialogue: 0,0:05:10.00,0:05:12.12,Cap,,0,0,0,,Execution is where it gets real.
+Dialogue: 0,0:05:12.19,0:05:14.71,Cap,,0,0,0,,Here's how a working session goes now.
+Dialogue: 0,0:05:14.79,0:05:16.38,Cap,,0,0,0,,I open the Today screen.
+Dialogue: 0,0:05:16.43,0:05:17.75,Cap,,0,0,0,,It shows what's due.
+Dialogue: 0,0:05:17.79,0:05:20.58,Cap,,0,0,0,,I pick a business and start with research.
+Dialogue: 0,0:05:20.66,0:05:22.05,Cap,,0,0,0,,Ten minutes, no more.
+Dialogue: 0,0:05:22.10,0:05:25.61,Cap,,0,0,0,,I write down one specific thing I noticed\Nabout them,
+Dialogue: 0,0:05:25.72,0:05:27.57,Cap,,0,0,0,,something true and relevant.
+Dialogue: 0,0:05:27.63,0:05:31.94,Cap,,0,0,0,,That's what keeps the message from\Nsounding like everyone else's.
+Dialogue: 0,0:05:32.07,0:05:35.19,Cap,,0,0,0,,Then I decide whether they're worth\Ncontacting.
+Dialogue: 0,0:05:35.28,0:05:36.87,Cap,,0,0,0,,Qualified, maybe, or no.
+Dialogue: 0,0:05:36.92,0:05:38.58,Cap,,0,0,0,,Writing no down is a win.
+Dialogue: 0,0:05:38.63,0:05:39.76,Cap,,0,0,0,,It saves me time.
+Dialogue: 0,0:05:39.79,0:05:42.11,Cap,,0,0,0,,I'm trying to be strict about this.
+Dialogue: 0,0:05:42.18,0:05:47.49,Cap,,0,0,0,,A business I like the idea of isn't the\Nsame as a business that actually has the
+Dialogue: 0,0:05:47.65,0:05:48.71,Cap,,0,0,0,,problem I solve.
+Dialogue: 0,0:05:48.74,0:05:52.12,Cap,,0,0,0,,If it's a yes, I follow the first-message\N{\c&H1EB0F2&}playbook.{\c&HFFFFFF&}
+Dialogue: 0,0:05:52.23,0:05:53.02,Cap,,0,0,0,,One channel.
+Dialogue: 0,0:05:53.05,0:05:54.24,Cap,,0,0,0,,One short message.
+Dialogue: 0,0:05:54.28,0:05:55.54,Cap,,0,0,0,,One small question.
+Dialogue: 0,0:05:55.57,0:06:00.21,Cap,,0,0,0,,I give the approach a name, so I can\Ncompare it with the others later.
+Dialogue: 0,0:06:00.36,0:06:03.74,Cap,,0,0,0,,Then comes the part that's genuinely\Nuncomfortable:
+Dialogue: 0,0:06:03.84,0:06:04.77,Cap,,0,0,0,,pressing send.
+Dialogue: 0,0:06:08.62,0:06:13.79,Cap,,0,0,0,,After I send it, I log it, and I set a\Nfollow-up date before I close the form.
+Dialogue: 0,0:06:13.95,0:06:16.41,Cap,,0,0,0,,That small habit is the whole system.
+Dialogue: 0,0:06:16.48,0:06:20.33,Cap,,0,0,0,,A message with no follow-up date is a\Nmessage I'll forget.
+Dialogue: 0,0:06:24.27,0:06:28.98,Cap,,0,0,0,,And when someone replies, I record it, and\Nthe tool moves them forward.
+Dialogue: 0,0:06:29.12,0:06:29.78,Cap,,0,0,0,,A meeting.
+Dialogue: 0,0:06:29.81,0:06:30.53,Cap,,0,0,0,,A proposal.
+Dialogue: 0,0:06:30.56,0:06:31.48,Cap,,0,0,0,,A yes or a no.
+Dialogue: 0,0:06:31.51,0:06:32.97,Cap,,0,0,0,,Each step gets a date.
+Dialogue: 0,0:06:33.02,0:06:36.26,Cap,,0,0,0,,The numbers that matter right now aren't\Nrevenue.
+Dialogue: 0,0:06:36.36,0:06:37.42,Cap,,0,0,0,,They're simpler.
+Dialogue: 0,0:06:37.46,0:06:39.58,Cap,,0,0,0,,How many real messages went out.
+Dialogue: 0,0:06:39.64,0:06:41.96,Cap,,0,0,0,,How many follow-ups I actually did.
+Dialogue: 0,0:06:42.04,0:06:43.63,Cap,,0,0,0,,How many people replied.
+Dialogue: 0,0:06:43.67,0:06:45.20,Cap,,0,0,0,,None of this is clever.
+Dialogue: 0,0:06:45.25,0:06:46.37,Cap,,0,0,0,,That's the point.
+Dialogue: 0,0:06:46.41,0:06:49.06,Cap,,0,0,0,,It's a way to turn effort into {\c&H1EB0F2&}evidence.{\c&HFFFFFF&}
+Dialogue: 0,0:06:50.04,0:06:51.84,Cap,,0,0,0,,Here's the bigger question.
+Dialogue: 0,0:06:51.89,0:06:54.09,Cap,,0,0,0,,Could this software be a product?
+Dialogue: 0,0:06:54.16,0:06:58.21,Cap,,0,0,0,,I think there's a version of it that could\Nhelp other people.
+Dialogue: 0,0:06:58.34,0:06:59.14,Cap,,0,0,0,,Freelancers.
+Dialogue: 0,0:06:59.16,0:07:00.16,Cap,,0,0,0,,Small agencies.
+Dialogue: 0,0:07:00.19,0:07:05.38,Cap,,0,0,0,,Anyone building a business through outreach\Nwho needs a way to know what to do
+Dialogue: 0,0:07:05.54,0:07:07.74,Cap,,0,0,0,,today, and what worked last week.
+Dialogue: 0,0:07:07.81,0:07:09.47,Cap,,0,0,0,,But I want to be careful.
+Dialogue: 0,0:07:09.52,0:07:12.05,Cap,,0,0,0,,Right now I have exactly one user: me.
+Dialogue: 0,0:07:12.13,0:07:14.26,Cap,,0,0,0,,{\c&H1EB0F2&}Zero{\c&HFFFFFF&} customers for the software.
+Dialogue: 0,0:07:14.32,0:07:16.58,Cap,,0,0,0,,I'm not claiming anybody wants it.
+Dialogue: 0,0:07:16.65,0:07:18.38,Cap,,0,0,0,,I haven't proven anything.
+Dialogue: 0,0:07:18.44,0:07:20.50,Cap,,0,0,0,,What I do have is an advantage.
+Dialogue: 0,0:07:20.56,0:07:24.22,Cap,,0,0,0,,I'm building it from a problem I'm living\Nin real time.
+Dialogue: 0,0:07:24.34,0:07:29.06,Cap,,0,0,0,,Every feature exists because I either\Nneeded it, or found out I didn't.
+Dialogue: 0,0:07:29.21,0:07:34.59,Cap,,0,0,0,,A tool like this would have to be simple\Nenough that one person can use it in ten
+Dialogue: 0,0:07:34.76,0:07:39.49,Cap,,0,0,0,,minutes a day, and solid enough that a\Nsmall team could share it later.
+Dialogue: 0,0:07:39.63,0:07:40.83,Cap,,0,0,0,,That's the target.
+Dialogue: 0,0:07:40.87,0:07:43.73,Cap,,0,0,0,,I'm a long way from knowing if I've hit\Nit.
+Dialogue: 0,0:07:43.82,0:07:45.08,Cap,,0,0,0,,So here's the rule.
+Dialogue: 0,0:07:45.12,0:07:48.84,Cap,,0,0,0,,The software has to earn its place in my\Nown week first.
+Dialogue: 0,0:07:48.96,0:07:54.61,Cap,,0,0,0,,If I keep using it when I'm busy, and it keeps\Nshowing me things I would have missed,
+Dialogue: 0,0:07:54.79,0:07:55.85,Cap,,0,0,0,,that's a signal.
+Dialogue: 0,0:07:55.89,0:07:59.95,Cap,,0,0,0,,If I stop opening it, that's a signal too,\Nand I'll tell you.
+Dialogue: 0,0:08:00.07,0:08:04.99,Cap,,0,0,0,,Only then does it make sense to ask\Nwhether someone else would pay for it.
+Dialogue: 0,0:08:05.15,0:08:07.21,Cap,,0,0,0,,Two businesses, one {\c&H1EB0F2&}experiment.{\c&HFFFFFF&}
+Dialogue: 0,0:08:07.27,0:08:10.87,Cap,,0,0,0,,But the second one only exists if the\Nfirst one works.
+Dialogue: 0,0:08:11.88,0:08:13.16,Cap,,0,0,0,,So what happens next?
+Dialogue: 0,0:08:13.20,0:08:14.48,Cap,,0,0,0,,Here's the challenge.
+Dialogue: 0,0:08:18.04,0:08:19.81,Cap,,0,0,0,,Here's what I don't know yet.
+Dialogue: 0,0:08:19.86,0:08:21.94,Cap,,0,0,0,,Whether my offer is the right one.
+Dialogue: 0,0:08:22.00,0:08:23.59,Cap,,0,0,0,,Whether my price is right.
+Dialogue: 0,0:08:23.64,0:08:26.87,Cap,,0,0,0,,Whether the people I'm contacting will\Nanswer at all.
+Dialogue: 0,0:08:26.97,0:08:31.24,Cap,,0,0,0,,And whether this software is something\NI'll still be using in a month.
+Dialogue: 0,0:08:31.37,0:08:35.40,Cap,,0,0,0,,I'd rather say that out loud than pretend\NI've got it figured out.
+Dialogue: 0,0:08:35.53,0:08:36.26,Cap,,0,0,0,,Why film it?
+Dialogue: 0,0:08:36.28,0:08:39.94,Cap,,0,0,0,,Because there's a version of starting that\Nnobody shows you.
+Dialogue: 0,0:08:40.05,0:08:41.52,Cap,,0,0,0,,Not the polished launch.
+Dialogue: 0,0:08:41.56,0:08:44.86,Cap,,0,0,0,,The Tuesday where you send a message and\Nhear nothing.
+Dialogue: 0,0:08:44.96,0:08:47.16,Cap,,0,0,0,,The small change that finally works.
+Dialogue: 0,0:08:47.22,0:08:49.85,Cap,,0,0,0,,The numbers going up slowly, or not at\Nall.
+Dialogue: 0,0:08:49.93,0:08:54.87,Cap,,0,0,0,,If you're thinking about starting something,\NI want you to see that you can start
+Dialogue: 0,0:08:55.02,0:08:56.18,Cap,,0,0,0,,with what you have.
+Dialogue: 0,0:08:56.22,0:08:58.35,Cap,,0,0,0,,I'm not starting with a big budget.
+Dialogue: 0,0:08:58.42,0:09:02.87,Cap,,0,0,0,,I'm starting with a plan, a tool I'm\Nbuilding, and a list of real people.
+Dialogue: 0,0:09:03.01,0:09:04.23,Cap,,0,0,0,,In the next episode,
+Dialogue: 0,0:09:07.79,0:09:12.73,Cap,,0,0,0,,You can expect a long episode like this\Nregularly, with shorter clips in between,
+Dialogue: 0,0:09:12.89,0:09:15.57,Cap,,0,0,0,,built from whatever I actually did that\Nday.
+Dialogue: 0,0:09:15.65,0:09:18.52,Cap,,0,0,0,,If a week is quiet, I'll tell you it was\Nquiet.
+Dialogue: 0,0:09:18.61,0:09:22.51,Cap,,0,0,0,,If you want to watch whether this works,\Nor watch it fall apart,
+Dialogue: 0,0:09:22.63,0:09:24.28,Cap,,0,0,0,,subscribe and follow along.
+Dialogue: 0,0:09:24.33,0:09:25.86,Cap,,0,0,0,,I'll show you every step.
+Dialogue: 0,0:09:25.90,0:09:26.58,Cap,,0,0,0,,I'm Andrew.
+Dialogue: 0,0:09:26.60,0:09:28.79,Cap,,0,0,0,,This is the Bootstrapper {\c&H1EB0F2&}Experiment.{\c&HFFFFFF&}
+Dialogue: 0,0:09:28.86,0:09:30.26,Cap,,0,0,0,,Let's see what happens.

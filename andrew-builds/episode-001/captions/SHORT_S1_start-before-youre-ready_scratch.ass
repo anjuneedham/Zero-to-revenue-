@@ -1,0 +1,29 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Cap,Inter,58,&H00FFFFFF,&H00FFFFFF,&H601A0F0A,&H601A0F0A,1,0,0,0,100,100,0,0,3,14,0,2,60,60,430,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.40,0:00:03.24,Cap,,0,0,0,,I started contacting\Ncustomers before my tools
+Dialogue: 0,0:00:03.33,0:00:04.01,Cap,,0,0,0,,were ready.
+Dialogue: 0,0:00:04.03,0:00:05.76,Cap,,0,0,0,,Not because I was\Nconfident.
+Dialogue: 0,0:00:05.82,0:00:08.73,Cap,,0,0,0,,Because every week I\Nwaited, I learned nothing.
+Dialogue: 0,0:00:08.82,0:00:11.54,Cap,,0,0,0,,So I picked a small\Ngroup of real people and
+Dialogue: 0,0:00:11.62,0:00:13.05,Cap,,0,0,0,,sent the first message.
+Dialogue: 0,0:00:16.53,0:00:19.13,Cap,,0,0,0,,Then I built the tool to\Nkeep track of it.
+Dialogue: 0,0:00:19.21,0:00:20.01,Cap,,0,0,0,,A to-do list.
+Dialogue: 0,0:00:20.04,0:00:21.09,Cap,,0,0,0,,A follow-up date.
+Dialogue: 0,0:00:21.12,0:00:23.35,Cap,,0,0,0,,A place to write down\Nwhat happened.
+Dialogue: 0,0:00:23.42,0:00:25.96,Cap,,0,0,0,,You don't need the\Nperfect plan to start.
+Dialogue: 0,0:00:26.03,0:00:27.83,Cap,,0,0,0,,You need the next small\Nstep,
+Dialogue: 0,0:00:27.89,0:00:30.18,Cap,,0,0,0,,and somewhere to record\Nwhat happens.
+Dialogue: 0,0:00:30.25,0:00:30.93,Cap,,0,0,0,,I'm Andrew.
+Dialogue: 0,0:00:30.95,0:00:33.67,Cap,,0,0,0,,I'm building a business,\Nand the software to
+Dialogue: 0,0:00:33.76,0:00:34.25,Cap,,0,0,0,,run it.
+Dialogue: 0,0:00:34.27,0:00:35.07,Cap,,0,0,0,,Follow along.

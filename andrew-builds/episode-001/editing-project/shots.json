@@ -1,0 +1,623 @@
+{
+ "naming": "EP001_<shot>_<slug>_<YYYYMMDD>_v<nn>.<ext>  (A: screen-recordings/product-demo/, B/C: screen-recordings/ or raw-footage/)",
+ "shots": [
+  {
+   "id": "A01",
+   "cat": "A",
+   "slug": "today-empty",
+   "scene": "VO_004_SOFTWARE",
+   "purpose": "Show the starting point: an empty Today screen and the add-prospect form.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#today (empty database)",
+   "actions": [
+    "Let the page settle for 2s",
+    "Move the pointer to the 'Add a prospect' card",
+    "Type a fictional business name",
+    "Click 'Add prospect'"
+   ],
+   "visible": [
+    "Empty states with guidance text",
+    "Add-prospect form",
+    "Daily targets"
+   ],
+   "hidden": [
+    "Nothing personal exists in the database"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "25-35s",
+   "timeline": "Scene 4, opening of the software section",
+   "n": 1,
+   "file_pattern": "EP001_A01_today-empty_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A02",
+   "cat": "A",
+   "slug": "prospect-create-edit",
+   "scene": "VO_004_SOFTWARE / Short 1",
+   "purpose": "A prospect can be created with only a name and filled in later.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#pipeline then #prospect/<id>",
+   "actions": [
+    "Add a fictional business",
+    "Open Details",
+    "Enter industry, location, source, a deal value",
+    "Save"
+   ],
+   "visible": [
+    "Prospect header chips",
+    "Details form",
+    "Timeline entry 'Details updated'"
+   ],
+   "hidden": [
+    "No real data; DEMO DATA label burned in"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "40-55s",
+   "timeline": "Short 1 beat 3",
+   "n": 2,
+   "file_pattern": "EP001_A02_prospect-create-edit_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A03",
+   "cat": "A",
+   "slug": "playbook-run",
+   "scene": "VO_001_HOOK / VO_004_SOFTWARE / VO_005_EXECUTION",
+   "purpose": "A playbook is an executable, step-by-step process with saved progress.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#prospect/<id> (Playbook card)",
+   "actions": [
+    "Choose 'D. Initial outreach'",
+    "Start playbook",
+    "Tick step 1, then 2",
+    "Open 'Playbook guide'"
+   ],
+   "visible": [
+    "Step list with notes",
+    "Progress '1 of 4 steps'",
+    "Example messages in the guide"
+   ],
+   "hidden": [
+    "No real data"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "40-55s",
+   "timeline": "Scene 5 and scene 4",
+   "n": 3,
+   "file_pattern": "EP001_A03_playbook-run_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A04",
+   "cat": "A",
+   "slug": "log-outreach-followup",
+   "scene": "VO_005_EXECUTION / Short 1",
+   "purpose": "Recording a message and scheduling its follow-up in one step.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#prospect/<id> (Log message sent)",
+   "actions": [
+    "Click 'Log message sent'",
+    "Choose channel, name the approach, paste fictional text",
+    "Leave 'Follow up in (days)' at 3",
+    "Record sent"
+   ],
+   "visible": [
+    "Channel/approach fields",
+    "Timeline: message sent + follow-up scheduled"
+   ],
+   "hidden": [
+    "Fictional text only"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "40-55s",
+   "timeline": "Scene 5, around 'set a follow-up date'",
+   "n": 4,
+   "file_pattern": "EP001_A04_log-outreach-followup_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A05",
+   "cat": "A",
+   "slug": "today-populated",
+   "scene": "VO_001_HOOK / VO_004_SOFTWARE / VO_007_CLOSING",
+   "purpose": "The Today command centre with real-looking structure: targets, follow-ups, attention list, recent activity.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#today (demo data loaded)",
+   "actions": [
+    "Slow scroll from targets to follow-ups due",
+    "Pause on 'Needs attention'",
+    "Pause on recent activity"
+   ],
+   "visible": [
+    "Targets with progress",
+    "Follow-ups due and overdue",
+    "Rule-based recommendations"
+   ],
+   "hidden": [
+    "All businesses are fictional 'DEMO' names"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "35-50s",
+   "timeline": "Scene 1 cold open; scene 4",
+   "n": 5,
+   "file_pattern": "EP001_A05_today-populated_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A06",
+   "cat": "A",
+   "slug": "timeline-playback",
+   "scene": "VO_004_SOFTWARE / VO_006_OPPORTUNITY / Short 2",
+   "purpose": "Reconstruct one prospect's journey event by event.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#prospect/<id> (Playback card)",
+   "actions": [
+    "Open a prospect with a full history",
+    "Click Next four times",
+    "Press Play and let it run",
+    "Drag the slider back to the start"
+   ],
+   "visible": [
+    "Stage track highlighting the current stage",
+    "Event details with 'Happened' and 'recorded' times"
+   ],
+   "hidden": [
+    "Fictional names only"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "35-50s",
+   "timeline": "Scene 4 ('step through its history')",
+   "n": 6,
+   "file_pattern": "EP001_A06_timeline-playback_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A07",
+   "cat": "A",
+   "slug": "insights",
+   "scene": "VO_001_HOOK / VO_004_SOFTWARE / VO_006_OPPORTUNITY / Short 2",
+   "purpose": "Honest reporting: counts first, no percentages from tiny samples, facts vs hypotheses.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#insights",
+   "actions": [
+    "Scroll from the counts to the Conversion table",
+    "Pause on 'too few to read'",
+    "Scroll to 'What you've learned'"
+   ],
+   "visible": [
+    "Counts",
+    "'too few to read' notes",
+    "Fact / Hypothesis / Suggestion badges"
+   ],
+   "hidden": [
+    "Demo numbers only (labelled)"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "35-50s",
+   "timeline": "Scene 4 ('one of six, not seventeen percent')",
+   "n": 7,
+   "file_pattern": "EP001_A07_insights_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A08",
+   "cat": "A",
+   "slug": "playbook-editor",
+   "scene": "VO_004_SOFTWARE / VO_006_OPPORTUNITY / Short 3",
+   "purpose": "Playbooks are editable and duplicable for different offers.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#playbooks then #playbook/<id>",
+   "actions": [
+    "Open 'E. Follow-up'",
+    "Duplicate",
+    "Add a step",
+    "Move a step down",
+    "Save new version"
+   ],
+   "visible": [
+    "Step editor with Up/Down/Remove",
+    "'Version 2' after saving"
+   ],
+   "hidden": [
+    "No real data"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "40-55s",
+   "timeline": "Scene 4 and scene 6",
+   "n": 8,
+   "file_pattern": "EP001_A08_playbook-editor_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A09",
+   "cat": "A",
+   "slug": "pipeline-populated",
+   "scene": "VO_001_HOOK / VO_003_BUSINESS / VO_004_SOFTWARE / VO_006_OPPORTUNITY / Shorts",
+   "purpose": "Every prospect sits at a clear stage.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#pipeline (demo data)",
+   "actions": [
+    "Pause on the stage chips",
+    "Click 'Contacted'",
+    "Click 'Closed'",
+    "Open one prospect"
+   ],
+   "visible": [
+    "Stage chips with counts",
+    "Prospect rows with follow-up pills"
+   ],
+   "hidden": [
+    "Fictional names only"
+   ],
+   "orientation": "landscape 1600x1000",
+   "length": "30-45s",
+   "timeline": "Scene 1, 3, 4",
+   "n": 9,
+   "file_pattern": "EP001_A09_pipeline-populated_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A10",
+   "cat": "A",
+   "slug": "tablet-portrait-today",
+   "scene": "Short 2",
+   "purpose": "The Today screen at tablet-portrait width for vertical video.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#today (demo data), viewport 810x1440",
+   "actions": [
+    "Slow scroll from targets to follow-ups due",
+    "Pause on 'Needs attention'"
+   ],
+   "visible": [
+    "Targets, follow-ups, attention list"
+   ],
+   "hidden": [
+    "Fictional names only"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "30-40s",
+   "timeline": "Short 2 beats 1-2",
+   "n": 10,
+   "file_pattern": "EP001_A10_tablet-portrait-today_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A11",
+   "cat": "A",
+   "slug": "e2e-test-run",
+   "scene": "VO_004_SOFTWARE",
+   "purpose": "Proof that the journey was tested: the automated browser test driving the real app.",
+   "app": "Automated Playwright test against the local app",
+   "page": "whole app",
+   "actions": [
+    "(automatic) The 25-check journey runs"
+   ],
+   "visible": [
+    "The app being driven through the full journey"
+   ],
+   "hidden": [
+    "Fictional names only (prefix TEST)"
+   ],
+   "orientation": "landscape 1280x800",
+   "length": "~90s, use 6-10s excerpts",
+   "timeline": "Scene 4 ('tested the whole journey')",
+   "n": 11,
+   "file_pattern": "EP001_A11_e2e-test-run_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "A12",
+   "cat": "A",
+   "slug": "portrait-empty-then-add",
+   "scene": "Short 1",
+   "purpose": "Portrait hook: an empty Today screen, then the first prospect gets added.",
+   "app": "Zero-to-Revenue web app (Sales: Today / Pipeline / Playbooks / Insights), run locally",
+   "page": "#today (empty), viewport 810x1440",
+   "actions": [
+    "Show empty state",
+    "Type a fictional name into the add form",
+    "Add prospect"
+   ],
+   "visible": [
+    "Empty state",
+    "Add form"
+   ],
+   "hidden": [
+    "Nothing personal"
+   ],
+   "orientation": "portrait 810x1440",
+   "length": "20-30s",
+   "timeline": "Short 1 opening",
+   "n": 12,
+   "file_pattern": "EP001_A12_portrait-empty-then-add_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B01",
+   "cat": "B",
+   "slug": "real-pipeline",
+   "scene": "VO_003_BUSINESS",
+   "purpose": "Your real pipeline: the evidence behind 'I've started reaching out'.",
+   "app": "Zero-to-Revenue (your deployed or local app, real data)",
+   "page": "#pipeline",
+   "actions": [
+    "Back-fill your real prospects first (see OUTREACH_STATUS.md)",
+    "Open Pipeline, tap 'Active'",
+    "Tap 'Contacted' to show who has been messaged",
+    "Hold still 3s on each view"
+   ],
+   "visible": [
+    "Stage chips and counts"
+   ],
+   "hidden": [
+    "BLUR OR HIDE every business name, contact name, email, phone, handle (use 'Search' to avoid scrolling past names)"
+   ],
+   "orientation": "landscape (tablet sideways)",
+   "length": "20-30s",
+   "timeline": "Scene 3",
+   "n": 13,
+   "file_pattern": "EP001_B01_real-pipeline_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B02",
+   "cat": "B",
+   "slug": "real-outreach-compose",
+   "scene": "VO_001_HOOK / VO_005_EXECUTION / Short 1",
+   "purpose": "The real moment of writing and sending a first message.",
+   "app": "Whichever app you really send from (WhatsApp, Instagram, email)",
+   "page": "Message composer",
+   "actions": [
+    "Start the recording before you open the app",
+    "Write the real message at normal speed",
+    "Send it",
+    "Stop recording"
+   ],
+   "visible": [
+    "Your typing, the send action"
+   ],
+   "hidden": [
+    "Recipient name, number, handle and profile photo; hide notification shade; do not show the thread history"
+   ],
+   "orientation": "portrait or landscape (portrait if it also feeds Shorts)",
+   "length": "20-40s",
+   "timeline": "Scene 1 and scene 5 ('pressing send')",
+   "n": 14,
+   "file_pattern": "EP001_B02_real-outreach-compose_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B03",
+   "cat": "B",
+   "slug": "real-today-morning",
+   "scene": "VO_002_BACKGROUND / VO_005_EXECUTION / VO_007_CLOSING",
+   "purpose": "Starting a real working day from the Today screen.",
+   "app": "Zero-to-Revenue (real data)",
+   "page": "#today",
+   "actions": [
+    "Open the app fresh",
+    "Pause on targets and follow-ups due",
+    "Tap one follow-up"
+   ],
+   "visible": [
+    "Targets and what's due"
+   ],
+   "hidden": [
+    "Business names (blur in edit or use the Search view)"
+   ],
+   "orientation": "landscape",
+   "length": "25-40s",
+   "timeline": "Scene 5 and 7",
+   "n": 15,
+   "file_pattern": "EP001_B03_real-today-morning_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B04",
+   "cat": "B",
+   "slug": "real-log-message",
+   "scene": "VO_003_BUSINESS / VO_005_EXECUTION / Short 3",
+   "purpose": "Recording a real message and setting its follow-up date.",
+   "app": "Zero-to-Revenue (real data)",
+   "page": "#prospect/<id> > Log message sent",
+   "actions": [
+    "Open a real prospect",
+    "Tap 'Log message sent'",
+    "Pick channel and a short approach label",
+    "Do not paste the full message on camera if it names anyone",
+    "Leave follow-up at 3 days and record"
+   ],
+   "visible": [
+    "Form fields, the follow-up being scheduled"
+   ],
+   "hidden": [
+    "Business and contact names, message body if it names anyone"
+   ],
+   "orientation": "landscape",
+   "length": "25-40s",
+   "timeline": "Scene 5",
+   "n": 16,
+   "file_pattern": "EP001_B04_real-log-message_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B05",
+   "cat": "B",
+   "slug": "real-insights",
+   "scene": "VO_003_BUSINESS / VO_005_EXECUTION",
+   "purpose": "Your real numbers, whatever they are.",
+   "app": "Zero-to-Revenue (real data)",
+   "page": "#insights",
+   "actions": [
+    "Open Insights",
+    "Pause on the counts for 4s",
+    "Scroll to 'What you've learned'"
+   ],
+   "visible": [
+    "Counts and honesty notes"
+   ],
+   "hidden": [
+    "Nothing sensitive; names only appear in the business timeline at the bottom, so do not scroll there"
+   ],
+   "orientation": "landscape",
+   "length": "20-30s",
+   "timeline": "Scene 3 status line",
+   "n": 17,
+   "file_pattern": "EP001_B05_real-insights_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B06",
+   "cat": "B",
+   "slug": "desk-broll",
+   "scene": "VO_001_HOOK / VO_002_BACKGROUND / VO_007_CLOSING / Shorts",
+   "purpose": "Who is building this and where.",
+   "app": "Camera (phone)",
+   "page": "n/a",
+   "actions": [
+    "Film your workspace in daylight",
+    "Slow pan, 10s each: desk, hands on the tablet, screen in the background",
+    "Optionally 10s to camera: 'I'm Andrew'"
+   ],
+   "visible": [
+    "Your desk, the tablet"
+   ],
+   "hidden": [
+    "Mail, documents, other screens, family, anything with addresses"
+   ],
+   "orientation": "landscape 4K or 1080p, 30fps",
+   "length": "30-60s total",
+   "timeline": "Scenes 1, 2, 7; Shorts 1 and 3",
+   "n": 18,
+   "file_pattern": "EP001_B06_desk-broll_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B07",
+   "cat": "B",
+   "slug": "tablet-hands",
+   "scene": "VO_002_BACKGROUND / VO_006_OPPORTUNITY / VO_007_CLOSING",
+   "purpose": "Hands-on-device texture for the product scenes.",
+   "app": "Camera (phone)",
+   "page": "n/a",
+   "actions": [
+    "Film your hands using the tablet, 15s",
+    "Keep the screen angled away or showing only the app shell"
+   ],
+   "visible": [
+    "Hands and device"
+   ],
+   "hidden": [
+    "Screen content that shows names or messages"
+   ],
+   "orientation": "landscape",
+   "length": "15-30s",
+   "timeline": "Scenes 2, 6, 7",
+   "n": 19,
+   "file_pattern": "EP001_B07_tablet-hands_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B08",
+   "cat": "B",
+   "slug": "dev-environment",
+   "scene": "VO_002_BACKGROUND",
+   "purpose": "You actually building the software.",
+   "app": "Your editor / terminal / browser dev tools",
+   "page": "n/a",
+   "actions": [
+    "Record 30s of real work in the editor or terminal on the Zero-to-Revenue repo",
+    "Run the tests once on camera"
+   ],
+   "visible": [
+    "Code, test output"
+   ],
+   "hidden": [
+    "ANY .env file, API keys, tokens, database URLs, secrets, private repo names you do not want public"
+   ],
+   "orientation": "landscape",
+   "length": "30-60s",
+   "timeline": "Scene 2",
+   "n": 20,
+   "file_pattern": "EP001_B08_dev-environment_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "B09",
+   "cat": "B",
+   "slug": "real-today-portrait",
+   "scene": "Shorts 1 and 2 (replaces A10 once real data exists)",
+   "purpose": "Vertical footage of your real Today screen.",
+   "app": "Zero-to-Revenue (real data)",
+   "page": "#today, tablet portrait",
+   "actions": [
+    "Rotate the tablet to portrait",
+    "Record the Today screen, slow scroll",
+    "Blur names in the edit"
+   ],
+   "visible": [
+    "Targets and follow-ups"
+   ],
+   "hidden": [
+    "Business names"
+   ],
+   "orientation": "portrait",
+   "length": "20-30s",
+   "timeline": "Shorts",
+   "n": 21,
+   "file_pattern": "EP001_B09_real-today-portrait_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "C01",
+   "cat": "C",
+   "slug": "first-reply",
+   "scene": "VO_005_EXECUTION (optional)",
+   "purpose": "A real reply arriving. Only if it happens; never staged.",
+   "app": "Wherever the reply arrives",
+   "page": "Notification / thread",
+   "actions": [
+    "Screen-record when a real reply lands",
+    "Then log it with 'Log response' on camera"
+   ],
+   "visible": [
+    "The moment of notice; then the log form"
+   ],
+   "hidden": [
+    "Sender identity, message content unless they agree"
+   ],
+   "orientation": "portrait or landscape",
+   "length": "15-30s",
+   "timeline": "Scene 5 (optional)",
+   "n": 22,
+   "file_pattern": "EP001_C01_first-reply_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "C02",
+   "cat": "C",
+   "slug": "first-call-or-meeting",
+   "scene": "Future episode",
+   "purpose": "A discovery call or meeting. Ask permission before recording anyone.",
+   "app": "Phone/Meet",
+   "page": "n/a",
+   "actions": [
+    "Get explicit consent first",
+    "Record audio only if they agree"
+   ],
+   "visible": [
+    "n/a"
+   ],
+   "hidden": [
+    "Their face, name, business unless they approve"
+   ],
+   "orientation": "n/a",
+   "length": "n/a",
+   "timeline": "Episode 002+",
+   "n": 23,
+   "file_pattern": "EP001_C02_first-call-or-meeting_<YYYYMMDD>_v<nn>.<ext>"
+  },
+  {
+   "id": "C03",
+   "cat": "C",
+   "slug": "first-payment",
+   "scene": "Future episode",
+   "purpose": "A real, verified payment. Do not stage; do not show until Treasury verifies it.",
+   "app": "Zero-to-Revenue Treasury page",
+   "page": "#treasury",
+   "actions": [
+    "Only after the payment is verified"
+   ],
+   "visible": [
+    "Verified status"
+   ],
+   "hidden": [
+    "Account numbers, payer details"
+   ],
+   "orientation": "landscape",
+   "length": "15-30s",
+   "timeline": "Episode 002+",
+   "n": 24,
+   "file_pattern": "EP001_C03_first-payment_<YYYYMMDD>_v<nn>.<ext>"
+  }
+ ]
+}

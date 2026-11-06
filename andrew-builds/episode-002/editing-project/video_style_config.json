@@ -1,0 +1,52 @@
+{
+  "_readme": "VIDEO_STYLE_CONFIG for Andrew Builds. Edit values here to restyle every episode and short without touching code. No official Andrew Builds brand assets were found in the attached repositories, so these are placeholder brand values: replace them with your real brand.",
+  "brand": {
+    "name": "Andrew Builds",
+    "primary_font_file": "/usr/share/fonts/opentype/inter/InterDisplay-Bold.otf",
+    "secondary_font_file": "/usr/share/fonts/opentype/inter/Inter-Medium.otf",
+    "caption_font_name": "Inter",
+    "fonts_dir": "/usr/share/fonts/opentype/inter",
+    "colors": { "background": "#0A0F1A", "text": "#F5F7FA", "highlight": "#F2B01E", "muted": "#8A97AD", "slate": "#141B2B" }
+  },
+  "text": {
+    "heading_size": { "horizontal": 84, "vertical": 96 },
+    "lower_third_size": { "horizontal": 40, "vertical": 46 },
+    "caption_size": { "horizontal": 46, "vertical": 58 },
+    "caption_position": { "horizontal": "bottom", "vertical": "lower-middle" },
+    "caption_margin_v": { "horizontal": 70, "vertical": 430 },
+    "caption_background_opacity": 0.62,
+    "caption_max_chars_per_line": { "horizontal": 42, "vertical": 24 },
+    "caption_max_lines": 2,
+    "caption_highlight_words": ["follow-up", "follow-ups", "zero", "playbook", "playbooks", "pipeline", "experiment", "evidence"]
+  },
+  "motion": {
+    "transition": "dip",
+    "transition_s": 0.22,
+    "zoom_intensity": 0.0,
+    "intro_s": 0,
+    "outro_s": 0
+  },
+  "audio": {
+    "narration_target_lufs": -16,
+    "true_peak_db": -1.5,
+    "music_file": null,
+    "music_db": -22,
+    "music_duck_db": -12,
+    "sound_effect_db": -18,
+    "lead_in_s": 0.4,
+    "tail_s": 0.5
+  },
+  "video": {
+    "horizontal": { "width": 1920, "height": 1080 },
+    "vertical": { "width": 1080, "height": 1920 },
+    "fps": 30,
+    "export_resolution": "1920x1080 (long) / 1080x1920 (shorts)",
+    "crf": 20,
+    "preset": "medium",
+    "maxrate": "12M",
+    "bufsize": "24M",
+    "audio_bitrate": "192k"
+  },
+  "captions": { "burn_in_long": true, "burn_in_short": true },
+  "proof": { "watermark": true, "watermark_text": "ASSEMBLY PROOF - NOT FOR PUBLISHING" }
+}

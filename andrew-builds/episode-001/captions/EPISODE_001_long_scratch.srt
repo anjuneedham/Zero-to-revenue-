@@ -1,0 +1,891 @@
+1
+00:00:00,400 --> 00:00:03,474
+What if I stopped waiting for the perfect
+idea?
+
+2
+00:00:03,569 --> 00:00:04,942
+The perfect software.
+
+3
+00:00:04,985 --> 00:00:06,227
+The perfect moment.
+
+4
+00:00:06,266 --> 00:00:07,770
+What if I just started?
+
+5
+00:00:07,816 --> 00:00:08,797
+I already have.
+
+6
+00:00:08,828 --> 00:00:11,313
+I've begun reaching out to businesses,
+
+7
+00:00:15,165 --> 00:00:19,939
+so far, and I'm trying to turn those
+conversations into paying customers.
+
+8
+00:00:20,087 --> 00:00:23,749
+But there's a second experiment hiding
+inside the first.
+
+9
+00:00:23,862 --> 00:00:27,394
+I'm also building the software I use to
+run all of it.
+
+10
+00:00:27,503 --> 00:00:28,353
+The pipeline.
+
+11
+00:00:28,380 --> 00:00:29,361
+The follow-ups.
+
+12
+00:00:29,391 --> 00:00:30,307
+The playbooks.
+
+13
+00:00:30,335 --> 00:00:34,847
+Every step I take, tracked in a tool that
+I'm writing while I use it.
+
+14
+00:00:34,987 --> 00:00:39,565
+If it works, I could end up with two
+businesses out of one experiment.
+
+15
+00:00:39,706 --> 00:00:43,042
+If it doesn't, you'll get to watch me find
+out why.
+
+16
+00:00:43,145 --> 00:00:43,864
+I'm Andrew.
+
+17
+00:00:43,886 --> 00:00:46,241
+This is the Bootstrapper Experiment.
+
+18
+00:00:46,314 --> 00:00:47,098
+Episode one.
+
+19
+00:00:48,023 --> 00:00:50,538
+Quick background, and I'll keep it short.
+
+20
+00:00:50,615 --> 00:00:53,499
+I've spent years in sales and customer
+service.
+
+21
+00:00:53,588 --> 00:00:57,759
+I've run my own businesses, and I've
+helped other people run theirs.
+
+22
+00:01:01,429 --> 00:01:05,048
+These days, a lot of what I do is use AI
+to build websites,
+
+23
+00:01:05,160 --> 00:01:08,411
+funnels and small apps that solve a
+specific problem.
+
+24
+00:01:08,512 --> 00:01:11,088
+Here's what I've learned from all of that.
+
+25
+00:01:11,168 --> 00:01:13,008
+Building is the easy part now.
+
+26
+00:01:13,065 --> 00:01:17,788
+The hard part is the thing nobody films:
+getting the first people to say yes.
+
+27
+00:01:17,935 --> 00:01:20,143
+I'm not saying that to sound clever.
+
+28
+00:01:20,211 --> 00:01:24,137
+I can get a working page or app live much
+faster than I used to.
+
+29
+00:01:24,258 --> 00:01:28,062
+Getting someone to care about it hasn't
+got any faster at all.
+
+30
+00:01:28,179 --> 00:01:32,964
+About two weeks ago I built a system that
+went out and found opportunities for
+
+31
+00:01:33,112 --> 00:01:33,602
+me.
+
+32
+00:01:33,618 --> 00:01:36,623
+It found over a hundred that it called
+qualified.
+
+33
+00:01:36,716 --> 00:01:39,599
+Verified revenue from that system, at the
+time?
+
+34
+00:01:39,689 --> 00:01:40,179
+Zero.
+
+35
+00:01:40,194 --> 00:01:44,120
+Those two numbers, side by side, taught me
+more than any course.
+
+36
+00:01:44,242 --> 00:01:46,143
+A big list looks like progress.
+
+37
+00:01:46,202 --> 00:01:46,754
+It isn't.
+
+38
+00:01:46,771 --> 00:01:48,612
+So I'm doing this differently.
+
+39
+00:01:52,210 --> 00:01:57,178
+And I'm doing it in public, because a story
+with only the wins in it isn't useful
+
+40
+00:01:57,332 --> 00:01:57,946
+to anyone.
+
+41
+00:01:57,964 --> 00:01:59,375
+You'll see the numbers.
+
+42
+00:01:59,419 --> 00:02:00,830
+Including the bad ones.
+
+43
+00:02:01,773 --> 00:02:03,397
+So what's the actual business?
+
+44
+00:02:06,570 --> 00:02:07,490
+The customers are
+
+45
+00:02:10,642 --> 00:02:11,670
+How do I find them?
+
+46
+00:02:11,701 --> 00:02:13,108
+Not the way I first tried.
+
+47
+00:02:13,152 --> 00:02:17,372
+I tested a proper business-contact
+database, and it simply doesn't cover small
+
+48
+00:02:17,502 --> 00:02:18,205
+local trades.
+
+49
+00:02:18,227 --> 00:02:22,068
+So I'm starting where the real
+conversations are: businesses I can see,
+
+50
+00:02:22,187 --> 00:02:24,838
+people I know, and people I can be
+introduced to.
+
+51
+00:02:24,920 --> 00:02:26,814
+The plan from the start was simple.
+
+52
+00:02:26,872 --> 00:02:30,389
+Pick a small group of real contacts, send
+a real message to each,
+
+53
+00:02:30,498 --> 00:02:31,742
+and watch what happens.
+
+54
+00:02:31,780 --> 00:02:32,971
+Not a thousand emails.
+
+55
+00:02:33,008 --> 00:02:34,468
+Ten or fifteen honest ones.
+
+56
+00:02:34,513 --> 00:02:37,705
+I know ten or fifteen conversations won't
+prove a business.
+
+57
+00:02:37,804 --> 00:02:39,049
+They're a first sample.
+
+58
+00:02:39,087 --> 00:02:42,063
+What they will tell me is whether people
+answer at all,
+
+59
+00:02:42,155 --> 00:02:44,697
+which words get a reply, and where I get
+stuck.
+
+60
+00:02:44,776 --> 00:02:47,157
+Right now that's worth more than a big
+list.
+
+61
+00:02:50,354 --> 00:02:52,247
+I want to be clear about one thing.
+
+62
+00:02:52,306 --> 00:02:53,225
+As I record this,
+
+63
+00:02:56,377 --> 00:02:56,810
+.
+
+64
+00:02:56,823 --> 00:03:00,070
+When that changes, you'll see the proof,
+not just the claim.
+
+65
+00:03:01,070 --> 00:03:05,146
+Now the software, because this is where it
+gets interesting.
+
+66
+00:03:05,272 --> 00:03:09,279
+When you do outreach, the work isn't just
+sending messages.
+
+67
+00:03:09,403 --> 00:03:10,558
+It's remembering.
+
+68
+00:03:10,594 --> 00:03:11,816
+Who did I contact?
+
+69
+00:03:11,854 --> 00:03:12,873
+What did I say?
+
+70
+00:03:12,904 --> 00:03:13,923
+Did they reply?
+
+71
+00:03:13,955 --> 00:03:15,585
+When should I follow up?
+
+72
+00:03:15,636 --> 00:03:17,673
+Which message actually worked?
+
+73
+00:03:17,736 --> 00:03:22,084
+If that lives in your head, or scattered
+across notes and chats,
+
+74
+00:03:22,218 --> 00:03:24,460
+you can't learn anything from it.
+
+75
+00:03:24,529 --> 00:03:26,838
+You just repeat yourself and hope.
+
+76
+00:03:26,910 --> 00:03:29,491
+So I'm building the tool I wish I had.
+
+77
+00:03:29,571 --> 00:03:33,171
+It has a Today screen that tells me what
+to do first:
+
+78
+00:03:33,282 --> 00:03:37,630
+who's due for a follow-up, who replied,
+and who's going nowhere.
+
+79
+00:03:37,764 --> 00:03:41,772
+It has a pipeline, so every business sits
+at a clear stage,
+
+80
+00:03:41,896 --> 00:03:44,477
+from just found, to customer, or lost.
+
+81
+00:03:44,557 --> 00:03:45,983
+And it has playbooks.
+
+82
+00:03:46,027 --> 00:03:51,733
+Every task has a priority and a due date,
+and every task points back to the business
+
+83
+00:03:51,909 --> 00:03:52,860
+it belongs to.
+
+84
+00:03:52,890 --> 00:03:54,995
+So Today isn't a wall of notes.
+
+85
+00:03:55,061 --> 00:03:57,778
+It's a short list I can actually finish.
+
+86
+00:03:57,862 --> 00:04:03,024
+I set daily targets, like five prospects
+researched and five first messages,
+
+87
+00:04:03,184 --> 00:04:06,852
+and I can change them whenever they stop
+making sense.
+
+88
+00:04:06,965 --> 00:04:09,750
+A playbook is a set of steps for one job.
+
+89
+00:04:09,836 --> 00:04:11,398
+Researching a prospect.
+
+90
+00:04:11,447 --> 00:04:13,077
+Writing a first message.
+
+91
+00:04:13,127 --> 00:04:14,010
+Following up.
+
+92
+00:04:14,038 --> 00:04:15,532
+Handling an objection.
+
+93
+00:04:15,578 --> 00:04:19,586
+There are twelve to start with, and
+they're fully editable,
+
+94
+00:04:19,710 --> 00:04:22,223
+because my offer won't be your offer.
+
+95
+00:04:22,301 --> 00:04:24,203
+Everything I do gets logged.
+
+96
+00:04:24,262 --> 00:04:27,998
+Open any business and you can step through
+its history,
+
+97
+00:04:28,113 --> 00:04:31,170
+event by event, to see exactly what
+happened.
+
+98
+00:04:31,264 --> 00:04:33,370
+Nothing gets quietly rewritten.
+
+99
+00:04:33,435 --> 00:04:36,152
+And the reports are deliberately honest.
+
+100
+00:04:36,236 --> 00:04:40,787
+If I've sent six messages and one got a
+reply, it shows one of six.
+
+101
+00:04:40,928 --> 00:04:42,422
+Not seventeen percent.
+
+102
+00:04:42,469 --> 00:04:44,710
+Six isn't enough to say anything.
+
+103
+00:04:44,779 --> 00:04:48,312
+What it doesn't do: it doesn't send
+messages for me,
+
+104
+00:04:48,421 --> 00:04:50,798
+and it doesn't pretend to be smart.
+
+105
+00:04:50,872 --> 00:04:52,842
+There's no AI judge in there.
+
+106
+00:04:52,903 --> 00:04:56,571
+It records what I do, and it shows me what
+I recorded.
+
+107
+00:04:56,684 --> 00:05:00,895
+I've tested the whole journey, from first
+note to closed deal,
+
+108
+00:05:01,026 --> 00:05:03,471
+in a browser, on made-up businesses.
+
+109
+00:05:08,368 --> 00:05:09,959
+Planning is comfortable.
+
+110
+00:05:10,008 --> 00:05:12,129
+Execution is where it gets real.
+
+111
+00:05:12,194 --> 00:05:14,713
+Here's how a working session goes now.
+
+112
+00:05:14,791 --> 00:05:16,381
+I open the Today screen.
+
+113
+00:05:16,430 --> 00:05:17,756
+It shows what's due.
+
+114
+00:05:17,797 --> 00:05:20,580
+I pick a business and start with research.
+
+115
+00:05:20,666 --> 00:05:22,058
+Ten minutes, no more.
+
+116
+00:05:22,101 --> 00:05:25,614
+I write down one specific thing I noticed
+about them,
+
+117
+00:05:25,722 --> 00:05:27,578
+something true and relevant.
+
+118
+00:05:27,635 --> 00:05:31,943
+That's what keeps the message from
+sounding like everyone else's.
+
+119
+00:05:32,076 --> 00:05:35,191
+Then I decide whether they're worth
+contacting.
+
+120
+00:05:35,288 --> 00:05:36,878
+Qualified, maybe, or no.
+
+121
+00:05:36,927 --> 00:05:38,584
+Writing no down is a win.
+
+122
+00:05:38,636 --> 00:05:39,762
+It saves me time.
+
+123
+00:05:39,797 --> 00:05:42,117
+I'm trying to be strict about this.
+
+124
+00:05:42,188 --> 00:05:47,490
+A business I like the idea of isn't the
+same as a business that actually has the
+
+125
+00:05:47,654 --> 00:05:48,715
+problem I solve.
+
+126
+00:05:48,748 --> 00:05:52,127
+If it's a yes, I follow the first-message
+playbook.
+
+127
+00:05:52,232 --> 00:05:53,027
+One channel.
+
+128
+00:05:53,052 --> 00:05:54,245
+One short message.
+
+129
+00:05:54,282 --> 00:05:55,541
+One small question.
+
+130
+00:05:55,580 --> 00:06:00,219
+I give the approach a name, so I can
+compare it with the others later.
+
+131
+00:06:00,363 --> 00:06:03,743
+Then comes the part that's genuinely
+uncomfortable:
+
+132
+00:06:03,847 --> 00:06:04,775
+pressing send.
+
+133
+00:06:08,630 --> 00:06:13,799
+After I send it, I log it, and I set a
+follow-up date before I close the form.
+
+134
+00:06:13,959 --> 00:06:16,411
+That small habit is the whole system.
+
+135
+00:06:16,487 --> 00:06:20,331
+A message with no follow-up date is a
+message I'll forget.
+
+136
+00:06:24,276 --> 00:06:28,981
+And when someone replies, I record it, and
+the tool moves them forward.
+
+137
+00:06:29,127 --> 00:06:29,790
+A meeting.
+
+138
+00:06:29,810 --> 00:06:30,539
+A proposal.
+
+139
+00:06:30,562 --> 00:06:31,490
+A yes or a no.
+
+140
+00:06:31,518 --> 00:06:32,976
+Each step gets a date.
+
+141
+00:06:33,021 --> 00:06:36,269
+The numbers that matter right now aren't
+revenue.
+
+142
+00:06:36,369 --> 00:06:37,430
+They're simpler.
+
+143
+00:06:37,462 --> 00:06:39,583
+How many real messages went out.
+
+144
+00:06:39,649 --> 00:06:41,968
+How many follow-ups I actually did.
+
+145
+00:06:42,040 --> 00:06:43,631
+How many people replied.
+
+146
+00:06:43,680 --> 00:06:45,204
+None of this is clever.
+
+147
+00:06:45,251 --> 00:06:46,378
+That's the point.
+
+148
+00:06:46,413 --> 00:06:49,064
+It's a way to turn effort into evidence.
+
+149
+00:06:50,046 --> 00:06:51,842
+Here's the bigger question.
+
+150
+00:06:51,898 --> 00:06:54,093
+Could this software be a product?
+
+151
+00:06:54,161 --> 00:06:58,220
+I think there's a version of it that could
+help other people.
+
+152
+00:06:58,345 --> 00:06:59,144
+Freelancers.
+
+153
+00:06:59,168 --> 00:07:00,166
+Small agencies.
+
+154
+00:07:00,197 --> 00:07:05,387
+Anyone building a business through outreach
+who needs a way to know what to do
+
+155
+00:07:05,547 --> 00:07:07,743
+today, and what worked last week.
+
+156
+00:07:07,811 --> 00:07:09,474
+But I want to be careful.
+
+157
+00:07:09,525 --> 00:07:12,054
+Right now I have exactly one user: me.
+
+158
+00:07:12,132 --> 00:07:14,261
+Zero customers for the software.
+
+159
+00:07:14,327 --> 00:07:16,589
+I'm not claiming anybody wants it.
+
+160
+00:07:16,659 --> 00:07:18,389
+I haven't proven anything.
+
+161
+00:07:18,442 --> 00:07:20,505
+What I do have is an advantage.
+
+162
+00:07:20,568 --> 00:07:24,228
+I'm building it from a problem I'm living
+in real time.
+
+163
+00:07:24,341 --> 00:07:29,065
+Every feature exists because I either
+needed it, or found out I didn't.
+
+164
+00:07:29,211 --> 00:07:34,600
+A tool like this would have to be simple
+enough that one person can use it in ten
+
+165
+00:07:34,766 --> 00:07:39,490
+minutes a day, and solid enough that a
+small team could share it later.
+
+166
+00:07:39,636 --> 00:07:40,834
+That's the target.
+
+167
+00:07:40,871 --> 00:07:43,732
+I'm a long way from knowing if I've hit
+it.
+
+168
+00:07:43,820 --> 00:07:45,084
+So here's the rule.
+
+169
+00:07:45,123 --> 00:07:48,849
+The software has to earn its place in my
+own week first.
+
+170
+00:07:48,965 --> 00:07:54,620
+If I keep using it when I'm busy, and it keeps
+showing me things I would have missed,
+
+171
+00:07:54,795 --> 00:07:55,859
+that's a signal.
+
+172
+00:07:55,892 --> 00:07:59,951
+If I stop opening it, that's a signal too,
+and I'll tell you.
+
+173
+00:08:00,076 --> 00:08:04,999
+Only then does it make sense to ask
+whether someone else would pay for it.
+
+174
+00:08:05,152 --> 00:08:07,214
+Two businesses, one experiment.
+
+175
+00:08:07,278 --> 00:08:10,871
+But the second one only exists if the
+first one works.
+
+176
+00:08:11,882 --> 00:08:13,163
+So what happens next?
+
+177
+00:08:13,203 --> 00:08:14,484
+Here's the challenge.
+
+178
+00:08:18,046 --> 00:08:19,815
+Here's what I don't know yet.
+
+179
+00:08:19,870 --> 00:08:21,944
+Whether my offer is the right one.
+
+180
+00:08:22,008 --> 00:08:23,594
+Whether my price is right.
+
+181
+00:08:23,643 --> 00:08:26,877
+Whether the people I'm contacting will
+answer at all.
+
+182
+00:08:26,977 --> 00:08:31,247
+And whether this software is something
+I'll still be using in a month.
+
+183
+00:08:31,379 --> 00:08:35,406
+I'd rather say that out loud than pretend
+I've got it figured out.
+
+184
+00:08:35,531 --> 00:08:36,263
+Why film it?
+
+185
+00:08:36,285 --> 00:08:39,946
+Because there's a version of starting that
+nobody shows you.
+
+186
+00:08:40,059 --> 00:08:41,523
+Not the polished launch.
+
+187
+00:08:41,569 --> 00:08:44,863
+The Tuesday where you send a message and
+hear nothing.
+
+188
+00:08:44,965 --> 00:08:47,161
+The small change that finally works.
+
+189
+00:08:47,229 --> 00:08:49,852
+The numbers going up slowly, or not at
+all.
+
+190
+00:08:49,934 --> 00:08:54,875
+If you're thinking about starting something,
+I want you to see that you can start
+
+191
+00:08:55,028 --> 00:08:56,187
+with what you have.
+
+192
+00:08:56,223 --> 00:08:58,358
+I'm not starting with a big budget.
+
+193
+00:08:58,424 --> 00:09:02,878
+I'm starting with a plan, a tool I'm
+building, and a list of real people.
+
+194
+00:09:03,016 --> 00:09:04,236
+In the next episode,
+
+195
+00:09:07,796 --> 00:09:12,738
+You can expect a long episode like this
+regularly, with shorter clips in between,
+
+196
+00:09:12,890 --> 00:09:15,575
+built from whatever I actually did that
+day.
+
+197
+00:09:15,658 --> 00:09:18,525
+If a week is quiet, I'll tell you it was
+quiet.
+
+198
+00:09:18,614 --> 00:09:22,518
+If you want to watch whether this works,
+or watch it fall apart,
+
+199
+00:09:22,639 --> 00:09:24,286
+subscribe and follow along.
+
+200
+00:09:24,337 --> 00:09:25,863
+I'll show you every step.
+
+201
+00:09:25,910 --> 00:09:26,581
+I'm Andrew.
+
+202
+00:09:26,602 --> 00:09:28,798
+This is the Bootstrapper Experiment.
+
+203
+00:09:28,866 --> 00:09:30,269
+Let's see what happens.
+

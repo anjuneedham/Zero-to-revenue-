@@ -1,0 +1,32 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Cap,Inter,58,&H00FFFFFF,&H00FFFFFF,&H601A0F0A,&H601A0F0A,1,0,0,0,100,100,0,0,3,14,0,2,60,60,430,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.40,0:00:02.16,Cap,,0,0,0,,Outreach gets messy\Nfast.
+Dialogue: 0,0:00:02.22,0:00:03.49,Cap,,0,0,0,,Who did I message?
+Dialogue: 0,0:00:03.53,0:00:04.59,Cap,,0,0,0,,What did I say?
+Dialogue: 0,0:00:04.62,0:00:06.60,Cap,,0,0,0,,Who needs a follow-up\Ntoday?
+Dialogue: 0,0:00:06.66,0:00:09.00,Cap,,0,0,0,,If the answer lives in\Nyour head,
+Dialogue: 0,0:00:09.07,0:00:10.20,Cap,,0,0,0,,you will forget.
+Dialogue: 0,0:00:10.24,0:00:13.13,Cap,,0,0,0,,So I'm building the tool\Nthat answers it.
+Dialogue: 0,0:00:13.22,0:00:14.92,Cap,,0,0,0,,This is my Today screen.
+Dialogue: 0,0:00:14.97,0:00:16.03,Cap,,0,0,0,,Follow-ups due.
+Dialogue: 0,0:00:16.07,0:00:16.92,Cap,,0,0,0,,Who replied.
+Dialogue: 0,0:00:16.94,0:00:18.07,Cap,,0,0,0,,What to do next.
+Dialogue: 0,0:00:18.11,0:00:21.15,Cap,,0,0,0,,Every business has a\Nstage in the {\c&H1EB0F2&}pipeline,{\c&HFFFFFF&}
+Dialogue: 0,0:00:21.24,0:00:23.93,Cap,,0,0,0,,and a full history I can\Nstep through,
+Dialogue: 0,0:00:24.01,0:00:25.07,Cap,,0,0,0,,event by event.
+Dialogue: 0,0:00:25.11,0:00:27.37,Cap,,0,0,0,,It doesn't send anything\Nfor me,
+Dialogue: 0,0:00:27.44,0:00:28.92,Cap,,0,0,0,,and it doesn't guess.
+Dialogue: 0,0:00:28.97,0:00:32.57,Cap,,0,0,0,,It records what I do, and\Nshows me what I recorded.
+Dialogue: 0,0:00:32.69,0:00:35.44,Cap,,0,0,0,,I'm building it around\Nmy own outreach,
+Dialogue: 0,0:00:35.53,0:00:37.65,Cap,,0,0,0,,and I'll tell you if it\Nworks.
+Dialogue: 0,0:00:37.72,0:00:38.71,Cap,,0,0,0,,Andrew Builds.

@@ -1,0 +1,111 @@
+{
+ "A12": {
+  "file": "EP001_A12_portrait-empty-then-add_v01.webm",
+  "start_offset_s": 1.7,
+  "duration_s": 16.4,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:15:53.080Z"
+ },
+ "A01": {
+  "file": "EP001_A01_today-empty_v01.webm",
+  "start_offset_s": 1.6,
+  "duration_s": 14.8,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:16:13.378Z"
+ },
+ "A02": {
+  "file": "EP001_A02_prospect-create-edit_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 25.5,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:16:40.105Z"
+ },
+ "A03": {
+  "file": "EP001_A03_playbook-run_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 26.7,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:17:07.856Z"
+ },
+ "A04": {
+  "file": "EP001_A04_log-outreach-followup_v01.webm",
+  "start_offset_s": 2.6,
+  "duration_s": 25.9,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:17:34.712Z"
+ },
+ "A05": {
+  "file": "EP001_A05_today-populated_v01.webm",
+  "start_offset_s": 1.6,
+  "duration_s": 19.8,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:17:55.958Z"
+ },
+ "A09": {
+  "file": "EP001_A09_pipeline-populated_v01.webm",
+  "start_offset_s": 2.7,
+  "duration_s": 21.6,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:18:18.607Z"
+ },
+ "A06": {
+  "file": "EP001_A06_timeline-playback_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 34.1,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:18:53.930Z"
+ },
+ "A07": {
+  "file": "EP001_A07_insights_v01.webm",
+  "start_offset_s": 2.6,
+  "duration_s": 19.3,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:19:14.595Z"
+ },
+ "A08": {
+  "file": "EP001_A08_playbook-editor_v01.webm",
+  "start_offset_s": 2.5,
+  "duration_s": 27.6,
+  "viewport": "1600x1000",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:19:43.307Z"
+ },
+ "A10": {
+  "file": "EP001_A10_tablet-portrait-today_v01.webm",
+  "start_offset_s": 1.7,
+  "duration_s": 19.4,
+  "viewport": "810x1440",
+  "data": "DEMO",
+  "burned_label": true,
+  "captured": "2026-11-06T21:20:03.353Z"
+ },
+ "A11": {
+  "file": "EP001_A11_e2e-test-run_v01.webm",
+  "start_offset_s": 0,
+  "duration_s": null,
+  "viewport": "1280x800",
+  "data": "TEST",
+  "burned_label": false,
+  "label": "AUTOMATED TEST RUN · made-up data",
+  "captured": "2026-11-06T21:20:03.357Z"
+ }
+}

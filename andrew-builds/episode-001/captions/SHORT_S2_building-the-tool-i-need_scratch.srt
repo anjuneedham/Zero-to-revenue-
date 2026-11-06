@@ -1,0 +1,90 @@
+1
+00:00:00,400 --> 00:00:02,168
+Outreach gets messy
+fast.
+
+2
+00:00:02,222 --> 00:00:03,495
+Who did I message?
+
+3
+00:00:03,534 --> 00:00:04,595
+What did I say?
+
+4
+00:00:04,628 --> 00:00:06,608
+Who needs a follow-up
+today?
+
+5
+00:00:06,669 --> 00:00:09,002
+If the answer lives in
+your head,
+
+6
+00:00:09,074 --> 00:00:10,205
+you will forget.
+
+7
+00:00:10,240 --> 00:00:13,139
+So I'm building the tool
+that answers it.
+
+8
+00:00:13,229 --> 00:00:14,926
+This is my Today screen.
+
+9
+00:00:14,978 --> 00:00:16,039
+Follow-ups due.
+
+10
+00:00:16,072 --> 00:00:16,920
+Who replied.
+
+11
+00:00:16,947 --> 00:00:18,078
+What to do next.
+
+12
+00:00:18,113 --> 00:00:21,153
+Every business has a
+stage in the pipeline,
+
+13
+00:00:21,247 --> 00:00:23,934
+and a full history I can
+step through,
+
+14
+00:00:24,017 --> 00:00:25,078
+event by event.
+
+15
+00:00:25,111 --> 00:00:27,373
+It doesn't send anything
+for me,
+
+16
+00:00:27,443 --> 00:00:28,928
+and it doesn't guess.
+
+17
+00:00:28,974 --> 00:00:32,580
+It records what I do, and
+shows me what I recorded.
+
+18
+00:00:32,691 --> 00:00:35,449
+I'm building it around
+my own outreach,
+
+19
+00:00:35,534 --> 00:00:37,655
+and I'll tell you if it
+works.
+
+20
+00:00:37,721 --> 00:00:38,711
+Andrew Builds.
+

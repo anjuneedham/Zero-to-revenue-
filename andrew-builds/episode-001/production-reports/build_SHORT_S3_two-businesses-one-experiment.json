@@ -1,0 +1,66 @@
+{
+ "name": "short_S3",
+ "format": "vertical",
+ "scenes": [
+  {
+   "id": "S3",
+   "seconds": 37.1,
+   "narration": "scratch",
+   "clips": 4,
+   "starts_at": 0.0
+  }
+ ],
+ "clips": [
+  {
+   "scene": "S3",
+   "shot": "B04",
+   "kind": "slate",
+   "seconds": 7.42,
+   "source": null
+  },
+  {
+   "scene": "S3",
+   "shot": "A09",
+   "kind": "clip",
+   "seconds": 11.13,
+   "source": "EP001_A09_pipeline-populated_v01.webm"
+  },
+  {
+   "scene": "S3",
+   "shot": "A08",
+   "kind": "clip",
+   "seconds": 11.13,
+   "source": "EP001_A08_playbook-editor_v01.webm"
+  },
+  {
+   "scene": "S3",
+   "shot": "B06",
+   "kind": "slate",
+   "seconds": 7.42,
+   "source": null
+  }
+ ],
+ "missing_clips": [
+  "B04",
+  "B06"
+ ],
+ "optional_skipped": [],
+ "narration_not_final": [
+  "S3 (scratch)"
+ ],
+ "overlays_skipped_unconfirmed": [],
+ "proof_text": null,
+ "music": null,
+ "output": "exports/SHORT_S3_two-businesses-one-experiment_PROOF.mp4",
+ "status": "NOT FINAL (assembly proof)",
+ "reasons": [
+  "2 footage gap(s)",
+  "scratch narration",
+  "1 script placeholder(s)"
+ ],
+ "total_seconds": 37.1,
+ "captions": "captions/SHORT_S3_two-businesses-one-experiment_scratch.srt",
+ "captions_timing": "estimated from text length, not forced-aligned",
+ "burned_captions": true,
+ "placeholders_in_script": 1
+}

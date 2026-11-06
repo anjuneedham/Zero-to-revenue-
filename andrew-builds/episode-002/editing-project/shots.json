@@ -1,0 +1,28 @@
+{
+ "naming": "EP002_<shot>_<slug>_<YYYYMMDD>_v<nn>.<ext>",
+ "shots": [
+  {
+   "id": "A01",
+   "cat": "A",
+   "slug": "todo",
+   "scene": "VO_001_HOOK",
+   "purpose": "TODO",
+   "app": "TODO",
+   "page": "TODO",
+   "actions": [
+    "TODO"
+   ],
+   "visible": [
+    "TODO"
+   ],
+   "hidden": [
+    "TODO"
+   ],
+   "orientation": "landscape",
+   "length": "20-30s",
+   "timeline": "TODO",
+   "n": 1,
+   "file_pattern": "EP002_A01_todo_<YYYYMMDD>_v<nn>.<ext>"
+  }
+ ]
+}

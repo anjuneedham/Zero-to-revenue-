@@ -102,3 +102,15 @@ CREATE TABLE playbook_runs (
 );
 CREATE INDEX playbook_runs_lead ON playbook_runs (lead_id);
 CREATE INDEX playbook_runs_pb ON playbook_runs (playbook_id);
+
+-- Carry earlier lead records into the pipeline without inventing history. The legacy status is mapped to a stage and a
+-- clearly labelled system event records that the stage came from the old status. No contact date is claimed: none was recorded.
+UPDATE leads SET stage = CASE status WHEN 'SENT' THEN 'contacted' WHEN 'DRAFTED' THEN 'outreach_prepared'
+                                     WHEN 'QUEUED' THEN 'outreach_prepared' ELSE 'identified' END,
+                 updated_at = created_at
+ WHERE status IN ('SENT','DRAFTED','QUEUED');
+INSERT INTO activity_events(at, occurred_at, lead_id, kind, summary, detail, actor)
+SELECT created_at, created_at, id, 'legacy_import',
+       'Carried over from the earlier lead list (old status: ' || status || '). The date of any contact was not recorded.',
+       '{"legacy_status":"' || status || '","stage_after":"' || stage || '"}', 'system'
+  FROM leads;

@@ -203,6 +203,9 @@ def record_meeting(conn, lead_id, when, notes=None, held=False, occurred_at=None
     when = check_date(when, "meeting date")
     lead = get_lead(conn, lead_id)
     _advance(conn, lead, "meeting_booked")
+    if held:  # the meeting happened, so its "booked" task is finished
+        conn.execute("UPDATE sales_tasks SET status='done', outcome='meeting held', completed_at=? WHERE lead_id=? AND kind='meeting' AND status='open'",
+                     (now(), lead_id))
     if not held:
         create_task(conn, {"lead_id": lead_id, "title": "Meeting: " + (lead["business"] or lead["name"] or "prospect"), "kind": "meeting",
                            "priority": "high", "due_date": when, "detail": text(notes, 1000)})

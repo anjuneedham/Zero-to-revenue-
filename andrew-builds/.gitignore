@@ -1,0 +1,13 @@
+# Source media and rendered outputs stay out of git (large, regenerable). Text, config, scripts and small stills are tracked.
+**/voiceover/*.wav
+**/voiceover/*.m4a
+**/raw-footage/*
+**/screen-recordings/**/*.webm
+**/screen-recordings/**/*.mp4
+**/music/*.mp3
+**/music/*.wav
+**/exports/*
+**/_work/
+!**/.gitkeep
+!**/exports/.gitkeep
+**/voiceover/_scratch/*.wav

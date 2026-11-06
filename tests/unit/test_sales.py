@@ -200,6 +200,15 @@ class IntegrityTest(unittest.TestCase):
         pipeline.prepare_message(self.conn, lead["id"], "email", "x", "draft")
         self.assertEqual(pipeline.get_lead(self.conn, lead["id"])["stage"], "contacted")
 
+    def test_recording_a_meeting_as_held_finishes_its_booked_task(self):
+        lead = pipeline.create_prospect(self.conn, {"business": "Acme"})
+        pipeline.record_meeting(self.conn, lead["id"], "2099-01-05")
+        self.assertEqual([t["kind"] for t in pipeline.list_tasks(self.conn, "open")], ["meeting"])
+        pipeline.record_meeting(self.conn, lead["id"], "2099-01-05", held=True)
+        self.assertEqual(pipeline.list_tasks(self.conn, "open"), [])
+        kinds = [e["kind"] for e in pipeline.timeline(self.conn, lead["id"])]
+        self.assertEqual(kinds[-2:], ["meeting_booked", "meeting_held"])
+
     def test_deleting_a_prospect_keeps_its_history(self):
         lead = pipeline.create_prospect(self.conn, {"business": "Gone"})
         pipeline.delete_prospect(self.conn, lead["id"])

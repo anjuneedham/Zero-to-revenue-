@@ -1,0 +1,291 @@
+{
+ "shorts": [
+  {
+   "id": "S1",
+   "slug": "start-before-youre-ready",
+   "title": "Start Before You're Ready",
+   "file": "VO_S1_START.wav",
+   "angle": "Taking action instead of waiting for perfect conditions. One idea: every week you wait, you learn nothing.",
+   "hook": "I started contacting customers before my tools were ready.",
+   "voiceover": "I started contacting customers before my tools were ready.\nNot because I was confident. Because every week I waited, I learned nothing.\nSo I picked a small group of real people and sent the first message. [FILL: only if true, otherwise say: \"So I'm picking a small group of real people to message.\"]\nThen I built the tool to keep track of it. A to-do list. A follow-up date. A place to write down what happened.\nYou don't need the perfect plan to start. You need the next small step, and somewhere to record what happens.\nI'm Andrew. I'm building a business, and the software to run it. Follow along.",
+   "beats": [
+    {
+     "t": "0-3",
+     "visual": "Today screen, empty state. Big text lands on the first word.",
+     "shot": "A12",
+     "text": "I STARTED BEFORE I WAS READY"
+    },
+    {
+     "t": "3-9",
+     "visual": "Quick cut: you sending or about to send a real message (recipient hidden).",
+     "shot": "B02",
+     "text": "Waiting = learning nothing"
+    },
+    {
+     "t": "9-18",
+     "visual": "Add a prospect on the tablet; the playbook list.",
+     "shot": "A02",
+     "text": "The tool came second"
+    },
+    {
+     "t": "18-27",
+     "visual": "Follow-up date being set on a prospect.",
+     "shot": "A04",
+     "text": "A to-do. A follow-up date. A record."
+    },
+    {
+     "t": "27-34",
+     "visual": "You to camera or desk shot; end card.",
+     "shot": "B06",
+     "text": "ANDREW BUILDS"
+    }
+   ],
+   "clips": [
+    {
+     "shot": "A12",
+     "weight": 2
+    },
+    {
+     "shot": "B02",
+     "weight": 2
+    },
+    {
+     "shot": "A02",
+     "weight": 3
+    },
+    {
+     "shot": "A04",
+     "weight": 3
+    },
+    {
+     "shot": "B06",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "I STARTED BEFORE\nI WAS READY",
+     "at": 0.0,
+     "dur": 0.1,
+     "kind": "hook"
+    },
+    {
+     "text": "ANDREW BUILDS",
+     "sub": "Follow the experiment",
+     "at": 0.88,
+     "dur": 0.12,
+     "kind": "full"
+    }
+   ],
+   "on_screen_text": [
+    "I STARTED BEFORE I WAS READY",
+    "Waiting = learning nothing",
+    "The tool came second",
+    "A to-do. A follow-up date. A record.",
+    "ANDREW BUILDS"
+   ],
+   "screen_recording_requirements": "A12, A02 and A04 (captured by me, DEMO DATA). B02 and B06 are yours: a real first message being written/sent (recipient and message hidden) and a desk shot. If B02 does not exist yet, the edit uses a slate.",
+   "captions": "Burn-in, 2 lines max, 5-6 words a line, white on dark rounded box, highlight colour on the key word of each line. Safe zone: keep captions between 18% and 70% of the height so the app UI does not cover them.",
+   "editing": "Cut every 2-4 seconds. First 1.5 seconds: the hook text on screen with the first spoken words. No music for the first line, a low bed after. Duck music 12 dB under the voice. Keep the DEMO DATA label visible on every captured product clip.",
+   "cta": "Follow for the next step.",
+   "tiktok_description": "I started before I was ready, and built the tool as I went. Real outreach, real software, real numbers. #andrewbuilds #bootstrapping #buildinpublic",
+   "yt_title": "I Started Before I Was Ready (Bootstrapping Day 1)",
+   "cover_text": "START BEFORE READY"
+  },
+  {
+   "id": "S2",
+   "slug": "building-the-tool-i-need",
+   "title": "Building the Tool I Need",
+   "file": "VO_S2_TOOL.wav",
+   "angle": "Building software around a real business problem: outreach gets messy and forgetting is the failure mode.",
+   "hook": "Outreach gets messy fast. Who did I message? Who needs a follow-up?",
+   "voiceover": "Outreach gets messy fast.\nWho did I message? What did I say? Who needs a follow-up today?\nIf the answer lives in your head, you will forget.\nSo I'm building the tool that answers it. This is my Today screen. Follow-ups due. Who replied. What to do next.\nEvery business has a stage in the pipeline, and a full history I can step through, event by event.\nIt doesn't send anything for me, and it doesn't guess. It records what I do, and shows me what I recorded.\nI'm building it around my own outreach, and I'll tell you if it works. Andrew Builds.",
+   "beats": [
+    {
+     "t": "0-3",
+     "visual": "Phone-width Today screen with a few follow-ups due. Hook text over it.",
+     "shot": "A10",
+     "text": "WHO DO I FOLLOW UP WITH?"
+    },
+    {
+     "t": "3-10",
+     "visual": "Scroll slowly through follow-ups due / who replied.",
+     "shot": "A10",
+     "text": "Follow-ups due"
+    },
+    {
+     "t": "10-19",
+     "visual": "Pipeline list with stage chips.",
+     "shot": "A09",
+     "text": "Every business has a stage"
+    },
+    {
+     "t": "19-28",
+     "visual": "Timeline playback stepping forward.",
+     "shot": "A06",
+     "text": "Step through the history"
+    },
+    {
+     "t": "28-35",
+     "visual": "Insights counts.",
+     "shot": "A07",
+     "text": "It records. It doesn't guess."
+    }
+   ],
+   "clips": [
+    {
+     "shot": "A10",
+     "weight": 4
+    },
+    {
+     "shot": "A09",
+     "weight": 3
+    },
+    {
+     "shot": "A06",
+     "weight": 3
+    },
+    {
+     "shot": "A07",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "WHO DO I\nFOLLOW UP WITH?",
+     "at": 0.0,
+     "dur": 0.1,
+     "kind": "hook"
+    },
+    {
+     "text": "DEMO DATA",
+     "at": 0.0,
+     "dur": 1.0,
+     "kind": "tag"
+    }
+   ],
+   "on_screen_text": [
+    "WHO DO I FOLLOW UP WITH?",
+    "Follow-ups due",
+    "Every business has a stage",
+    "Step through the history",
+    "It records. It doesn't guess."
+   ],
+   "screen_recording_requirements": "A10, A09, A06, A07 (all captured by me from the real app, DEMO DATA label burned in). Replace with your real screens (B03, B05) once your real data is in; blur every name.",
+   "captions": "Same style as S1. Highlight 'follow-up', 'stage' and 'history' as they are spoken.",
+   "editing": "Open on the product, not on you. Vertical layout: headline in the top third, screen in the middle, captions below. For landscape clips use a blurred copy as the background. Scroll recordings may be played at 1x only.",
+   "cta": "Follow to see if it works.",
+   "tiktok_description": "Outreach gets messy fast. So I'm building the tool that tells me who to follow up with today. Not AI magic: it just records what I do. #andrewbuilds #buildinpublic #sales",
+   "yt_title": "The Tool I'm Building to Run My Outreach",
+   "cover_text": "WHO DO I FOLLOW UP?"
+  },
+  {
+   "id": "S3",
+   "slug": "two-businesses-one-experiment",
+   "title": "Two Businesses, One Experiment",
+   "file": "VO_S3_TWO.wav",
+   "angle": "Testing whether you can build a business and a sellable software product at the same time, with honest odds.",
+   "hook": "One experiment. Two businesses. No guarantees.",
+   "voiceover": "One experiment. Two businesses. No guarantees.\nBusiness one: I'm reaching out to real companies and trying to win paying customers.\nBusiness two: the software I'm building to run that outreach. If it genuinely helps me, it might become a product for other people.\nRight now? The software has one user: me. And [FILL: your verified revenue, or \"I haven't made a dollar from this yet\"].\nThat's the experiment. If the first business works, the tool earns its place. If the tool works, it might become a second business.\nFollow along and watch whether either one does. I'm Andrew.",
+   "beats": [
+    {
+     "t": "0-3",
+     "visual": "Split screen: left, outreach (message composer, hidden recipient); right, the app.",
+     "shot": "B04",
+     "text": "ONE EXPERIMENT. TWO BUSINESSES."
+    },
+    {
+     "t": "3-11",
+     "visual": "Business one: pipeline with stages.",
+     "shot": "A09",
+     "text": "1. Win paying customers"
+    },
+    {
+     "t": "11-19",
+     "visual": "Business two: playbook editor / product.",
+     "shot": "A08",
+     "text": "2. Build a tool others could use"
+    },
+    {
+     "t": "19-27",
+     "visual": "Plain card: the honest status.",
+     "shot": null,
+     "text": "Users of the software: 1 (me)"
+    },
+    {
+     "t": "27-35",
+     "visual": "Desk shot / end card.",
+     "shot": "B06",
+     "text": "ANDREW BUILDS"
+    }
+   ],
+   "clips": [
+    {
+     "shot": "B04",
+     "weight": 2
+    },
+    {
+     "shot": "A09",
+     "weight": 3
+    },
+    {
+     "shot": "A08",
+     "weight": 3
+    },
+    {
+     "shot": "B06",
+     "weight": 2
+    }
+   ],
+   "overlays": [
+    {
+     "text": "ONE EXPERIMENT.\nTWO BUSINESSES.",
+     "at": 0.0,
+     "dur": 0.1,
+     "kind": "hook"
+    },
+    {
+     "text": "1. Win paying customers",
+     "at": 0.2,
+     "dur": 0.2,
+     "kind": "lower"
+    },
+    {
+     "text": "2. Build a tool others could use",
+     "at": 0.42,
+     "dur": 0.2,
+     "kind": "lower"
+    },
+    {
+     "text": "Users of the software: 1 (me)",
+     "at": 0.62,
+     "dur": 0.2,
+     "kind": "lower"
+    },
+    {
+     "text": "ANDREW BUILDS",
+     "sub": "Follow the experiment",
+     "at": 0.9,
+     "dur": 0.1,
+     "kind": "full"
+    }
+   ],
+   "on_screen_text": [
+    "ONE EXPERIMENT. TWO BUSINESSES.",
+    "1. Win paying customers",
+    "2. Build a tool others could use",
+    "Users of the software: 1 (me)",
+    "ANDREW BUILDS"
+   ],
+   "screen_recording_requirements": "A09 and A08 (captured by me, DEMO DATA). B04 (your real log form, recipient hidden) and B06 (desk) are yours.",
+   "captions": "Same style as S1. Keep 'Users of the software: 1 (me)' as an overlay so the claim stays honest.",
+   "editing": "Number the two businesses on screen as they are spoken. Do not show any revenue figure unless Treasury has verified it. Hold the 'one user' card for the whole sentence.",
+   "cta": "Follow to watch it work (or not).",
+   "tiktok_description": "Two businesses from one experiment: win customers, and build the software that runs it. Honest odds, real numbers. #andrewbuilds #bootstrapping #startup",
+   "yt_title": "Two Businesses, One Experiment (No Guarantees)",
+   "cover_text": "2 BUSINESSES\n1 EXPERIMENT"
+  }
+ ],
+ "words_per_second": 2.6,
+ "placeholder_words": 10
+}

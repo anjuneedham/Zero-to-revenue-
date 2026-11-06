@@ -1,0 +1,73 @@
+{
+ "name": "short_S1",
+ "format": "vertical",
+ "scenes": [
+  {
+   "id": "S1",
+   "seconds": 35.6,
+   "narration": "scratch",
+   "clips": 5,
+   "starts_at": 0.0
+  }
+ ],
+ "clips": [
+  {
+   "scene": "S1",
+   "shot": "A12",
+   "kind": "clip",
+   "seconds": 5.93,
+   "source": "EP001_A12_portrait-empty-then-add_v01.webm"
+  },
+  {
+   "scene": "S1",
+   "shot": "B02",
+   "kind": "slate",
+   "seconds": 5.93,
+   "source": null
+  },
+  {
+   "scene": "S1",
+   "shot": "A02",
+   "kind": "clip",
+   "seconds": 8.9,
+   "source": "EP001_A02_prospect-create-edit_v01.webm"
+  },
+  {
+   "scene": "S1",
+   "shot": "A04",
+   "kind": "clip",
+   "seconds": 8.9,
+   "source": "EP001_A04_log-outreach-followup_v01.webm"
+  },
+  {
+   "scene": "S1",
+   "shot": "B06",
+   "kind": "slate",
+   "seconds": 5.93,
+   "source": null
+  }
+ ],
+ "missing_clips": [
+  "B02",
+  "B06"
+ ],
+ "optional_skipped": [],
+ "narration_not_final": [
+  "S1 (scratch)"
+ ],
+ "overlays_skipped_unconfirmed": [],
+ "proof_text": null,
+ "music": null,
+ "output": "exports/SHORT_S1_start-before-youre-ready_PROOF.mp4",
+ "status": "NOT FINAL (assembly proof)",
+ "reasons": [
+  "2 footage gap(s)",
+  "scratch narration",
+  "1 script placeholder(s)"
+ ],
+ "total_seconds": 35.6,
+ "captions": "captions/SHORT_S1_start-before-youre-ready_scratch.srt",
+ "captions_timing": "estimated from text length, not forced-aligned",
+ "burned_captions": true,
+ "placeholders_in_script": 1
+}
