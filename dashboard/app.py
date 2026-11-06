@@ -13,7 +13,7 @@ from agents.operator import outreach, run as operator
 from agents.scout.run import run_scout
 from agents.treasury import run as treasury
 from core import actions, rates, scheduler
-from dashboard import api_data
+from dashboard import api_data, sales_api
 from dashboard.mcp import handle_mcp
 from core import db
 from core.audit import audit
@@ -40,6 +40,7 @@ def static_file(path: str):
         return None
     return STATIC_MIME[f.suffix], f.read_bytes()
 MAX_BODY = 4096
+READ_CAP = 200_001  # most we ever read; each route enforces its own (smaller) limit. Was MAX_BODY+1, which silently truncated the 200 KB CSV import.
 SCOUT_SOURCES = None  # None = defaults (public GitHub bounty issues); tests inject fixtures
 SCOUT_CLIENT = None
 TREASURY_RPC = None  # None = live read-only RPC; tests inject a fake
@@ -127,6 +128,8 @@ def handle(method, path, authz, conn, body: bytes = b""):
         owner = ol.verify_session(conn, token)
     except ol.AuthError:
         return _json(401, {"error": "unauthorized"})
+    if path.startswith("/api/sales/"):
+        return sales_api.handle(method, path, conn, body)
     if method == "GET" and path == "/api/status":
         return _json(200, status_snapshot(conn))
     if method == "POST" and path == "/api/pause":
@@ -328,7 +331,7 @@ def serve(host="127.0.0.1", port=8080):
     class H(BaseHTTPRequestHandler):
         def _go(self, method):
             n = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(min(n, MAX_BODY + 1)) if n else b""
+            body = self.rfile.read(min(n, READ_CAP)) if n else b""
             path = self.path.split("?")[0]
             conn = None
             try:

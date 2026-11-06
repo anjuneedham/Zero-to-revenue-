@@ -194,3 +194,29 @@ dialog .body{padding:16px;overflow:auto;max-height:calc(90vh - 56px);display:gri
   .top .actions .hide-sm{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- sales execution system ---- */
+.sform{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));align-items:start}
+.sform .wide,.wide{grid-column:1/-1}
+.sform label.f span{font-size:12px}
+.hint{font-weight:400;color:var(--muted);font-size:12px}
+.panelhold:empty{display:none}.panelhold>.card{border-color:var(--gold)}
+.actionbar{gap:6px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ev .evbody{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font-size:14px}
+.target{display:grid;grid-template-columns:26px 1fr auto;gap:4px 10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.target .bar{grid-column:2/-1}.target.met{border-color:var(--ok)}.target .tcheck{font-weight:700;color:var(--muted)}.target.met .tcheck{color:var(--ok)}
+.stagetrack{display:flex;gap:4px;flex-wrap:wrap}
+.stg{padding:5px 9px;border-radius:99px;font:600 11px var(--mono);background:var(--chip);color:var(--muted)}
+.stg.past{background:color-mix(in srgb,var(--royal) 18%,transparent);color:var(--ink)}.stg.now{background:var(--gold);color:var(--navy)}
+.stepedit{display:grid;gap:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.guide{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2)}.guide summary{cursor:pointer;font-weight:600}
+.gh{font:700 13px var(--display);letter-spacing:.06em;text-transform:uppercase;margin:8px 0 4px}
+input[type=range]{padding:0;min-height:28px}
+@media (max-width:860px){
+  .tabbar{display:flex!important;overflow-x:auto;scrollbar-width:none}
+  .tabbar a{flex:0 0 22%}
+  .sform{grid-template-columns:1fr}
+}
+.sform .err:empty{display:none}
+.compact table{min-width:0}.compact th,.compact td{padding:8px 10px}

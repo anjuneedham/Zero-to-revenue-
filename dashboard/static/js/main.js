@@ -1,8 +1,8 @@
 (function () {
   const { $, el, add, text, icon } = Z;
-  const NAV = [["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
+  const NAV = [["today", "Today"], ["pipeline", "Pipeline"], ["playbooks", "Playbooks"], ["insights", "Insights"], ["overview", "Overview"], ["scout", "Scout"], ["operator", "Operator"], ["treasury", "Treasury"], ["plan", "Game plan"]];
   const AUTH = ["msgbox", "setup1", "setup2", "setup3", "login"];
-  let timer = null, seq = 0, current = "overview";
+  let timer = null, seq = 0, current = "today";
 
   const KO = ["Walking out of the tunnel", "Checking the pitch", "Reading the team sheet", "Warming up the agents"];
   let ki = 0; const kt = setInterval(() => { ki = (ki + 1) % KO.length; text($("ko-msg"), KO[ki]); }, 700); const t0 = Date.now();
@@ -35,16 +35,15 @@
     const n = s.open_user_actions.length; document.querySelectorAll(".nav .badge").forEach(b => { b.hidden = !n; text(b, n); });
   };
   async function render() {
-    const my = ++seq; const name = (NAV.find(([k]) => k === location.hash.slice(1)) || NAV[0])[0]; current = name; markNav();
-    const page = Z.pages[name]; text($("page-title"), page.title); text($("page-sub"), page.sub); document.title = page.title + " · Zero-to-Revenue";
-    const view = $("view"); const y = scrollY; const box = el("div"); const first = !view.firstChild || view.dataset.page !== name;
+    const my = ++seq; const [route, arg] = location.hash.slice(1).split("/"); const name = Z.pages[route] ? route : NAV[0][0]; const page = Z.pages[name]; current = page.navKey || name; markNav(); text($("page-title"), page.title); text($("page-sub"), page.sub); document.title = page.title + " · Zero-to-Revenue";
+    const view = $("view"); const y = scrollY; const box = el("div"); const first = !view.firstChild || view.dataset.page !== name + "/" + (arg || "");
     if (first) view.replaceChildren(Z.skeleton(4));
-    try { await page.render(box); } catch (e) {
+    try { await page.render(box, arg ? decodeURIComponent(arg) : undefined); } catch (e) {
       if (my !== seq || e.message === "Signed out") return;
       const c = Z.card("Could not load this page", e.message); c.append(Z.btn("Try again", "gold", () => render())); box.replaceChildren(c);
     }
     if (my !== seq) return; view.replaceChildren(...box.childNodes);
-    if (!Z.state.status || name === "scout" || name === "treasury" || name === "plan") Z.api("/api/status").then(st => { Z.state.status = st; Z.paintStatus(st); }).catch(() => {}); view.dataset.page = name; if (!first) scrollTo(0, y);
+    if (!Z.state.status || name === "scout" || name === "treasury" || name === "plan") Z.api("/api/status").then(st => { Z.state.status = st; Z.paintStatus(st); }).catch(() => {}); view.dataset.page = name + "/" + (arg || ""); if (!first) scrollTo(0, y);
   }
   Z.rerender = render;
   window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); $("view").focus({ preventScroll: true }); });

@@ -19,6 +19,10 @@
     copy: "M9 9h11v11H9zM5 15V4h11",
     link: "M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1",
     stop: "M6 6h12v12H6z",
+    today: "M4 5h16v15H4zM4 10h16M9 3v4M15 3v4M8 15l3 3 5-6",
+    pipeline: "M3 5h4v14H3zM10 5h4v9h-4zM17 5h4v5h-4z",
+    book: "M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h10",
+    chart: "M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-3",
   };
   Z.icon = name => {
     const s = document.createElementNS(NS, "svg");
